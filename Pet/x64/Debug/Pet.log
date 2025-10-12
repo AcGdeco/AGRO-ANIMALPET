@@ -6,10 +6,13 @@ C:\Users\Andre\source\repos\Pet\MenuUniversal.h(1,1): warning C4828: O arquivo c
   (compilando o arquivo fonte 'Select.cpp')
   
 C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\format(42): warning STL4038: The contents of <format> are available only with C++20 or later.
-C:\Users\Andre\source\repos\Pet\Select.cpp(304,24): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\Select.cpp(306,20): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\Select.cpp(392,26): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\Select.cpp(393,26): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\Select.cpp(418,50): warning C4267: '=': conversão de 'size_t' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\Select.cpp(435,50): warning C4267: '=': conversão de 'size_t' para 'int', possível perda de dados
+C:\Users\Andre\source\repos\Pet\Select.cpp(106,20): warning C4244: 'inicializando': conversão de 'LONG_PTR' para 'LONG', possível perda de dados
+C:\Users\Andre\source\repos\Pet\Select.cpp(220,32): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
+C:\Users\Andre\source\repos\Pet\Select.cpp(232,50): warning C4267: '=': conversão de 'size_t' para 'int', possível perda de dados
+C:\Users\Andre\source\repos\Pet\Select.cpp(375,24): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
+C:\Users\Andre\source\repos\Pet\Select.cpp(463,26): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
+C:\Users\Andre\source\repos\Pet\Select.cpp(464,26): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
+C:\Users\Andre\source\repos\Pet\Select.cpp(489,50): warning C4267: '=': conversão de 'size_t' para 'int', possível perda de dados
+C:\Users\Andre\source\repos\Pet\Select.cpp(531,23): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
+C:\Users\Andre\source\repos\Pet\Select.cpp(578,23): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
   Pet.vcxproj -> C:\Users\Andre\source\repos\Pet\x64\Debug\Pet.exe

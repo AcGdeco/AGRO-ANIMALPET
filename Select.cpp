@@ -102,38 +102,28 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
     {
     case WM_CREATE:
     {
-        // Abrir ou criar o banco de dados
+        // Garantir que a janela tenha WS_VSCROLL
+        LONG style = GetWindowLongPtr(hWnd, GWL_STYLE);
+        if (!(style & WS_VSCROLL)) {
+            SetWindowLongPtr(hWnd, GWL_STYLE, style | WS_VSCROLL);
+        }
+
+        // Abrir ou criar o banco de dados (código original mantido)
         sqlite3* db;
         char* errMsg = 0;
-        int rc = sqlite3_open("pet.db", &db);  // Cria o arquivo pet.db na pasta do exe
-
+        int rc = sqlite3_open("pet.db", &db);
         if (rc) {
             MessageBox(hWnd, L"Erro ao abrir/criar o banco de dados!", L"Erro", MB_OK | MB_ICONERROR);
             sqlite3_free(errMsg);
         }
         else {
-            //MessageBox(hWnd, L"Banco de dados 'pet.db' aberto/criado com sucesso!", L"Sucesso", MB_OK);
-
-            sqlite3* db;
-            char* errMsg = 0;
-            int rc = sqlite3_open("pet.db", &db);
-            if (rc == SQLITE_OK) {
-                const char* sqlDrop = "DROP TABLE IF EXISTS Pets;";
-                rc = sqlite3_exec(db, sqlDrop, 0, 0, &errMsg);
-                if (rc != SQLITE_OK) {
-                    MessageBox(hWnd, L"Erro ao dropar tabela!", L"Erro", MB_OK | MB_ICONERROR);
-                    sqlite3_free(errMsg);
-                }
-                else {
-                    //MessageBox(hWnd, L"Tabela 'Pets' removida com sucesso!", L"Sucesso", MB_OK);
-                }
-            }
-            else {
-                MessageBox(hWnd, L"Erro ao abrir o banco de dados!", L"Erro", MB_OK | MB_ICONERROR);
+            // Código de criação de tabela e inserção (mantido como está)
+            const char* sqlDrop = "DROP TABLE IF EXISTS Pets;";
+            rc = sqlite3_exec(db, sqlDrop, 0, 0, &errMsg);
+            if (rc != SQLITE_OK) {
+                MessageBox(hWnd, L"Erro ao dropar tabela!", L"Erro", MB_OK | MB_ICONERROR);
                 sqlite3_free(errMsg);
             }
-
-            // Criar uma tabela
             const char* sqlCreate = "CREATE TABLE IF NOT EXISTS Pets (ID INTEGER PRIMARY KEY AUTOINCREMENT, Nome_do_Pet TEXT, Raca TEXT, Nome_do_Tutor TEXT, CEP TEXT, Cor TEXT, Idade INTEGER, Peso REAL, Sexo TEXT, Castrado TEXT, Endereco TEXT, Ponto_de_referencia TEXT, Banho TEXT, Tosa TEXT, Obs_Tosa TEXT, Parasitas TEXT, Lesoes TEXT, Obs_Lesoes TEXT, Telefone TEXT, CPF TEXT, Date TEXT, Hour TEXT);";
             rc = sqlite3_exec(db, sqlCreate, 0, 0, &errMsg);
             if (rc != SQLITE_OK) {
@@ -141,87 +131,166 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
                 wchar_t codeStr[32];
                 swprintf_s(codeStr, L"%d", rc);
                 wcscat_s(fullMsg, codeStr);
-
-                // Verificar se errMsg é válido antes de converter
-                if (errMsg != NULL) {
+                if (errMsg) {
                     size_t len = strlen(errMsg) + 1;
                     wchar_t wErrMsg[256];
                     mbstowcs_s(NULL, wErrMsg, len, errMsg, _TRUNCATE);
                     wcscat_s(fullMsg, L" - Detalhes: ");
                     wcscat_s(fullMsg, wErrMsg);
                 }
-                else {
-                    wcscat_s(fullMsg, L" - Sem detalhes adicionais.");
-                }
-
                 MessageBox(hWnd, fullMsg, L"Erro", MB_OK | MB_ICONERROR);
-                if (errMsg != NULL) {  // Liberar apenas se não for NULL
-                    sqlite3_free(errMsg);
-                }
+                sqlite3_free(errMsg);
             }
             else {
-                //MessageBox(hWnd, L"Tabela 'Pets' criada com sucesso!", L"Sucesso", MB_OK);
-
-                // uso
+                // Inserções (código original mantido)
                 std::wstring currentDate = GetCurrentDate();
                 std::wstring currentHour = GetCurrentHour();
-
-                std::wstring sqlInsertW =
-                    L"INSERT INTO Pets (Nome_do_Pet, Raca, Nome_do_Tutor, CEP, Cor, Idade, Peso, Sexo, Castrado, Endereco, Ponto_de_referencia, Banho, Tosa, Obs_Tosa, Parasitas, Lesoes, Obs_Lesoes, Telefone, CPF, Date, Hour) "
-                    L"VALUES ('Fido', 'Bulldog', 'Laís', '36309016', 'Preto', 5, 25, 'Masculino', 'Sim', 'Rua das flores - Guarda Mor - São João del Rei', 'Perto da pizzaria Agostinho', 'Padrão', 'Tesoura', 'ir qpiofj adfjs kçjf dkfjeif çsdaf jkasdjf iejf sdçf aksdfjis fdfj çaklsfjaksdfj kdsjfçaejf idsjfkasdf jaies', 'Carrapatos', 'Pele', 'asdf façldj fçkalsdj fdaskljf dsçkf jçklasdf jkaldsfj çkldsa fjaçklds jfakdls fjkalsdjf klasdjf çasdfj çasfj çadsklfjklf ', '32998360862', '09813426632', '"
-                    + currentDate + L"', '" + currentHour + L"');";
-
-                // converter para UTF-8
-                int required = WideCharToMultiByte(CP_UTF8, 0, sqlInsertW.c_str(), -1, nullptr, 0, nullptr, nullptr);
-                if (required > 0) {
-                    std::string sqlInsertUtf8(required, '\0'); // inclui \0
-                    WideCharToMultiByte(CP_UTF8, 0, sqlInsertW.c_str(), -1, &sqlInsertUtf8[0], required, nullptr, nullptr);
-
-                    // Executa
-                    char* errMsg = nullptr;
-                    int rc = sqlite3_exec(db, sqlInsertUtf8.c_str(), nullptr, nullptr, &errMsg);
-                    if (rc != SQLITE_OK) {
-                        // tratar erro (errMsg)
-                        sqlite3_free(errMsg);
+                for (int i = 1; i <= 100; i++) {
+                    std::wstring sqlInsertW = L"INSERT INTO Pets (Nome_do_Pet, Raca, Nome_do_Tutor, CEP, Cor, Idade, Peso, Sexo, Castrado, Endereco, Ponto_de_referencia, Banho, Tosa, Obs_Tosa, Parasitas, Lesoes, Obs_Lesoes, Telefone, CPF, Date, Hour) VALUES ('Fido', 'Bulldog', 'Laís', '36309016', 'Preto', 5, 25, 'Masculino', 'Sim', 'Rua das flores - Guarda Mor - São João del Rei', 'Perto da pizzaria Agostinho', 'Padrão', 'Tesoura', 'ir qpiofj adfjs kçjf dkfjeif çsdaf jkasdjf iejf sdçf aksdfjis fdfj çaklsfjaksdfj kdsjfçaejf idsjfkasdf jaies', 'Carrapatos', 'Pele', 'asdf façldj fçkalsdj fdaskljf dsçkf jçklasdf jkaldsfj çkldsa fjaçklds jfakdls fjkalsdjf klasdjf çasdfj çasfj çadsklfjklf ', '32998360862', '09813426632', '" + currentDate + L"', '" + currentHour + L"');";
+                    int required = WideCharToMultiByte(CP_UTF8, 0, sqlInsertW.c_str(), -1, nullptr, 0, nullptr, nullptr);
+                    if (required > 0) {
+                        std::string sqlInsertUtf8(required, '\0');
+                        WideCharToMultiByte(CP_UTF8, 0, sqlInsertW.c_str(), -1, &sqlInsertUtf8[0], required, nullptr, nullptr);
+                        char* errMsg = nullptr;
+                        int rc = sqlite3_exec(db, sqlInsertUtf8.c_str(), nullptr, nullptr, &errMsg);
+                        if (rc != SQLITE_OK) sqlite3_free(errMsg);
                     }
                 }
-
-                // uso
-                std::wstring sqlInsertW2 =
-                    L"INSERT INTO Pets (Nome_do_Pet, Raca, Nome_do_Tutor, CEP, Cor, Idade, Peso, Sexo, Castrado, Endereco, Ponto_de_referencia, Banho, Tosa, Obs_Tosa, Parasitas, Lesoes, Obs_Lesoes, Telefone, CPF, Date, Hour) "
-                    L"VALUES ('Astralis', 'Viralata', 'Débora', '36309022', 'Preto', 6, 18, 'Feminino', 'Não', 'Rua Ricador Geraldo dos Santos - Alto das Mercês - nº12', 'Perto da igreja das Mercês', 'Padrão', 'Tesoura', 'aa ksfj asldfj açlksdj fkasjd fçklasdjf aksdlfjkalçsdfj kçalsdjf kçlasjd çfkasdj fklçaj sdçlfkjakslfj çlasdjf çasd jfçaskdjfsdf', 'Carrapatos', 'Pele', ' asdfj açlsjf akçslj fkçlasdj fkçlasdjf lçkasjdf kasdjfkiujriwejfç dfkmdnfçnvçaidsjfçkdsfjaçksdjfkaçsjdfkasdjfkçlasjdçfaksdjf', '32998365552', '09813426789', '"
-                    + currentDate + L"', '" + currentHour + L"');";
-
-                // converter para UTF-8
+                std::wstring sqlInsertW2 = L"INSERT INTO Pets (Nome_do_Pet, Raca, Nome_do_Tutor, CEP, Cor, Idade, Peso, Sexo, Castrado, Endereco, Ponto_de_referencia, Banho, Tosa, Obs_Tosa, Parasitas, Lesoes, Obs_Lesoes, Telefone, CPF, Date, Hour) VALUES ('Astralis', 'Viralata', 'Débora', '36309022', 'Preto', 6, 18, 'Feminino', 'Não', 'Rua Ricador Geraldo dos Santos - Alto das Mercês - nº12', 'Perto da igreja das Mercês', 'Padrão', 'Tesoura', 'aa ksfj asldfj açlksdj fkasjd fçklasdjf aksdlfjkalçsdfj kçalsdjf kçlasjd çfkasdj fklçaj sdçlfkjakslfj çlasdjf çasd jfçaskdjfsdf', 'Carrapatos', 'Pele', ' asdfj açlsjf akçslj fkçlasdj fkçlasdjf lçkasjdf kasdjfkiujriwejfç dfkmdnfçnvçaidsjfçkdsfjaçksdjfkaçsjdfkasdjfkçlasjdçfaksdjf', '32998365552', '09813426789', '" + currentDate + L"', '" + currentHour + L"');";
                 int required2 = WideCharToMultiByte(CP_UTF8, 0, sqlInsertW2.c_str(), -1, nullptr, 0, nullptr, nullptr);
                 if (required2 > 0) {
-                    std::string sqlInsertUtf8(required2, '\0'); // inclui \0
+                    std::string sqlInsertUtf8(required2, '\0');
                     WideCharToMultiByte(CP_UTF8, 0, sqlInsertW2.c_str(), -1, &sqlInsertUtf8[0], required2, nullptr, nullptr);
-
-                    // Executa
                     char* errMsg = nullptr;
                     int rc = sqlite3_exec(db, sqlInsertUtf8.c_str(), nullptr, nullptr, &errMsg);
-                    if (rc != SQLITE_OK) {
-                        // tratar erro (errMsg)
-                        sqlite3_free(errMsg);
-                    }
+                    if (rc != SQLITE_OK) sqlite3_free(errMsg);
                 }
-                
-                if (rc != SQLITE_OK) {
+                if (rc != SQLITE_OK && errMsg) {
                     size_t len = strlen(errMsg) + 1;
                     wchar_t wErrMsg[256];
                     mbstowcs_s(NULL, wErrMsg, len, errMsg, _TRUNCATE);
                     wchar_t fullMsg[512];
                     swprintf_s(fullMsg, L"Erro ao inserir dados! Detalhes: %s", wErrMsg);
                     MessageBoxW(hWnd, fullMsg, L"Erro", MB_OK | MB_ICONERROR);
-                    sqlite3_free(errMsg); // Liberar após uso
-                }
-                else {
-                    //MessageBox(hWnd, L"Dados inseridos com sucesso!", L"Sucesso", MB_OK);
+                    sqlite3_free(errMsg);
                 }
             }
-            sqlite3_close(db);  // Fechar o banco de dados
+            sqlite3_close(db);
+
+            // Consultar o banco apenas se a tabela estiver vazia
+            if (g_tableData.empty()) {
+                sqlite3* db;
+                char* errMsg = 0;
+                int rc = sqlite3_open("pet.db", &db);
+                if (rc == SQLITE_OK) {
+                    const char* sqlSelect = "SELECT ID, Nome_do_Pet, Raca, Nome_do_Tutor, Telefone, CPF, Date, Hour FROM Pets;";
+                    rc = sqlite3_exec(db, sqlSelect, sqlite_callback, &g_tableData, &errMsg);
+                    if (rc != SQLITE_OK) {
+                        if (errMsg) {
+                            // Converte char* para wchar_t* corretamente
+                            size_t len = strlen(errMsg) + 1;
+                            std::wstring wErrMsg(len, L'\0');
+                            mbstowcs_s(nullptr, &wErrMsg[0], len, errMsg, _TRUNCATE);
+                            // Remove o caractere nulo extra do final
+                            wErrMsg.resize(wcslen(wErrMsg.c_str()));
+                            g_tableData.push_back({ L"Erro", wErrMsg });
+                        }
+                        else {
+                            g_tableData.push_back({ L"Erro", L"Desconhecido" });
+                        }
+                        if (errMsg) sqlite3_free(errMsg);
+                    }
+                    sqlite3_close(db);
+                }
+                else {
+                    g_tableData.push_back({ L"Erro", L"Não foi possível abrir o banco" });
+                }
+            }
+
+            for (size_t row = 1; row < g_tableData.size(); row++) {
+
+                // Obter dimensões da janela
+                RECT rect;
+                GetClientRect(hWnd, &rect);
+                int width = (rect.right - rect.left) - 44;
+                int height = rect.bottom - rect.top;
+
+                // Configurar a tabela
+                int cellHeight = 32;  // Altura de cada célula
+                int numColumns = g_tableData.empty() ? 0 : g_tableData[0].size() + 3;  // Número de colunas baseado nos cabeçalhos
+                int cellWidth = width / (numColumns > 0 ? numColumns : 1);  // Evitar divisão por zero
+                int startY = 10;
+                int startX = 22;
+
+                // Supondo que g_tableData[row][0] contém o ID do registro (ajuste o índice se for diferente)
+                LONG_PTR recordId = _wtoi(g_tableData[row][0].c_str());
+
+                int yPos;
+                int xPos;
+
+                xPos = startX + 8 * cellWidth + 2;
+                yPos = startY + row * cellHeight + 2;
+
+                int buttonWidth = 70;
+                int buttonHeight = 30;
+                HWND hButton = CreateWindowW(
+                    L"BUTTON",           // Classe do controle
+                    L"Consultar",        // Texto do botão
+                    WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
+                    xPos, yPos,          // Posição (x, y)
+                    buttonWidth, buttonHeight,              // Largura e altura
+                    hWnd,                // Handle da janela pai
+                    (HMENU)(CONSULTAR), // ID simples, usado como base
+                    (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
+                    NULL
+                );
+
+                if (hButton)
+                {
+                    SetWindowLongPtr(hButton, GWLP_USERDATA, recordId); // Armazenar o ID do registro
+                    g_buttons.push_back(hButton); // Armazenar o handle
+                }
+
+                // Botão "Editar"
+                xPos = startX + 9 * cellWidth + 2;
+                hButton = CreateWindowW(
+                    L"BUTTON",
+                    L"Editar",
+                    WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
+                    xPos, yPos,
+                    buttonWidth, buttonHeight,
+                    hWnd,
+                    (HMENU)(EDITAR), // ID simples
+                    (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
+                    NULL
+                );
+                if (hButton)
+                {
+                    SetWindowLongPtr(hButton, GWLP_USERDATA, recordId); // Armazenar o ID do registro
+                    g_buttons.push_back(hButton);
+                }
+
+                // Botão "Deletar"
+                xPos = startX + 10 * cellWidth + 2;
+                hButton = CreateWindowW(
+                    L"BUTTON",
+                    L"Deletar",
+                    WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
+                    xPos, yPos,
+                    buttonWidth, buttonHeight,
+                    hWnd,
+                    (HMENU)(DELETAR), // ID simples
+                    (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
+                    NULL
+                );
+                if (hButton)
+                {
+                    SetWindowLongPtr(hButton, GWLP_USERDATA, recordId); // Armazenar o ID do registro
+                    g_buttons.push_back(hButton);
+                }
+            }
         }
+        return 0;
     }
     break;
     case WM_COMMAND:
@@ -249,6 +318,8 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
             wchar_t msg[50];
             swprintf_s(msg, L"Botão %s%d clicado! Id: %d", L"Editar", (int)id, (int)id);
             MessageBoxW(hWnd, msg, L"Info", MB_OK);
+
+            InvalidateRect(hWnd, NULL, TRUE);
         }
         else if (wmId == DELETAR) // Botões "Deletar"
         {
@@ -303,7 +374,7 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
         int cellHeight = 32;  // Altura de cada célula
         int numColumns = g_tableData.empty() ? 0 : g_tableData[0].size() + 3;  // Número de colunas baseado nos cabeçalhos
         int cellWidth = width / (numColumns > 0 ? numColumns : 1);  // Evitar divisão por zero
-        int startY = (height - (g_tableData.size() * cellHeight)) / 2;  // Centralizar verticalmente
+        int startY = 10;
         int startX = 22;
 
         // Desenhar a grade
@@ -426,72 +497,6 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
                 xPos = startX + 10 * cellWidth + 2;
                 TextOut(hdc, xPos, yPos, L"Deletar", static_cast<int>(7));
             }
-            else {
-
-                // Supondo que g_tableData[row][0] contém o ID do registro (ajuste o índice se for diferente)
-                LONG_PTR recordId = _wtoi(g_tableData[row][0].c_str());
-
-                xPos = startX + 8 * cellWidth + 2;
-                yPos = startY + row * cellHeight + 2;
-
-                int buttonWidth = 70;
-                int buttonHeight = 30;
-                HWND hButton = CreateWindowW(
-                    L"BUTTON",           // Classe do controle
-                    L"Consultar",        // Texto do botão
-                    WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
-                    xPos, yPos,          // Posição (x, y)
-                    buttonWidth, buttonHeight,              // Largura e altura
-                    hWnd,                // Handle da janela pai
-                    (HMENU)(CONSULTAR), // ID simples, usado como base
-                    (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
-                    NULL
-                );
-
-                if (hButton)
-                {
-                    SetWindowLongPtr(hButton, GWLP_USERDATA, recordId); // Armazenar o ID do registro
-                    g_buttons.push_back(hButton); // Armazenar o handle
-                }
-
-                // Botão "Editar"
-                xPos = startX + 9 * cellWidth + 2;
-                hButton = CreateWindowW(
-                    L"BUTTON",
-                    L"Editar",
-                    WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
-                    xPos, yPos,
-                    buttonWidth, buttonHeight,
-                    hWnd,
-                    (HMENU)(EDITAR), // ID simples
-                    (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
-                    NULL
-                );
-                if (hButton)
-                {
-                    SetWindowLongPtr(hButton, GWLP_USERDATA, recordId); // Armazenar o ID do registro
-                    g_buttons.push_back(hButton);
-                }
-
-                // Botão "Deletar"
-                xPos = startX + 10 * cellWidth + 2;
-                hButton = CreateWindowW(
-                    L"BUTTON",
-                    L"Deletar",
-                    WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
-                    xPos, yPos,
-                    buttonWidth, buttonHeight,
-                    hWnd,
-                    (HMENU)(DELETAR), // ID simples
-                    (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
-                    NULL
-                );
-                if (hButton)
-                {
-                    SetWindowLongPtr(hButton, GWLP_USERDATA, recordId); // Armazenar o ID do registro
-                    g_buttons.push_back(hButton);
-                }
-            }
         }
 
         EndPaint(hWnd, &ps);
@@ -509,6 +514,89 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
         windowClose(hWnd, message, wParam, lParam);
         break;
     }
+    case WM_SIZE:
+    {
+        int clientHeight = HIWORD(lParam);
+        int totalHeight = static_cast<int>(g_tableData.size() - 1) * 32; // -1 para pular header
+        if (totalHeight > clientHeight) {
+            SetScrollRange(hWnd, SB_VERT, 0, totalHeight - clientHeight, TRUE);
+        }
+        else {
+            SetScrollRange(hWnd, SB_VERT, 0, 0, TRUE);
+        }
+        // Recalcular posições dos botões com base no novo tamanho
+        RECT rect;
+        GetClientRect(hWnd, &rect);
+        int width = rect.right - rect.left - 44;
+        int cellWidth = width / (g_tableData.empty() ? 1 : g_tableData[0].size() + 3);
+        int scrollPos = GetScrollPos(hWnd, SB_VERT);
+        int startX = 22;
+        for (size_t row = 0; row < g_tableData.size() - 1 && row * 3 < g_buttons.size(); row++) {
+            int yPos = 11 + static_cast<int>(row + 1) * 32 - scrollPos; // Ajuste para começar após o header
+            if (yPos + 32 >= 0 && yPos <= clientHeight) { // Visível na janela
+                SetWindowPos(g_buttons[row * 3], NULL, startX + 8 * cellWidth + 2, yPos, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+                SetWindowPos(g_buttons[row * 3 + 1], NULL, startX + 9 * cellWidth + 2, yPos, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+                SetWindowPos(g_buttons[row * 3 + 2], NULL, startX + 10 * cellWidth + 2, yPos, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+                ShowWindow(g_buttons[row * 3], SW_SHOW);
+                ShowWindow(g_buttons[row * 3 + 1], SW_SHOW);
+                ShowWindow(g_buttons[row * 3 + 2], SW_SHOW);
+            }
+            else {
+                ShowWindow(g_buttons[row * 3], SW_HIDE);
+                ShowWindow(g_buttons[row * 3 + 1], SW_HIDE);
+                ShowWindow(g_buttons[row * 3 + 2], SW_HIDE);
+            }
+        }
+        InvalidateRect(hWnd, NULL, TRUE);
+        return 0;
+    }
+    break;
+
+    case WM_VSCROLL:
+    {
+        int scrollPos = GetScrollPos(hWnd, SB_VERT);
+        int clientHeight = HIWORD(GetClientRect(hWnd, NULL));
+        int totalHeight = static_cast<int>(g_tableData.size() - 1) * 32;
+
+        switch (LOWORD(wParam))
+        {
+        case SB_LINEUP: scrollPos -= 32; break;
+        case SB_LINEDOWN: scrollPos += 32; break;
+        case SB_PAGEUP: scrollPos -= clientHeight; break;
+        case SB_PAGEDOWN: scrollPos += clientHeight; break;
+        case SB_TOP: scrollPos = 0; break;
+        case SB_BOTTOM: scrollPos = totalHeight - clientHeight; break;
+        case SB_THUMBTRACK: scrollPos = HIWORD(wParam); break;
+        }
+        scrollPos = max(0, min(scrollPos, totalHeight - clientHeight));
+        SetScrollPos(hWnd, SB_VERT, scrollPos, TRUE);
+
+        // Ajustar posições dos botões
+        RECT rect;
+        GetClientRect(hWnd, &rect);
+        int width = rect.right - rect.left - 44;
+        int cellWidth = width / (g_tableData.empty() ? 1 : g_tableData[0].size() + 3);
+        int startX = 22;
+        for (size_t row = 0; row < g_tableData.size() - 1 && row * 3 < g_buttons.size(); row++) {
+            int yPos = 11 + static_cast<int>(row + 1) * 32 - scrollPos;
+            if (yPos + 32 >= 0 && yPos <= clientHeight) {
+                SetWindowPos(g_buttons[row * 3], NULL, startX + 8 * cellWidth + 2, yPos, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+                SetWindowPos(g_buttons[row * 3 + 1], NULL, startX + 9 * cellWidth + 2, yPos, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+                SetWindowPos(g_buttons[row * 3 + 2], NULL, startX + 10 * cellWidth + 2, yPos, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+                ShowWindow(g_buttons[row * 3], SW_SHOW);
+                ShowWindow(g_buttons[row * 3 + 1], SW_SHOW);
+                ShowWindow(g_buttons[row * 3 + 2], SW_SHOW);
+            }
+            else {
+                ShowWindow(g_buttons[row * 3], SW_HIDE);
+                ShowWindow(g_buttons[row * 3 + 1], SW_HIDE);
+                ShowWindow(g_buttons[row * 3 + 2], SW_HIDE);
+            }
+        }
+        InvalidateRect(hWnd, NULL, TRUE);
+        return 0;
+    }
+    break;
     default:
         return DefWindowProc(hWnd, message, wParam, lParam);
     }

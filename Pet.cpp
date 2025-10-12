@@ -101,6 +101,51 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
     return RegisterClassExW(&wcex);
 }
 
+int g_scrollX;      // Posição horizontal do scroll
+int g_scrollY;      // Posição vertical do scroll
+int g_contentWidth;   // Largura total do conteúdo
+int g_contentHeight;   // Altura total do conteúdo
+int g_clientWidth;       // Largura da área cliente
+int g_clientHeight;      // Altura da área cliente
+
+BOOL scroll(HWND hWnd, int scrollX, int scrollY, int contentWidth, int contentHeight, int clientWidth, int clientHeight)
+{
+    // Variáveis de scroll
+    g_scrollX = scrollX;      // Posição horizontal do scroll
+    g_scrollY = scrollY;      // Posição vertical do scroll
+    g_contentWidth = contentWidth;   // Largura total do conteúdo
+    g_contentHeight = contentHeight;   // Altura total do conteúdo
+    g_clientWidth = clientWidth;       // Largura da área cliente
+    g_clientHeight = clientHeight;      // Altura da área cliente
+
+    // Obter dimensões da área cliente
+    RECT rect;
+    GetClientRect(hWnd, &rect);
+    g_clientWidth = rect.right - rect.left;
+    g_clientHeight = rect.bottom - rect.top;
+
+    // Configurar scroll bars
+    SCROLLINFO si = {};
+    si.cbSize = sizeof(SCROLLINFO);
+    si.fMask = SIF_RANGE | SIF_PAGE | SIF_POS;
+
+    // Scroll vertical
+    si.nMin = 0;
+    si.nMax = g_contentHeight;
+    si.nPage = g_clientHeight;
+    si.nPos = g_scrollY;
+    SetScrollInfo(hWnd, SB_VERT, &si, TRUE);
+
+    // Scroll horizontal
+    si.nMin = 0;
+    si.nMax = g_contentWidth;
+    si.nPage = g_clientWidth;
+    si.nPos = g_scrollX;
+    SetScrollInfo(hWnd, SB_HORZ, &si, TRUE);
+
+    return 0;
+}
+
 BOOL windowClose(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     int windowsNumberString = windowsNumber;
@@ -194,11 +239,18 @@ BOOL CreateNewWindow(HWND hWndParent, HINSTANCE hInst, LPCWSTR className, LPCWST
         SetForegroundWindow(hSelectWnd);
     }
     else {
+
+        // Na criação da janela, adicione CS_DBLCLKS
+        WNDCLASSEX wc = {};
+        wc.cbSize = sizeof(WNDCLASSEX);
+        wc.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;  // ← ADICIONE ESTE
+        wc.lpfnWndProc = WndProc;
+
         // Criar a janela Nova
         HWND hNewWnd = CreateWindowW(
             className,
             windowTittle,
-            WS_OVERLAPPEDWINDOW,
+            WS_OVERLAPPEDWINDOW | WS_VSCROLL | WS_HSCROLL,
             CW_USEDEFAULT, CW_USEDEFAULT,
             1400, 400, // Tamanho inicial (pode ser ignorado ao maximizar)
             NULL,

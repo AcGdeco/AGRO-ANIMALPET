@@ -66,14 +66,171 @@ BOOL RegisterReadClass(HINSTANCE hInstance)
 LRESULT CALLBACK WndProcRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     ProcessarMenu(hWnd, message, wParam, lParam);
+    scroll(hWnd, 0, 0, 1000, 800, 0, 0);
 
     // Depois processa as mensagens específicas da janela
     switch (message)
     {
+    case WM_CREATE: {
+        // Obter dimensões da área cliente
+        RECT rect;
+        GetClientRect(hWnd, &rect);
+        g_clientWidth = rect.right - rect.left;
+        g_clientHeight = rect.bottom - rect.top;
+
+        // Configurar scroll bars
+        SCROLLINFO si = {};
+        si.cbSize = sizeof(SCROLLINFO);
+        si.fMask = SIF_RANGE | SIF_PAGE | SIF_POS;
+
+        // Scroll vertical
+        si.nMin = 0;
+        si.nMax = g_contentHeight;
+        si.nPage = g_clientHeight;
+        si.nPos = g_scrollY;
+        SetScrollInfo(hWnd, SB_VERT, &si, TRUE);
+
+        // Scroll horizontal
+        si.nMin = 0;
+        si.nMax = g_contentWidth;
+        si.nPage = g_clientWidth;
+        si.nPos = g_scrollX;
+        SetScrollInfo(hWnd, SB_HORZ, &si, TRUE);
+
+        break;
+    }
+    case WM_VSCROLL: {
+        SCROLLINFO si = {};
+        si.cbSize = sizeof(SCROLLINFO);
+        si.fMask = SIF_ALL;
+        GetScrollInfo(hWnd, SB_VERT, &si);
+
+        int oldPos = si.nPos;
+
+        switch (LOWORD(wParam)) {
+        case SB_LINEUP:        si.nPos -= 10; break;
+        case SB_LINEDOWN:      si.nPos += 10; break;
+        case SB_PAGEUP:        si.nPos -= si.nPage; break;
+        case SB_PAGEDOWN:      si.nPos += si.nPage; break;
+        case SB_THUMBTRACK:    si.nPos = si.nTrackPos; break;
+        case SB_THUMBPOSITION: si.nPos = si.nTrackPos; break;
+        case SB_TOP:           si.nPos = si.nMin; break;
+        case SB_BOTTOM:        si.nPos = si.nMax; break;
+        default: break;
+        }
+
+        // Limitar posição
+        si.fMask = SIF_POS;
+        si.nPos = max(si.nMin, min(si.nPos, si.nMax - (int)si.nPage + 1));
+        SetScrollInfo(hWnd, SB_VERT, &si, TRUE);
+        GetScrollInfo(hWnd, SB_VERT, &si);
+
+        // Se a posição mudou, scroll a janela
+        if (si.nPos != oldPos) {
+            ScrollWindow(hWnd, 0, oldPos - si.nPos, NULL, NULL);
+            g_scrollY = si.nPos;
+            UpdateWindow(hWnd);
+        }
+        break;
+    }
+    case WM_HSCROLL: {
+        SCROLLINFO si = {};
+        si.cbSize = sizeof(SCROLLINFO);
+        si.fMask = SIF_ALL;
+        GetScrollInfo(hWnd, SB_HORZ, &si);
+
+        int oldPos = si.nPos;
+
+        switch (LOWORD(wParam)) {
+        case SB_LINELEFT:      si.nPos -= 10; break;
+        case SB_LINERIGHT:     si.nPos += 10; break;
+        case SB_PAGELEFT:      si.nPos -= si.nPage; break;
+        case SB_PAGERIGHT:     si.nPos += si.nPage; break;
+        case SB_THUMBTRACK:    si.nPos = si.nTrackPos; break;
+        case SB_THUMBPOSITION: si.nPos = si.nTrackPos; break;
+        default: break;
+        }
+
+        // Limitar posição
+        si.fMask = SIF_POS;
+        si.nPos = max(si.nMin, min(si.nPos, si.nMax - (int)si.nPage + 1));
+        SetScrollInfo(hWnd, SB_HORZ, &si, TRUE);
+        GetScrollInfo(hWnd, SB_HORZ, &si);
+
+        // Se a posição mudou, scroll a janela
+        if (si.nPos != oldPos) {
+            ScrollWindow(hWnd, oldPos - si.nPos, 0, NULL, NULL);
+            g_scrollX = si.nPos;
+            UpdateWindow(hWnd);
+        }
+        break;
+    }
+    case WM_SIZE: {
+        // Atualizar dimensões da área cliente
+        g_clientWidth = LOWORD(lParam);
+        g_clientHeight = HIWORD(lParam);
+
+        // Atualizar scroll bars
+        SCROLLINFO si = {};
+        si.cbSize = sizeof(SCROLLINFO);
+        si.fMask = SIF_RANGE | SIF_PAGE | SIF_POS;
+
+        // Scroll vertical
+        si.nMin = 0;
+        si.nMax = g_contentHeight;
+        si.nPage = g_clientHeight;
+        si.nPos = g_scrollY;
+        SetScrollInfo(hWnd, SB_VERT, &si, TRUE);
+
+        // Scroll horizontal
+        si.nMin = 0;
+        si.nMax = g_contentWidth;
+        si.nPage = g_clientWidth;
+        si.nPos = g_scrollX;
+        SetScrollInfo(hWnd, SB_HORZ, &si, TRUE);
+
+        break;
+    }
+    case WM_MOUSEWHEEL: {
+        // Obter delta do wheel (positivo = para cima, negativo = para baixo)
+        int zDelta = GET_WHEEL_DELTA_WPARAM(wParam);
+
+        SCROLLINFO si = {};
+        si.cbSize = sizeof(SCROLLINFO);
+        si.fMask = SIF_ALL;
+        GetScrollInfo(hWnd, SB_VERT, &si);
+
+        int oldPos = si.nPos;
+
+        // Calcular quantidade de scroll (3 linhas por "click")
+        int scrollAmount = -zDelta / WHEEL_DELTA * 50;  // 50 pixels por click
+
+        // Aplicar scroll
+        si.nPos += scrollAmount;
+
+        // Limitar posição
+        si.nPos = max(si.nMin, min(si.nPos, si.nMax - (int)si.nPage + 1));
+
+        si.fMask = SIF_POS;
+        SetScrollInfo(hWnd, SB_VERT, &si, TRUE);
+        GetScrollInfo(hWnd, SB_VERT, &si);
+
+        // Se a posição mudou, atualizar a janela
+        if (si.nPos != oldPos) {
+            ScrollWindow(hWnd, 0, oldPos - si.nPos, NULL, NULL);
+            g_scrollY = si.nPos;
+            UpdateWindow(hWnd);
+        }
+
+        return 0;
+    }
     case WM_PAINT:
     {
         PAINTSTRUCT ps;
         HDC hdc = BeginPaint(hWnd, &ps);
+
+        // Aplicar transformação de scroll
+        SetViewportOrgEx(hdc, -g_scrollX, -g_scrollY, NULL);
 
         // Texto de exemplo
         RECT rect;
@@ -121,7 +278,7 @@ LRESULT CALLBACK WndProcRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
         int cellHeight = 32;  // Altura de cada célula
         int numColumns = g_tableDataConsulta.empty() ? 0 : g_tableDataConsulta[0].size() + 3;  // Número de colunas baseado nos cabeçalhos
         int cellWidth = (width + 2000) / (numColumns > 0 ? numColumns : 1);  // Evitar divisão por zero
-        int startY = 100;  // Centralizar verticalmente
+        int startY = 10;  // Centralizar verticalmente
         int startX = 22;
 
         // Desenhar a grade
@@ -204,10 +361,12 @@ LRESULT CALLBACK WndProcRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
                     if (row == 0) {
                         xPos = startX;  // Pequeno deslocamento para margem
                         yPos = startY + colNumber * cellHeight + 7;  // Ajuste vertical
+                        HFONT hOldFont = (HFONT)SelectObject(hdc, hFontHeader); // Selecionar a nova fonte
                     }
                     else {
                         xPos = startX + cellWidth + 2;  // Pequeno deslocamento para margem
                         yPos = startY + colNumber * cellHeight + 7;  // Ajuste vertical
+                        HFONT hOldFont = (HFONT)SelectObject(hdc, hFont); // Selecionar a nova fonte
                     }
                     
 
