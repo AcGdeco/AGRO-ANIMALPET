@@ -103,6 +103,9 @@ void AtualizarPosicoesBotoes(HWND hWnd)
     int startY = 10;
     int cellHeight = 32;
 
+    // Desabilitar redesenho durante a atualização
+    SendMessage(hWnd, WM_SETREDRAW, FALSE, 0);
+
     for (size_t i = 0; i < g_buttons.size(); i++) {
         size_t row = (i / 3) + 1;
         int buttonType = i % 3;
@@ -110,8 +113,24 @@ void AtualizarPosicoesBotoes(HWND hWnd)
         int yPos = startY + row * cellHeight + 2 - g_scrollY;
         int xPos = startX + (8 + buttonType) * cellWidth + 2;
 
-        SetWindowPos(g_buttons[i], NULL, xPos, yPos, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+        // Verificar se o botão está visível na área da janela
+        BOOL isVisible = (yPos >= -cellHeight && yPos <= rect.bottom);
+
+        if (isVisible) {
+            SetWindowPos(g_buttons[i], NULL, xPos, yPos, 0, 0,
+                SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
+        }
+        else {
+            // Esconder botões que estão fora da área visível
+            SetWindowPos(g_buttons[i], NULL, xPos, yPos, 0, 0,
+                SWP_NOSIZE | SWP_NOZORDER | SWP_HIDEWINDOW);
+        }
     }
+
+    // Reabilitar redesenho e forçar atualização
+    SendMessage(hWnd, WM_SETREDRAW, TRUE, 0);
+    RedrawWindow(hWnd, NULL, NULL,
+        RDW_ERASE | RDW_FRAME | RDW_INVALIDATE | RDW_ALLCHILDREN);
 }
 
 // Função para configurar scroll bars
@@ -383,11 +402,9 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
                 rc = sqlite3_exec(db, sqlSelect, sqlite_callback, &g_tableData, &errMsg);
                 if (rc != SQLITE_OK) {
                     if (errMsg) {
-                        // Converte char* para wchar_t* corretamente
                         size_t len = strlen(errMsg) + 1;
                         std::wstring wErrMsg(len, L'\0');
                         mbstowcs_s(nullptr, &wErrMsg[0], len, errMsg, _TRUNCATE);
-                        // Remove o caractere nulo extra do final
                         wErrMsg.resize(wcslen(wErrMsg.c_str()));
                         g_tableData.push_back({ L"Erro", wErrMsg });
                     }
@@ -410,133 +427,108 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
         int height = rect.bottom - rect.top;
 
         // Configurar a tabela
-        int cellHeight = 32;  // Altura de cada célula
-        int numColumns = g_tableData.empty() ? 0 : g_tableData[0].size() + 3;  // Número de colunas baseado nos cabeçalhos
-        int cellWidth = width / (numColumns > 0 ? numColumns : 1);  // Evitar divisão por zero
-        int startY = 10 - g_scrollY;  // Subtrair scroll
+        int cellHeight = 32;
+        int numColumns = g_tableData.empty() ? 0 : g_tableData[0].size();
+        int cellWidth = width / (numColumns > 0 ? numColumns + 3 : 1); // +3 para os botões
+        int startY = 10 - g_scrollY;
         int startX = 22;
 
-        // Desenhar a grade
-        HPEN hPen = CreatePen(PS_SOLID, 1, RGB(0, 0, 0));  // Caneta preta
-        HPEN hOldPen = (HPEN)SelectObject(hdc, hPen);
-        //for (int i = 0; i <= static_cast<int>(g_tableData.size()); i++) {  // Linhas horizontais
-            //MoveToEx(hdc, startX, startY + i * cellHeight, NULL);
-            //LineTo(hdc, startX + width, startY + i * cellHeight);
-        //}
-        //for (int i = 0; i < numColumns + 1; i++) {  // Linhas verticais, corrigido para numColumns
-            //MoveToEx(hdc, startX + i * cellWidth, startY, NULL);
-            //LineTo(hdc, startX + i * cellWidth, startY + g_tableData.size() * cellHeight);
-        //}
-        SelectObject(hdc, hOldPen);
-        DeleteObject(hPen);
+        // LIMPAR a área de desenho primeiro
+        HBRUSH hBgBrush = CreateSolidBrush(GetSysColor(COLOR_WINDOW));
+        FillRect(hdc, &rect, hBgBrush);
+        DeleteObject(hBgBrush);
 
         // Desenhar fundos alternados para as linhas
-        HBRUSH hBrushHeader = CreateSolidBrush(RGB(150, 150, 150)); // Fundo header
-        HBRUSH hBrushWhite = CreateSolidBrush(RGB(255, 255, 255)); // Fundo branco
-        HBRUSH hBrushGray = CreateSolidBrush(RGB(240, 240, 240));  // Fundo cinza claro
-        HBRUSH hOldBrush = (HBRUSH)SelectObject(hdc, hBrushWhite); // Pincel inicial
+        HBRUSH hBrushHeader = CreateSolidBrush(RGB(150, 150, 150));
+        HBRUSH hBrushWhite = CreateSolidBrush(RGB(255, 255, 255));
+        HBRUSH hBrushGray = CreateSolidBrush(RGB(240, 240, 240));
 
-        // Criar fonte header
-        HFONT hFontHeader = CreateFont(
-            16,                        // Altura da fonte (ajuste conforme necessário)
-            0,                         // Largura (0 para proporção automática)
-            0,                         // Escapamento
-            0,                         // Orientação
-            FW_EXTRABOLD,              // Peso (700 para bold, 800 para extra bold)
-            FALSE,                     // Itálico
-            FALSE,                     // Sublinhado
-            FALSE,                     // Tachado
-            DEFAULT_CHARSET,           // Conjunto de caracteres
-            OUT_DEFAULT_PRECIS,        // Precisão de saída
-            CLIP_DEFAULT_PRECIS,       // Precisão de recorte
-            ANTIALIASED_QUALITY,       // Qualidade
-            DEFAULT_PITCH | FF_DONTCARE, // Tipo de pitch e família
-            L"Arial"                   // Nome da fonte (pode mudar, ex.: "Times New Roman")
-        );
+        // Criar fontes
+        HFONT hFontHeader = CreateFont(16, 0, 0, 0, FW_EXTRABOLD, FALSE, FALSE, FALSE,
+            DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
+            ANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Arial");
 
-        // Criar fonte default
-        HFONT hFont = CreateFont(
-            16,                        // Altura da fonte (ajuste conforme necessário)
-            0,                         // Largura (0 para proporção automática)
-            0,                         // Escapamento
-            0,                         // Orientação
-            FW_BOLD,                 // Peso (700 para bold, 800 para extra bold)
-            FALSE,                     // Itálico
-            FALSE,                     // Sublinhado
-            FALSE,                     // Tachado
-            DEFAULT_CHARSET,           // Conjunto de caracteres
-            OUT_DEFAULT_PRECIS,        // Precisão de saída
-            CLIP_DEFAULT_PRECIS,       // Precisão de recorte
-            ANTIALIASED_QUALITY,       // Qualidade
-            DEFAULT_PITCH | FF_DONTCARE, // Tipo de pitch e família
-            L"Arial"                   // Nome da fonte (pode mudar, ex.: "Times New Roman")
-        );
+        HFONT hFont = CreateFont(16, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE,
+            DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
+            ANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Arial");
 
         // Desenhar o texto nas células
-        SetBkMode(hdc, TRANSPARENT);  // Texto sem fundo
-        int colNumber = 0;
+        SetBkMode(hdc, TRANSPARENT);
+
+        // DESENHAR APENAS UMA VEZ - REMOVER loops desnecessários
         for (size_t row = 0; row < g_tableData.size(); row++) {
             HBRUSH hCurrentBrush = (row % 2 == 0) ? hBrushGray : hBrushWhite;
-
-            // Selecionar cor do texto
             COLORREF textColor = RGB(0, 0, 0);
-            SetTextColor(hdc, textColor);
-            HFONT hOldFont = (HFONT)SelectObject(hdc, hFont); // Selecionar a nova fonte
-            
+
             if (row == 0) {
                 hCurrentBrush = hBrushHeader;
-                COLORREF textColor = RGB(255, 255, 255);
-                SetTextColor(hdc, textColor);
-                HFONT hOldFont = (HFONT)SelectObject(hdc, hFontHeader); // Selecionar a nova fonte
+                textColor = RGB(255, 255, 255);
+                SelectObject(hdc, hFontHeader);
             }
-            
-            SelectObject(hdc, hCurrentBrush);
+            else {
+                SelectObject(hdc, hFont);
+            }
+
+            SetTextColor(hdc, textColor);
 
             // Desenhar o fundo da linha
-            RECT rowRect = { startX, startY + static_cast<int>(row) * cellHeight,
-                            startX + width, startY + (static_cast<int>(row) + 1) * cellHeight };
+            RECT rowRect = {
+                startX,
+                startY + static_cast<int>(row) * cellHeight,
+                startX + width,
+                startY + (static_cast<int>(row) + 1) * cellHeight
+            };
             FillRect(hdc, &rowRect, hCurrentBrush);
 
+            // Desenhar as células de dados
             for (size_t col = 0; col < g_tableData[row].size(); col++) {
-                colNumber++;
-                int xPos = startX + col * cellWidth + 2;  // Pequeno deslocamento para margem
-                int yPos = startY + row * cellHeight + 7;  // Ajuste vertical
-                if (g_tableData[row][col] == L"Nome_do_Pet") {
-                    TextOut(hdc, xPos, yPos, L"Nome do Pet", static_cast<int>(g_tableData[row][col].length()));
+                int xPos = startX + col * cellWidth + 2;
+                int yPos = startY + row * cellHeight + 7;
+
+                std::wstring displayText = g_tableData[row][col];
+
+                // Traduzir cabeçalhos se necessário
+                if (row == 0) {
+                    if (displayText == L"Nome_do_Pet") displayText = L"Nome do Pet";
+                    else if (displayText == L"Nome_do_Tutor") displayText = L"Nome do Tutor";
+                    else if (displayText == L"Raca") displayText = L"Raça";
+                    else if (displayText == L"Date") displayText = L"Data";
+                    else if (displayText == L"Hour") displayText = L"Hora";
                 }
-                else if (g_tableData[row][col] == L"Nome_do_Tutor") {
-                    TextOut(hdc, xPos, yPos, L"Nome do Tutor", static_cast<int>(g_tableData[row][col].length()));
-                }
-                else if (g_tableData[row][col] == L"Raca") {
-                    TextOut(hdc, xPos, yPos, L"Raça", static_cast<int>(g_tableData[row][col].length()));
-                }
-                else if (g_tableData[row][col] == L"Date") {
-                    TextOut(hdc, xPos, yPos, L"Data", static_cast<int>(g_tableData[row][col].length()));
-                }
-                else if (g_tableData[row][col] == L"Hour") {
-                    TextOut(hdc, xPos, yPos, L"Hora", static_cast<int>(g_tableData[row][col].length()));
-                }
-                else{
-                    TextOut(hdc, xPos, yPos, g_tableData[row][col].c_str(), static_cast<int>(g_tableData[row][col].length()));
-                }
+
+                TextOut(hdc, xPos, yPos, displayText.c_str(), static_cast<int>(displayText.length()));
             }
 
-            int yPos;
-            int xPos;
-
-            if (row == 0) {
-                yPos = startY + row * cellHeight + 7;
-
-                xPos = startX + 8 * cellWidth + 2;
-                TextOut(hdc, xPos, yPos, L"Consultar", static_cast<int>(9));
-
-                xPos = startX + 9 * cellWidth + 2;
-                TextOut(hdc, xPos, yPos, L"Editar", static_cast<int>(6));
-
-                xPos = startX + 10 * cellWidth + 2;
-                TextOut(hdc, xPos, yPos, L"Deletar", static_cast<int>(7));
-            }
+            // Desenhar cabeçalhos dos botões apenas na linha do cabeçalho
+            // REMOVER o código duplicado de desenho de botões que estava criando tabelas sobrepostas
         }
+
+        // DESENHAR CABEÇALHOS DOS BOTÕES APENAS UMA VEZ - fora do loop principal
+        if (!g_tableData.empty()) {
+            COLORREF textColor = RGB(255, 255, 255);
+            SetTextColor(hdc, textColor);
+
+            int headerY = startY + 7;
+
+            // Consultar
+            int xPos = startX + g_tableData[0].size() * cellWidth + 2;
+            TextOut(hdc, xPos, headerY, L"Consultar", 9);
+
+            // Editar
+            xPos = startX + (g_tableData[0].size() + 1) * cellWidth + 2;
+            TextOut(hdc, xPos, headerY, L"Editar", 6);
+
+            // Deletar
+            xPos = startX + (g_tableData[0].size() + 2) * cellWidth + 2;
+            TextOut(hdc, xPos, headerY, L"Deletar", 7);
+        }
+
+        // Limpar recursos
+        DeleteObject(hBrushHeader);
+        DeleteObject(hBrushWhite);
+        DeleteObject(hBrushGray);
+        DeleteObject(hFontHeader);
+        DeleteObject(hFont);
 
         EndPaint(hWnd, &ps);
     }
@@ -557,14 +549,18 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
     {
         g_clientHeight = HIWORD(lParam);
         ConfigurarScrollBars(hWnd);
+
+        // Apenas atualizar botões, NÃO chamar InvalidateRect aqui
         AtualizarPosicoesBotoes(hWnd);
-        InvalidateRect(hWnd, NULL, TRUE);
+
+        // Forçar redesenho apenas do conteúdo
+        RECT clientRect;
+        GetClientRect(hWnd, &clientRect);
+        InvalidateRect(hWnd, &clientRect, TRUE);
         break;
     }
-    break;
 
-    case WM_VSCROLL:
-    {
+    case WM_VSCROLL: {
         SCROLLINFO si = {};
         si.cbSize = sizeof(SCROLLINFO);
         si.fMask = SIF_ALL;
@@ -591,12 +587,18 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 
         if (si.nPos != oldPos) {
             g_scrollY = si.nPos;
+
+            // Apenas atualizar botões, NÃO chamar InvalidateRect
             AtualizarPosicoesBotoes(hWnd);
-            InvalidateRect(hWnd, NULL, TRUE);
+
+            // Forçar redesenho apenas do conteúdo (não dos controles)
+            RECT clientRect;
+            GetClientRect(hWnd, &clientRect);
+            InvalidateRect(hWnd, &clientRect, TRUE);
             UpdateWindow(hWnd);
         }
+        break;
     }
-    break;
     case WM_MOUSEWHEEL:
     {
         int zDelta = GET_WHEEL_DELTA_WPARAM(wParam);
@@ -617,11 +619,23 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 
         if (si.nPos != oldPos) {
             g_scrollY = si.nPos;
+
+            // Apenas atualizar botões, NÃO chamar InvalidateRect
             AtualizarPosicoesBotoes(hWnd);
-            InvalidateRect(hWnd, NULL, TRUE);
+
+            // Forçar redesenho apenas do conteúdo (não dos controles)
+            RECT clientRect;
+            GetClientRect(hWnd, &clientRect);
+            InvalidateRect(hWnd, &clientRect, TRUE);
             UpdateWindow(hWnd);
         }
         return 0;
+    }
+    case WM_ERASEBKGND:
+    {
+        // Retornar TRUE para evitar que o sistema apague o fundo
+        // Isso reduz o flicker durante o redesenho
+        return 1;
     }
     default:
         return DefWindowProc(hWnd, message, wParam, lParam);
