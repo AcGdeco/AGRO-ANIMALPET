@@ -8,6 +8,14 @@
 #include "sqlite3.h"
 #include <vector>
 
+// Variáveis externas para scroll
+extern int g_scrollY;
+extern int g_clientHeight;
+extern int g_contentHeight;
+extern int g_scrollX;
+extern int g_clientWidth;
+extern int g_contentWidth;
+
 std::vector<std::vector<std::wstring>> g_tableDataConsulta;
 
 // Função auxiliar para converter de UTF-8 (char*) para std::wstring (UTF-16)
@@ -44,6 +52,38 @@ int sqlite_callback_consulta(void* data, int argc, char** argv, char** azColName
 // Declaração do procedimento da janela
 LRESULT CALLBACK WndProcRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
+// Função para configurar scroll bars
+void ConfigurarScrollBarsConsulta(HWND hWnd)
+{
+    RECT rect;
+    GetClientRect(hWnd, &rect);
+    g_clientHeight = rect.bottom - rect.top;
+    g_clientWidth = rect.right - rect.left;
+
+    // Calcular altura total do conteúdo baseado na tabela
+    int cellHeight = 32;
+    g_contentHeight = 22 * cellHeight + 100; // 22 colunas + margem
+    g_contentWidth = 2000; // Largura fixa para conteúdo largo
+
+    SCROLLINFO si = {};
+    si.cbSize = sizeof(SCROLLINFO);
+    si.fMask = SIF_RANGE | SIF_PAGE | SIF_POS;
+
+    // Scroll vertical
+    si.nMin = 0;
+    si.nMax = g_contentHeight;
+    si.nPage = g_clientHeight;
+    si.nPos = g_scrollY;
+    SetScrollInfo(hWnd, SB_VERT, &si, TRUE);
+
+    // Scroll horizontal
+    si.nMin = 0;
+    si.nMax = g_contentWidth;
+    si.nPage = g_clientWidth;
+    si.nPos = g_scrollX;
+    SetScrollInfo(hWnd, SB_HORZ, &si, TRUE);
+}
+
 // Função para registrar a classe da janela (pode ser chamada de outro lugar, como Pet.cpp)
 BOOL RegisterReadClass(HINSTANCE hInstance)
 {
@@ -66,39 +106,18 @@ BOOL RegisterReadClass(HINSTANCE hInstance)
 LRESULT CALLBACK WndProcRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     ProcessarMenu(hWnd, message, wParam, lParam);
-    scroll(hWnd, 0, 0, 1000, 800, 0, 0);
 
     // Depois processa as mensagens específicas da janela
     switch (message)
     {
     case WM_CREATE: {
-        // Obter dimensões da área cliente
-        RECT rect;
-        GetClientRect(hWnd, &rect);
-        g_clientWidth = rect.right - rect.left;
-        g_clientHeight = rect.bottom - rect.top;
-
-        // Configurar scroll bars
-        SCROLLINFO si = {};
-        si.cbSize = sizeof(SCROLLINFO);
-        si.fMask = SIF_RANGE | SIF_PAGE | SIF_POS;
-
-        // Scroll vertical
-        si.nMin = 0;
-        si.nMax = g_contentHeight;
-        si.nPage = g_clientHeight;
-        si.nPos = g_scrollY;
-        SetScrollInfo(hWnd, SB_VERT, &si, TRUE);
-
-        // Scroll horizontal
-        si.nMin = 0;
-        si.nMax = g_contentWidth;
-        si.nPage = g_clientWidth;
-        si.nPos = g_scrollX;
-        SetScrollInfo(hWnd, SB_HORZ, &si, TRUE);
-
+        // Resetar scroll para garantir que comece do topo
+        g_scrollY = 0;
+        g_scrollX = 0;
+        ConfigurarScrollBarsConsulta(hWnd);
         break;
     }
+
     case WM_VSCROLL: {
         SCROLLINFO si = {};
         si.cbSize = sizeof(SCROLLINFO);
@@ -119,20 +138,19 @@ LRESULT CALLBACK WndProcRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
         default: break;
         }
 
-        // Limitar posição
         si.fMask = SIF_POS;
         si.nPos = max(si.nMin, min(si.nPos, si.nMax - (int)si.nPage + 1));
         SetScrollInfo(hWnd, SB_VERT, &si, TRUE);
         GetScrollInfo(hWnd, SB_VERT, &si);
 
-        // Se a posição mudou, scroll a janela
         if (si.nPos != oldPos) {
-            ScrollWindow(hWnd, 0, oldPos - si.nPos, NULL, NULL);
             g_scrollY = si.nPos;
+            InvalidateRect(hWnd, NULL, TRUE);
             UpdateWindow(hWnd);
         }
         break;
     }
+
     case WM_HSCROLL: {
         SCROLLINFO si = {};
         si.cbSize = sizeof(SCROLLINFO);
@@ -151,48 +169,45 @@ LRESULT CALLBACK WndProcRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
         default: break;
         }
 
-        // Limitar posição
         si.fMask = SIF_POS;
         si.nPos = max(si.nMin, min(si.nPos, si.nMax - (int)si.nPage + 1));
         SetScrollInfo(hWnd, SB_HORZ, &si, TRUE);
         GetScrollInfo(hWnd, SB_HORZ, &si);
 
-        // Se a posição mudou, scroll a janela
         if (si.nPos != oldPos) {
-            ScrollWindow(hWnd, oldPos - si.nPos, 0, NULL, NULL);
             g_scrollX = si.nPos;
+            InvalidateRect(hWnd, NULL, TRUE);
             UpdateWindow(hWnd);
         }
         break;
     }
+
     case WM_SIZE: {
-        // Atualizar dimensões da área cliente
-        g_clientWidth = LOWORD(lParam);
-        g_clientHeight = HIWORD(lParam);
+        int newWidth = LOWORD(lParam);
+        int newHeight = HIWORD(lParam);
 
-        // Atualizar scroll bars
-        SCROLLINFO si = {};
-        si.cbSize = sizeof(SCROLLINFO);
-        si.fMask = SIF_RANGE | SIF_PAGE | SIF_POS;
+        // Verificar se é uma mudança significativa de tamanho (maximizar/restaurar)
+        static int oldWidth = 0;
+        static int oldHeight = 0;
 
-        // Scroll vertical
-        si.nMin = 0;
-        si.nMax = g_contentHeight;
-        si.nPage = g_clientHeight;
-        si.nPos = g_scrollY;
-        SetScrollInfo(hWnd, SB_VERT, &si, TRUE);
+        if ((newWidth > oldWidth * 1.5) || (newHeight > oldHeight * 1.5) ||
+            (newWidth < oldWidth * 0.7) || (newHeight < oldHeight * 0.7)) {
+            // Mudança significativa - resetar scroll para o topo
+            g_scrollY = 0;
+            g_scrollX = 0;
+        }
 
-        // Scroll horizontal
-        si.nMin = 0;
-        si.nMax = g_contentWidth;
-        si.nPage = g_clientWidth;
-        si.nPos = g_scrollX;
-        SetScrollInfo(hWnd, SB_HORZ, &si, TRUE);
+        oldWidth = newWidth;
+        oldHeight = newHeight;
 
+        g_clientWidth = newWidth;
+        g_clientHeight = newHeight;
+        ConfigurarScrollBarsConsulta(hWnd);
+        InvalidateRect(hWnd, NULL, TRUE);
         break;
     }
+
     case WM_MOUSEWHEEL: {
-        // Obter delta do wheel (positivo = para cima, negativo = para baixo)
         int zDelta = GET_WHEEL_DELTA_WPARAM(wParam);
 
         SCROLLINFO si = {};
@@ -202,35 +217,27 @@ LRESULT CALLBACK WndProcRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
 
         int oldPos = si.nPos;
 
-        // Calcular quantidade de scroll (3 linhas por "click")
-        int scrollAmount = -zDelta / WHEEL_DELTA * 50;  // 50 pixels por click
+        int scrollAmount = -zDelta / WHEEL_DELTA * 30;
 
-        // Aplicar scroll
         si.nPos += scrollAmount;
-
-        // Limitar posição
         si.nPos = max(si.nMin, min(si.nPos, si.nMax - (int)si.nPage + 1));
 
         si.fMask = SIF_POS;
         SetScrollInfo(hWnd, SB_VERT, &si, TRUE);
         GetScrollInfo(hWnd, SB_VERT, &si);
 
-        // Se a posição mudou, atualizar a janela
         if (si.nPos != oldPos) {
-            ScrollWindow(hWnd, 0, oldPos - si.nPos, NULL, NULL);
             g_scrollY = si.nPos;
+            InvalidateRect(hWnd, NULL, TRUE);
             UpdateWindow(hWnd);
         }
-
         return 0;
     }
+
     case WM_PAINT:
     {
         PAINTSTRUCT ps;
         HDC hdc = BeginPaint(hWnd, &ps);
-
-        // Aplicar transformação de scroll
-        SetViewportOrgEx(hdc, -g_scrollX, -g_scrollY, NULL);
 
         // Texto de exemplo
         RECT rect;
@@ -274,124 +281,107 @@ LRESULT CALLBACK WndProcRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
         int width = (rect.right - rect.left) - 44;
         int height = rect.bottom - rect.top;
 
-        // Configurar a tabela
+        // Configurar a tabela com scroll
         int cellHeight = 32;  // Altura de cada célula
-        int numColumns = g_tableDataConsulta.empty() ? 0 : g_tableDataConsulta[0].size() + 3;  // Número de colunas baseado nos cabeçalhos
-        int cellWidth = (width + 2000) / (numColumns > 0 ? numColumns : 1);  // Evitar divisão por zero
-        int startY = 10;  // Centralizar verticalmente
-        int startX = 22;
+        int numColumns = g_tableDataConsulta.empty() ? 0 : g_tableDataConsulta[0].size() + 3;
+        int cellWidth = (width + 2000) / (numColumns > 0 ? numColumns : 1);
+        int startY = 10 - g_scrollY;  // Posição Y com scroll
+        int startX = 22 - g_scrollX;  // Posição X com scroll
 
         // Desenhar a grade
-        HPEN hPen = CreatePen(PS_SOLID, 1, RGB(0, 0, 0));  // Caneta preta
+        HPEN hPen = CreatePen(PS_SOLID, 1, RGB(0, 0, 0));
         HPEN hOldPen = (HPEN)SelectObject(hdc, hPen);
-        //for (int i = 0; i <= static_cast<int>(g_tableDataConsulta.size()); i++) {  // Linhas horizontais
-            //MoveToEx(hdc, startX, startY + i * cellHeight, NULL);
-            //LineTo(hdc, startX + width, startY + i * cellHeight);
-        //}
-        //for (int i = 0; i < numColumns + 1; i++) {  // Linhas verticais, corrigido para numColumns
-            //MoveToEx(hdc, startX + i * cellWidth, startY, NULL);
-            //LineTo(hdc, startX + i * cellWidth, startY + g_tableDataConsulta.size() * cellHeight);
-        //}
         SelectObject(hdc, hOldPen);
         DeleteObject(hPen);
 
         // Desenhar fundos alternados para as linhas
-        HBRUSH hBrushHeader = CreateSolidBrush(RGB(150, 150, 150)); // Fundo header
-        HBRUSH hBrushWhite = CreateSolidBrush(RGB(255, 255, 255)); // Fundo branco
-        HBRUSH hBrushGray = CreateSolidBrush(RGB(240, 240, 240));  // Fundo cinza claro
-        HBRUSH hOldBrush = (HBRUSH)SelectObject(hdc, hBrushWhite); // Pincel inicial
+        HBRUSH hBrushHeader = CreateSolidBrush(RGB(150, 150, 150));
+        HBRUSH hBrushWhite = CreateSolidBrush(RGB(255, 255, 255));
+        HBRUSH hBrushGray = CreateSolidBrush(RGB(240, 240, 240));
+        HBRUSH hOldBrush = (HBRUSH)SelectObject(hdc, hBrushWhite);
 
         // Criar fonte header
         HFONT hFontHeader = CreateFont(
-            16,                        // Altura da fonte (ajuste conforme necessário)
-            0,                         // Largura (0 para proporção automática)
-            0,                         // Escapamento
-            0,                         // Orientação
-            FW_EXTRABOLD,              // Peso (700 para bold, 800 para extra bold)
-            FALSE,                     // Itálico
-            FALSE,                     // Sublinhado
-            FALSE,                     // Tachado
-            DEFAULT_CHARSET,           // Conjunto de caracteres
-            OUT_DEFAULT_PRECIS,        // Precisão de saída
-            CLIP_DEFAULT_PRECIS,       // Precisão de recorte
-            ANTIALIASED_QUALITY,       // Qualidade
-            DEFAULT_PITCH | FF_DONTCARE, // Tipo de pitch e família
-            L"Arial"                   // Nome da fonte (pode mudar, ex.: "Times New Roman")
+            16, 0, 0, 0, FW_EXTRABOLD, FALSE, FALSE, FALSE,
+            DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
+            ANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Arial"
         );
 
         // Criar fonte default
         HFONT hFont = CreateFont(
-            16,                        // Altura da fonte (ajuste conforme necessário)
-            0,                         // Largura (0 para proporção automática)
-            0,                         // Escapamento
-            0,                         // Orientação
-            FW_BOLD,                 // Peso (700 para bold, 800 para extra bold)
-            FALSE,                     // Itálico
-            FALSE,                     // Sublinhado
-            FALSE,                     // Tachado
-            DEFAULT_CHARSET,           // Conjunto de caracteres
-            OUT_DEFAULT_PRECIS,        // Precisão de saída
-            CLIP_DEFAULT_PRECIS,       // Precisão de recorte
-            ANTIALIASED_QUALITY,       // Qualidade
-            DEFAULT_PITCH | FF_DONTCARE, // Tipo de pitch e família
-            L"Arial"                   // Nome da fonte (pode mudar, ex.: "Times New Roman")
+            16, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE,
+            DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
+            ANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Arial"
         );
 
         // Desenhar o texto nas células
-        SetBkMode(hdc, TRANSPARENT);  // Texto sem fundo
+        SetBkMode(hdc, TRANSPARENT);
         int colNumber = 0;
-		int rowNumber = 0;
+        int rowNumber = 0;
+
         for (size_t col = 0; col < 22; col++) {
             colNumber++;
 
             HBRUSH hCurrentBrush = (col % 2 == 0) ? hBrushGray : hBrushWhite;
             SelectObject(hdc, hCurrentBrush);
 
-            // Desenhar o fundo da linha
-            RECT rowRect = { startX, startY + static_cast<int>(colNumber) * cellHeight,
-                            startX + width, startY + (static_cast<int>(colNumber) + 1) * cellHeight };
+            // Desenhar o fundo da linha (com scroll)
+            RECT rowRect = {
+                startX,
+                startY + static_cast<int>(colNumber) * cellHeight,
+                startX + width,
+                startY + (static_cast<int>(colNumber) + 1) * cellHeight
+            };
             FillRect(hdc, &rowRect, hCurrentBrush);
 
             for (size_t row = 0; row < g_tableDataConsulta.size(); row++) {
                 if (g_tableDataConsulta[row][0] == std::to_wstring(idRecord) || row == 0) {
-                    
+
                     int xPos;
                     int yPos;
 
                     if (row == 0) {
-                        xPos = startX;  // Pequeno deslocamento para margem
-                        yPos = startY + colNumber * cellHeight + 7;  // Ajuste vertical
-                        HFONT hOldFont = (HFONT)SelectObject(hdc, hFontHeader); // Selecionar a nova fonte
+                        xPos = startX;
+                        yPos = startY + colNumber * cellHeight + 7;
+                        HFONT hOldFont = (HFONT)SelectObject(hdc, hFontHeader);
                     }
                     else {
-                        xPos = startX + cellWidth + 2;  // Pequeno deslocamento para margem
-                        yPos = startY + colNumber * cellHeight + 7;  // Ajuste vertical
-                        HFONT hOldFont = (HFONT)SelectObject(hdc, hFont); // Selecionar a nova fonte
+                        xPos = startX + cellWidth + 2;
+                        yPos = startY + colNumber * cellHeight + 7;
+                        HFONT hOldFont = (HFONT)SelectObject(hdc, hFont);
                     }
-                    
 
                     if (g_tableDataConsulta[row][col] == L"Nome_do_Pet") {
-                        TextOut(hdc, xPos, yPos, L"Nome do Pet", static_cast<int>(g_tableDataConsulta[row][col].length()));
+                        TextOut(hdc, xPos, yPos, L"Nome do Pet", 11);
                     }
                     else if (g_tableDataConsulta[row][col] == L"Nome_do_Tutor") {
-                        TextOut(hdc, xPos, yPos, L"Nome do Tutor", static_cast<int>(g_tableDataConsulta[row][col].length()));
+                        TextOut(hdc, xPos, yPos, L"Nome do Tutor", 13);
                     }
                     else if (g_tableDataConsulta[row][col] == L"Raca") {
-                        TextOut(hdc, xPos, yPos, L"Raça", static_cast<int>(g_tableDataConsulta[row][col].length()));
+                        TextOut(hdc, xPos, yPos, L"Raça", 4);
                     }
                     else if (g_tableDataConsulta[row][col] == L"Date") {
-                        TextOut(hdc, xPos, yPos, L"Data", static_cast<int>(g_tableDataConsulta[row][col].length()));
+                        TextOut(hdc, xPos, yPos, L"Data", 4);
                     }
                     else if (g_tableDataConsulta[row][col] == L"Hour") {
-                        TextOut(hdc, xPos, yPos, L"Hora", static_cast<int>(g_tableDataConsulta[row][col].length()));
+                        TextOut(hdc, xPos, yPos, L"Hora", 4);
                     }
                     else {
-                        TextOut(hdc, xPos, yPos, g_tableDataConsulta[row][col].c_str(), static_cast<int>(g_tableDataConsulta[row][col].length()));
+                        TextOut(hdc, xPos, yPos, g_tableDataConsulta[row][col].c_str(),
+                            static_cast<int>(g_tableDataConsulta[row][col].length()));
                     }
                 }
                 rowNumber++;
             }
         }
+
+        // Limpar recursos
+        SelectObject(hdc, hOldBrush);
+        DeleteObject(hBrushHeader);
+        DeleteObject(hBrushWhite);
+        DeleteObject(hBrushGray);
+        DeleteObject(hFontHeader);
+        DeleteObject(hFont);
 
         EndPaint(hWnd, &ps);
     }

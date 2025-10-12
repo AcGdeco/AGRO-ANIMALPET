@@ -8,6 +8,11 @@
 #include "sqlite3.h"
 #include <vector>
 
+// ADICIONE estas linhas para usar as variáveis externas:
+extern int g_scrollY;
+extern int g_clientHeight;
+extern int g_contentHeight;
+
 std::vector<std::vector<std::wstring>> g_tableData;
 std::vector<HWND> g_buttons;
 
@@ -18,6 +23,117 @@ LONG_PTR idRecord;
 
 // Declaração do procedimento da janela
 LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+
+void CriarBotoesTabela(HWND hWnd)
+{
+    // Limpar botões existentes
+    for (HWND hButton : g_buttons) {
+        DestroyWindow(hButton);
+    }
+    g_buttons.clear();
+
+    if (g_tableData.size() <= 1) return;
+
+    RECT rect;
+    GetClientRect(hWnd, &rect);
+    int width = (rect.right - rect.left) - 44;
+    int numColumns = g_tableData.empty() ? 0 : g_tableData[0].size() + 3;
+    int cellWidth = width / (numColumns > 0 ? numColumns : 1);
+    int startX = 22;
+    int startY = 10;
+    int cellHeight = 32;
+
+    for (size_t row = 1; row < g_tableData.size(); row++) {
+        LONG_PTR recordId = _wtoi(g_tableData[row][0].c_str());
+        int yPos = startY + row * cellHeight + 2;
+
+        // Botão Consultar
+        int xPos = startX + 8 * cellWidth + 2;
+        HWND hButton = CreateWindowW(
+            L"BUTTON", L"Consultar",
+            WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
+            xPos, yPos, 70, 30,
+            hWnd, (HMENU)(CONSULTAR),
+            (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL
+        );
+        if (hButton) {
+            SetWindowLongPtr(hButton, GWLP_USERDATA, recordId);
+            g_buttons.push_back(hButton);
+        }
+
+        // Botão Editar
+        xPos = startX + 9 * cellWidth + 2;
+        hButton = CreateWindowW(
+            L"BUTTON", L"Editar",
+            WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
+            xPos, yPos, 70, 30,
+            hWnd, (HMENU)(EDITAR),
+            (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL
+        );
+        if (hButton) {
+            SetWindowLongPtr(hButton, GWLP_USERDATA, recordId);
+            g_buttons.push_back(hButton);
+        }
+
+        // Botão Deletar
+        xPos = startX + 10 * cellWidth + 2;
+        hButton = CreateWindowW(
+            L"BUTTON", L"Deletar",
+            WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
+            xPos, yPos, 70, 30,
+            hWnd, (HMENU)(DELETAR),
+            (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL
+        );
+        if (hButton) {
+            SetWindowLongPtr(hButton, GWLP_USERDATA, recordId);
+            g_buttons.push_back(hButton);
+        }
+    }
+}
+
+// Função para atualizar posições dos botões com scroll
+void AtualizarPosicoesBotoes(HWND hWnd)
+{
+    RECT rect;
+    GetClientRect(hWnd, &rect);
+    int width = (rect.right - rect.left) - 44;
+    int numColumns = g_tableData.empty() ? 0 : g_tableData[0].size() + 3;
+    int cellWidth = width / (numColumns > 0 ? numColumns : 1);
+    int startX = 22;
+    int startY = 10;
+    int cellHeight = 32;
+
+    for (size_t i = 0; i < g_buttons.size(); i++) {
+        size_t row = (i / 3) + 1;
+        int buttonType = i % 3;
+
+        int yPos = startY + row * cellHeight + 2 - g_scrollY;
+        int xPos = startX + (8 + buttonType) * cellWidth + 2;
+
+        SetWindowPos(g_buttons[i], NULL, xPos, yPos, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+    }
+}
+
+// Função para configurar scroll bars
+void ConfigurarScrollBars(HWND hWnd)
+{
+    RECT rect;
+    GetClientRect(hWnd, &rect);
+    g_clientHeight = rect.bottom - rect.top;
+
+    int cellHeight = 32;
+    g_contentHeight = static_cast<int>(g_tableData.size()) * cellHeight + 50;
+
+    SCROLLINFO si = {};
+    si.cbSize = sizeof(SCROLLINFO);
+    si.fMask = SIF_RANGE | SIF_PAGE | SIF_POS;
+    si.nMin = 0;
+    si.nMax = g_contentHeight;
+    si.nPage = g_clientHeight;
+    si.nPos = g_scrollY;
+
+    SetScrollInfo(hWnd, SB_VERT, &si, TRUE);
+}
 
 // Função para obter a data atual como string
 std::wstring GetCurrentDate()
@@ -207,88 +323,11 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
                 }
             }
 
-            for (size_t row = 1; row < g_tableData.size(); row++) {
+            // Criar botões após carregar os dados
+            CriarBotoesTabela(hWnd);
 
-                // Obter dimensões da janela
-                RECT rect;
-                GetClientRect(hWnd, &rect);
-                int width = (rect.right - rect.left) - 44;
-                int height = rect.bottom - rect.top;
-
-                // Configurar a tabela
-                int cellHeight = 32;  // Altura de cada célula
-                int numColumns = g_tableData.empty() ? 0 : g_tableData[0].size() + 3;  // Número de colunas baseado nos cabeçalhos
-                int cellWidth = width / (numColumns > 0 ? numColumns : 1);  // Evitar divisão por zero
-                int startY = 10;
-                int startX = 22;
-
-                // Supondo que g_tableData[row][0] contém o ID do registro (ajuste o índice se for diferente)
-                LONG_PTR recordId = _wtoi(g_tableData[row][0].c_str());
-
-                int yPos;
-                int xPos;
-
-                xPos = startX + 8 * cellWidth + 2;
-                yPos = startY + row * cellHeight + 2;
-
-                int buttonWidth = 70;
-                int buttonHeight = 30;
-                HWND hButton = CreateWindowW(
-                    L"BUTTON",           // Classe do controle
-                    L"Consultar",        // Texto do botão
-                    WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
-                    xPos, yPos,          // Posição (x, y)
-                    buttonWidth, buttonHeight,              // Largura e altura
-                    hWnd,                // Handle da janela pai
-                    (HMENU)(CONSULTAR), // ID simples, usado como base
-                    (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
-                    NULL
-                );
-
-                if (hButton)
-                {
-                    SetWindowLongPtr(hButton, GWLP_USERDATA, recordId); // Armazenar o ID do registro
-                    g_buttons.push_back(hButton); // Armazenar o handle
-                }
-
-                // Botão "Editar"
-                xPos = startX + 9 * cellWidth + 2;
-                hButton = CreateWindowW(
-                    L"BUTTON",
-                    L"Editar",
-                    WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
-                    xPos, yPos,
-                    buttonWidth, buttonHeight,
-                    hWnd,
-                    (HMENU)(EDITAR), // ID simples
-                    (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
-                    NULL
-                );
-                if (hButton)
-                {
-                    SetWindowLongPtr(hButton, GWLP_USERDATA, recordId); // Armazenar o ID do registro
-                    g_buttons.push_back(hButton);
-                }
-
-                // Botão "Deletar"
-                xPos = startX + 10 * cellWidth + 2;
-                hButton = CreateWindowW(
-                    L"BUTTON",
-                    L"Deletar",
-                    WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
-                    xPos, yPos,
-                    buttonWidth, buttonHeight,
-                    hWnd,
-                    (HMENU)(DELETAR), // ID simples
-                    (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
-                    NULL
-                );
-                if (hButton)
-                {
-                    SetWindowLongPtr(hButton, GWLP_USERDATA, recordId); // Armazenar o ID do registro
-                    g_buttons.push_back(hButton);
-                }
-            }
+            // Configurar scroll bars após criar tudo
+            ConfigurarScrollBars(hWnd);
         }
         return 0;
     }
@@ -374,7 +413,7 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
         int cellHeight = 32;  // Altura de cada célula
         int numColumns = g_tableData.empty() ? 0 : g_tableData[0].size() + 3;  // Número de colunas baseado nos cabeçalhos
         int cellWidth = width / (numColumns > 0 ? numColumns : 1);  // Evitar divisão por zero
-        int startY = 10;
+        int startY = 10 - g_scrollY;  // Subtrair scroll
         int startX = 22;
 
         // Desenhar a grade
@@ -516,87 +555,74 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
     }
     case WM_SIZE:
     {
-        int clientHeight = HIWORD(lParam);
-        int totalHeight = static_cast<int>(g_tableData.size() - 1) * 32; // -1 para pular header
-        if (totalHeight > clientHeight) {
-            SetScrollRange(hWnd, SB_VERT, 0, totalHeight - clientHeight, TRUE);
-        }
-        else {
-            SetScrollRange(hWnd, SB_VERT, 0, 0, TRUE);
-        }
-        // Recalcular posições dos botões com base no novo tamanho
-        RECT rect;
-        GetClientRect(hWnd, &rect);
-        int width = rect.right - rect.left - 44;
-        int cellWidth = width / (g_tableData.empty() ? 1 : g_tableData[0].size() + 3);
-        int scrollPos = GetScrollPos(hWnd, SB_VERT);
-        int startX = 22;
-        for (size_t row = 0; row < g_tableData.size() - 1 && row * 3 < g_buttons.size(); row++) {
-            int yPos = 11 + static_cast<int>(row + 1) * 32 - scrollPos; // Ajuste para começar após o header
-            if (yPos + 32 >= 0 && yPos <= clientHeight) { // Visível na janela
-                SetWindowPos(g_buttons[row * 3], NULL, startX + 8 * cellWidth + 2, yPos, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
-                SetWindowPos(g_buttons[row * 3 + 1], NULL, startX + 9 * cellWidth + 2, yPos, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
-                SetWindowPos(g_buttons[row * 3 + 2], NULL, startX + 10 * cellWidth + 2, yPos, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
-                ShowWindow(g_buttons[row * 3], SW_SHOW);
-                ShowWindow(g_buttons[row * 3 + 1], SW_SHOW);
-                ShowWindow(g_buttons[row * 3 + 2], SW_SHOW);
-            }
-            else {
-                ShowWindow(g_buttons[row * 3], SW_HIDE);
-                ShowWindow(g_buttons[row * 3 + 1], SW_HIDE);
-                ShowWindow(g_buttons[row * 3 + 2], SW_HIDE);
-            }
-        }
+        g_clientHeight = HIWORD(lParam);
+        ConfigurarScrollBars(hWnd);
+        AtualizarPosicoesBotoes(hWnd);
         InvalidateRect(hWnd, NULL, TRUE);
-        return 0;
+        break;
     }
     break;
 
     case WM_VSCROLL:
     {
-        int scrollPos = GetScrollPos(hWnd, SB_VERT);
-        int clientHeight = HIWORD(GetClientRect(hWnd, NULL));
-        int totalHeight = static_cast<int>(g_tableData.size() - 1) * 32;
+        SCROLLINFO si = {};
+        si.cbSize = sizeof(SCROLLINFO);
+        si.fMask = SIF_ALL;
+        GetScrollInfo(hWnd, SB_VERT, &si);
 
-        switch (LOWORD(wParam))
-        {
-        case SB_LINEUP: scrollPos -= 32; break;
-        case SB_LINEDOWN: scrollPos += 32; break;
-        case SB_PAGEUP: scrollPos -= clientHeight; break;
-        case SB_PAGEDOWN: scrollPos += clientHeight; break;
-        case SB_TOP: scrollPos = 0; break;
-        case SB_BOTTOM: scrollPos = totalHeight - clientHeight; break;
-        case SB_THUMBTRACK: scrollPos = HIWORD(wParam); break;
-        }
-        scrollPos = max(0, min(scrollPos, totalHeight - clientHeight));
-        SetScrollPos(hWnd, SB_VERT, scrollPos, TRUE);
+        int oldPos = si.nPos;
 
-        // Ajustar posições dos botões
-        RECT rect;
-        GetClientRect(hWnd, &rect);
-        int width = rect.right - rect.left - 44;
-        int cellWidth = width / (g_tableData.empty() ? 1 : g_tableData[0].size() + 3);
-        int startX = 22;
-        for (size_t row = 0; row < g_tableData.size() - 1 && row * 3 < g_buttons.size(); row++) {
-            int yPos = 11 + static_cast<int>(row + 1) * 32 - scrollPos;
-            if (yPos + 32 >= 0 && yPos <= clientHeight) {
-                SetWindowPos(g_buttons[row * 3], NULL, startX + 8 * cellWidth + 2, yPos, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
-                SetWindowPos(g_buttons[row * 3 + 1], NULL, startX + 9 * cellWidth + 2, yPos, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
-                SetWindowPos(g_buttons[row * 3 + 2], NULL, startX + 10 * cellWidth + 2, yPos, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
-                ShowWindow(g_buttons[row * 3], SW_SHOW);
-                ShowWindow(g_buttons[row * 3 + 1], SW_SHOW);
-                ShowWindow(g_buttons[row * 3 + 2], SW_SHOW);
-            }
-            else {
-                ShowWindow(g_buttons[row * 3], SW_HIDE);
-                ShowWindow(g_buttons[row * 3 + 1], SW_HIDE);
-                ShowWindow(g_buttons[row * 3 + 2], SW_HIDE);
-            }
+        switch (LOWORD(wParam)) {
+        case SB_LINEUP:        si.nPos -= 10; break;
+        case SB_LINEDOWN:      si.nPos += 10; break;
+        case SB_PAGEUP:        si.nPos -= si.nPage; break;
+        case SB_PAGEDOWN:      si.nPos += si.nPage; break;
+        case SB_THUMBTRACK:    si.nPos = si.nTrackPos; break;
+        case SB_THUMBPOSITION: si.nPos = si.nTrackPos; break;
+        case SB_TOP:           si.nPos = si.nMin; break;
+        case SB_BOTTOM:        si.nPos = si.nMax; break;
+        default: break;
         }
-        InvalidateRect(hWnd, NULL, TRUE);
-        return 0;
+
+        si.fMask = SIF_POS;
+        si.nPos = max(si.nMin, min(si.nPos, si.nMax - (int)si.nPage + 1));
+        SetScrollInfo(hWnd, SB_VERT, &si, TRUE);
+        GetScrollInfo(hWnd, SB_VERT, &si);
+
+        if (si.nPos != oldPos) {
+            g_scrollY = si.nPos;
+            AtualizarPosicoesBotoes(hWnd);
+            InvalidateRect(hWnd, NULL, TRUE);
+            UpdateWindow(hWnd);
+        }
     }
     break;
+    case WM_MOUSEWHEEL:
+    {
+        int zDelta = GET_WHEEL_DELTA_WPARAM(wParam);
+
+        SCROLLINFO si = {};
+        si.cbSize = sizeof(SCROLLINFO);
+        si.fMask = SIF_ALL;
+        GetScrollInfo(hWnd, SB_VERT, &si);
+
+        int oldPos = si.nPos;
+        int scrollAmount = -zDelta / WHEEL_DELTA * 30;
+        si.nPos += scrollAmount;
+
+        si.nPos = max(si.nMin, min(si.nPos, si.nMax - (int)si.nPage + 1));
+        si.fMask = SIF_POS;
+        SetScrollInfo(hWnd, SB_VERT, &si, TRUE);
+        GetScrollInfo(hWnd, SB_VERT, &si);
+
+        if (si.nPos != oldPos) {
+            g_scrollY = si.nPos;
+            AtualizarPosicoesBotoes(hWnd);
+            InvalidateRect(hWnd, NULL, TRUE);
+            UpdateWindow(hWnd);
+        }
+        return 0;
+    }
     default:
         return DefWindowProc(hWnd, message, wParam, lParam);
     }
