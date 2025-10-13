@@ -40,7 +40,7 @@ void CriarBotoesTabela(HWND hWnd)
     int numColumns = g_tableData.empty() ? 0 : g_tableData[0].size() + 3;
     int cellWidth = width / (numColumns > 0 ? numColumns : 1);
     int startX = 22;
-    int startY = 10;
+    int startY = 80;
     int cellHeight = 32;
 
     for (size_t row = 1; row < g_tableData.size(); row++) {
@@ -100,7 +100,7 @@ void AtualizarPosicoesBotoes(HWND hWnd)
     int numColumns = g_tableData.empty() ? 0 : g_tableData[0].size() + 3;
     int cellWidth = width / (numColumns > 0 ? numColumns : 1);
     int startX = 22;
-    int startY = 10;
+    int startY = 80;
     int cellHeight = 32;
 
     // Desabilitar redesenho durante a atualização
@@ -141,7 +141,7 @@ void ConfigurarScrollBars(HWND hWnd)
     g_clientHeight = rect.bottom - rect.top;
 
     int cellHeight = 32;
-    g_contentHeight = static_cast<int>(g_tableData.size()) * cellHeight + 50;
+    g_contentHeight = static_cast<int>(g_tableData.size()) * cellHeight + 130;
 
     SCROLLINFO si = {};
     si.cbSize = sizeof(SCROLLINFO);
@@ -359,13 +359,13 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 
         if (wmId == CONSULTAR) // Botões "Consultar"
         {
-            wchar_t msg[50];
-            swprintf_s(msg, L"Botão %s%d clicado! Id: %d", L"Consultar", (int)id, (int)id);
-            MessageBoxW(hWnd, msg, L"Info", MB_OK);
+            //wchar_t msg[50];
+            //swprintf_s(msg, L"Botão %s%d clicado! Id: %d", L"Consultar", (int)id, (int)id);
+            //MessageBoxW(hWnd, msg, L"Info", MB_OK);
 
             idRecord = id;
 
-            if (!CreateNewWindow(hWnd, hInst, L"JanelaReadClasse", L"CONSULTA REGISTRO"))
+            if (!CreateNewWindow(hWnd, hInst, L"JanelaReadClasse", L"AGRO ANIMAL PET - CONSULTAR REGISTRO"))
             {
                 // O erro já é tratado dentro da função
                 break;
@@ -430,8 +430,8 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
         int cellHeight = 32;
         int numColumns = g_tableData.empty() ? 0 : g_tableData[0].size();
         int cellWidth = width / (numColumns > 0 ? numColumns + 3 : 1); // +3 para os botões
-        int startY = 10 - g_scrollY;
-        int startX = 22;
+        int startY = 80 - g_scrollY;  // Posição Y com scroll
+        int startX = 22 - g_scrollX;  // Posição X com scroll
 
         // LIMPAR a área de desenho primeiro
         HBRUSH hBgBrush = CreateSolidBrush(GetSysColor(COLOR_WINDOW));
@@ -443,33 +443,23 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
         HBRUSH hBrushWhite = CreateSolidBrush(RGB(255, 255, 255));
         HBRUSH hBrushGray = CreateSolidBrush(RGB(240, 240, 240));
 
-        // Criar fontes
-        HFONT hFontHeader = CreateFont(16, 0, 0, 0, FW_EXTRABOLD, FALSE, FALSE, FALSE,
-            DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
-            ANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Arial");
-
-        HFONT hFont = CreateFont(16, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE,
-            DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
-            ANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Arial");
-
         // Desenhar o texto nas células
         SetBkMode(hdc, TRANSPARENT);
+
+        //Título
+        windowsTitle(hdc, startX, startY - 60, L"REGISTROS", 9);
 
         // DESENHAR APENAS UMA VEZ - REMOVER loops desnecessários
         for (size_t row = 0; row < g_tableData.size(); row++) {
             HBRUSH hCurrentBrush = (row % 2 == 0) ? hBrushGray : hBrushWhite;
-            COLORREF textColor = RGB(0, 0, 0);
 
             if (row == 0) {
                 hCurrentBrush = hBrushHeader;
-                textColor = RGB(255, 255, 255);
-                SelectObject(hdc, hFontHeader);
+                fonte(L"Header", RGB(255, 255, 255), hdc);
             }
             else {
-                SelectObject(hdc, hFont);
+                fonte(L"Font", RGB(0, 0, 0), hdc);
             }
-
-            SetTextColor(hdc, textColor);
 
             // Desenhar o fundo da linha
             RECT rowRect = {
@@ -505,8 +495,7 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 
         // DESENHAR CABEÇALHOS DOS BOTÕES APENAS UMA VEZ - fora do loop principal
         if (!g_tableData.empty()) {
-            COLORREF textColor = RGB(255, 255, 255);
-            SetTextColor(hdc, textColor);
+            fonte(L"Font", RGB(255, 255, 255), hdc);
 
             int headerY = startY + 7;
 
@@ -527,8 +516,6 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
         DeleteObject(hBrushHeader);
         DeleteObject(hBrushWhite);
         DeleteObject(hBrushGray);
-        DeleteObject(hFontHeader);
-        DeleteObject(hFont);
 
         EndPaint(hWnd, &ps);
     }

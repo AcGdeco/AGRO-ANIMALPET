@@ -16,3 +16,5 @@ BOOL ProcessarMenu(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 BOOL Shortcuts(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 BOOL windowClose(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 BOOL scroll(HWND hWnd, int scrollX, int scrollY, int contentWidth, int contentHeight, int clientWidth, int clientHeight);
+BOOL fonte(LPCWSTR fonte, COLORREF color, HDC hdc);
+BOOL windowsTitle(HDC hdc, int startX, int startY, LPCWSTR tit, int size);

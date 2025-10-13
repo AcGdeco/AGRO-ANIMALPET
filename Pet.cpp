@@ -108,6 +108,37 @@ int g_contentHeight;   // Altura total do conteúdo
 int g_clientWidth;       // Largura da área cliente
 int g_clientHeight;      // Altura da área cliente
 
+BOOL fonte(LPCWSTR fonte, COLORREF color, HDC hdc) {
+    HFONT hFont;
+    if (fonte == L"Header") {
+        hFont = CreateFont(16, 0, 0, 0, FW_EXTRABOLD, FALSE, FALSE, FALSE,
+            DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
+            ANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Arial");
+    }
+    else if (fonte == L"Title") {
+        hFont = CreateFont(35, 0, 0, 0, FW_EXTRABOLD, FALSE, FALSE, FALSE,
+            DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
+            ANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Arial");
+    }
+    else {
+        hFont = CreateFont(16, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE,
+            DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
+            ANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Arial");
+    }
+    COLORREF textColor = color;
+    SelectObject(hdc, hFont);
+    SetTextColor(hdc, textColor);
+
+    return 0;
+}
+
+BOOL windowsTitle(HDC hdc, int startX, int startY, LPCWSTR tit, int size) {
+    fonte(L"Title", RGB(0, 0, 0), hdc);
+    TextOut(hdc, startX, startY, tit, size);
+
+    return 0;
+}
+
 BOOL scroll(HWND hWnd, int scrollX, int scrollY, int contentWidth, int contentHeight, int clientWidth, int clientHeight)
 {
     // Variáveis de scroll

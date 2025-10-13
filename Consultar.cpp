@@ -285,8 +285,11 @@ LRESULT CALLBACK WndProcRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
         int cellHeight = 32;  // Altura de cada célula
         int numColumns = g_tableDataConsulta.empty() ? 0 : g_tableDataConsulta[0].size() + 3;
         int cellWidth = (width + 2000) / (numColumns > 0 ? numColumns : 1);
-        int startY = 10 - g_scrollY;  // Posição Y com scroll
+        int startY = 40 - g_scrollY;  // Posição Y com scroll
         int startX = 22 - g_scrollX;  // Posição X com scroll
+
+        //Título
+        windowsTitle(hdc, startX, startY - 20, L"CONSULTAR REGISTRO", 19);
 
         // Desenhar a grade
         HPEN hPen = CreatePen(PS_SOLID, 1, RGB(0, 0, 0));
@@ -299,20 +302,6 @@ LRESULT CALLBACK WndProcRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
         HBRUSH hBrushWhite = CreateSolidBrush(RGB(255, 255, 255));
         HBRUSH hBrushGray = CreateSolidBrush(RGB(240, 240, 240));
         HBRUSH hOldBrush = (HBRUSH)SelectObject(hdc, hBrushWhite);
-
-        // Criar fonte header
-        HFONT hFontHeader = CreateFont(
-            16, 0, 0, 0, FW_EXTRABOLD, FALSE, FALSE, FALSE,
-            DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
-            ANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Arial"
-        );
-
-        // Criar fonte default
-        HFONT hFont = CreateFont(
-            16, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE,
-            DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
-            ANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Arial"
-        );
 
         // Desenhar o texto nas células
         SetBkMode(hdc, TRANSPARENT);
@@ -343,12 +332,12 @@ LRESULT CALLBACK WndProcRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
                     if (row == 0) {
                         xPos = startX;
                         yPos = startY + colNumber * cellHeight + 7;
-                        HFONT hOldFont = (HFONT)SelectObject(hdc, hFontHeader);
+                        fonte(L"Header", RGB(0, 0, 0), hdc);
                     }
                     else {
                         xPos = startX + cellWidth + 2;
                         yPos = startY + colNumber * cellHeight + 7;
-                        HFONT hOldFont = (HFONT)SelectObject(hdc, hFont);
+                        fonte(L"Font", RGB(0, 0, 0), hdc);
                     }
 
                     if (g_tableDataConsulta[row][col] == L"Nome_do_Pet") {
@@ -395,8 +384,6 @@ LRESULT CALLBACK WndProcRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
         DeleteObject(hBrushHeader);
         DeleteObject(hBrushWhite);
         DeleteObject(hBrushGray);
-        DeleteObject(hFontHeader);
-        DeleteObject(hFont);
 
         EndPaint(hWnd, &ps);
     }

@@ -47,7 +47,7 @@ LRESULT ProcessarMenuArquivo(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
         switch (wmId) {
         case IDM_ARQUIVO_NOVO:
         {
-            if (!CreateNewWindow(hWnd, hInst, L"JanelaAddClasse", L"NOVO REGISTRO"))
+            if (!CreateNewWindow(hWnd, hInst, L"JanelaAddClasse", L"AGRO ANIMAL PET - CRIAR REGISTRO"))
             {
                 // O erro já é tratado dentro da função
                 break;
@@ -57,7 +57,7 @@ LRESULT ProcessarMenuArquivo(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
         }
         case IDM_ARQUIVO_CONSULTAR:
         {
-            if (!CreateNewWindow(hWnd, hInst, L"JanelaSelectClasse", L"REGISTROS"))
+            if (!CreateNewWindow(hWnd, hInst, L"JanelaSelectClasse", L"AGRO ANIMAL PET - REGISTROS"))
             {
                 // O erro já é tratado dentro da função
                 break;
