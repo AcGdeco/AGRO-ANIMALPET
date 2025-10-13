@@ -366,6 +366,21 @@ LRESULT CALLBACK WndProcRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
                     else if (g_tableDataConsulta[row][col] == L"Hour") {
                         TextOut(hdc, xPos, yPos, L"Hora", 4);
                     }
+                    else if (g_tableDataConsulta[row][col] == L"Endereco") {
+                        TextOut(hdc, xPos, yPos, L"Endereço", 8);
+                    }
+                    else if (g_tableDataConsulta[row][col] == L"Ponto_de_referencia") {
+                        TextOut(hdc, xPos, yPos, L"Ponto de Referência", 19);
+                    }
+                    else if (g_tableDataConsulta[row][col] == L"Obs_Tosa") {
+                        TextOut(hdc, xPos, yPos, L"Observação", 10);
+                    }
+                    else if (g_tableDataConsulta[row][col] == L"Lesoes") {
+                        TextOut(hdc, xPos, yPos, L"Lesões", 6);
+                    }
+                    else if (g_tableDataConsulta[row][col] == L"Obs_Lesoes") {
+                        TextOut(hdc, xPos, yPos, L"Observação", 10);
+                    }
                     else {
                         TextOut(hdc, xPos, yPos, g_tableDataConsulta[row][col].c_str(),
                             static_cast<int>(g_tableDataConsulta[row][col].length()));
