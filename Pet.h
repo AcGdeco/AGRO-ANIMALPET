@@ -1,5 +1,7 @@
 #pragma once
-
+#include <windows.h>
+#include <vector>
+#include <string>
 #include "resource.h"
 
 extern int windowsNumber;
@@ -11,6 +13,9 @@ extern int g_contentHeight;
 extern int g_clientWidth;
 extern int g_clientHeight;
 
+std::wstring GetCurrentDate();
+std::wstring GetCurrentHour();
+
 BOOL CreateNewWindow(HWND hWndParent, HINSTANCE hInst, LPCWSTR className, LPCWSTR windowTittle);
 BOOL ProcessarMenu(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 BOOL Shortcuts(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
@@ -18,3 +23,4 @@ BOOL windowClose(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 BOOL scroll(HWND hWnd, int scrollX, int scrollY, int contentWidth, int contentHeight, int clientWidth, int clientHeight);
 BOOL fonte(LPCWSTR fonte, COLORREF color, HDC hdc);
 BOOL windowsTitle(HDC hdc, int startX, int startY, LPCWSTR tit, int size);
+BOOL windowsTitleTeste(HWND hWnd,int startX, int startY, LPCWSTR tit, int size);

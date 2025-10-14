@@ -27,7 +27,7 @@ HMENU CriarMenu() {
     AppendMenuW(hFileMenu, MF_STRING, IDM_ARQUIVO_CONSULTAR, L"&Deletar\tCtrl+D");
    
     // Adiciona o menu Arquivo ao menu principal
-    AppendMenuW(hMenu, MF_POPUP, (UINT_PTR)hFileMenu, L"&Registros");
+    AppendMenuW(hMenu, MF_POPUP, (UINT_PTR)hFileMenu, L"&Agendamentos");
 
     // Menu Ajuda
     HMENU hFileMenuAjuda = CreatePopupMenu();
@@ -47,7 +47,7 @@ LRESULT ProcessarMenuArquivo(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
         switch (wmId) {
         case IDM_ARQUIVO_NOVO:
         {
-            if (!CreateNewWindow(hWnd, hInst, L"JanelaAddClasse", L"AGRO ANIMAL PET - CRIAR REGISTRO"))
+            if (!CreateNewWindow(hWnd, hInst, L"JanelaAddClasse", L"AGRO ANIMAL PET - CRIAR AGENDAMENTO"))
             {
                 // O erro já é tratado dentro da função
                 break;
@@ -57,7 +57,7 @@ LRESULT ProcessarMenuArquivo(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
         }
         case IDM_ARQUIVO_CONSULTAR:
         {
-            if (!CreateNewWindow(hWnd, hInst, L"JanelaSelectClasse", L"AGRO ANIMAL PET - REGISTROS"))
+            if (!CreateNewWindow(hWnd, hInst, L"JanelaSelectClasse", L"AGRO ANIMAL PET - AGENDAMENTOS"))
             {
                 // O erro já é tratado dentro da função
                 break;

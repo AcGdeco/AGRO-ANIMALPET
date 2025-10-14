@@ -105,7 +105,12 @@ BOOL RegisterReadClass(HINSTANCE hInstance)
 // Procedimento da janela Read
 LRESULT CALLBACK WndProcRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    ProcessarMenu(hWnd, message, wParam, lParam);
+    // Processar o menu APENAS para mensagens específicas
+    if (message == WM_COMMAND || message == WM_INITMENU || message == WM_MENUSELECT) {
+        if (ProcessarMenu(hWnd, message, wParam, lParam)) {
+            return 0; // Mensagem já processada pelo menu
+        }
+    }
 
     // Depois processa as mensagens específicas da janela
     switch (message)
@@ -239,6 +244,8 @@ LRESULT CALLBACK WndProcRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
         PAINTSTRUCT ps;
         HDC hdc = BeginPaint(hWnd, &ps);
 
+        fonte(L"Font", RGB(0, 0, 0), hdc);
+
         // Texto de exemplo
         RECT rect;
         GetClientRect(hWnd, &rect);
@@ -247,34 +254,32 @@ LRESULT CALLBACK WndProcRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
         FillRect(hdc, &rect, (HBRUSH)(COLOR_WINDOW + 1));
 
         // Consultar o banco apenas se a tabela estiver vazia
-        if (g_tableDataConsulta.empty()) {
-            sqlite3* db;
-            char* errMsg = 0;
-            int rc = sqlite3_open("pet.db", &db);
-            if (rc == SQLITE_OK) {
-                const char* sqlSelectConsulta = "SELECT * FROM Pets;";
-                rc = sqlite3_exec(db, sqlSelectConsulta, sqlite_callback_consulta, &g_tableDataConsulta, &errMsg);
-                if (rc != SQLITE_OK) {
-                    if (errMsg) {
-                        // Converte char* para wchar_t* corretamente
-                        size_t len = strlen(errMsg) + 1;
-                        std::wstring wErrMsg(len, L'\0');
-                        mbstowcs_s(nullptr, &wErrMsg[0], len, errMsg, _TRUNCATE);
-                        // Remove o caractere nulo extra do final
-                        wErrMsg.resize(wcslen(wErrMsg.c_str()));
-                        g_tableDataConsulta.push_back({ L"Erro", wErrMsg });
-                    }
-                    else {
-                        g_tableDataConsulta.push_back({ L"Erro", L"Desconhecido" });
-                    }
-                    if (errMsg) sqlite3_free(errMsg);
+        sqlite3* db;
+        char* errMsg = 0;
+        int rc = sqlite3_open("pet.db", &db);
+        if (rc == SQLITE_OK) {
+            const char* sqlSelectConsulta = "SELECT * FROM Pets;";
+            rc = sqlite3_exec(db, sqlSelectConsulta, sqlite_callback_consulta, &g_tableDataConsulta, &errMsg);
+            if (rc != SQLITE_OK) {
+                if (errMsg) {
+                    // Converte char* para wchar_t* corretamente
+                    size_t len = strlen(errMsg) + 1;
+                    std::wstring wErrMsg(len, L'\0');
+                    mbstowcs_s(nullptr, &wErrMsg[0], len, errMsg, _TRUNCATE);
+                    // Remove o caractere nulo extra do final
+                    wErrMsg.resize(wcslen(wErrMsg.c_str()));
+                    g_tableDataConsulta.push_back({ L"Erro", wErrMsg });
                 }
-                sqlite3_close(db);
+                else {
+                    g_tableDataConsulta.push_back({ L"Erro", L"Desconhecido" });
+                }
+                if (errMsg) sqlite3_free(errMsg);
             }
-            else {
-                g_tableDataConsulta.push_back({ L"Erro", L"Não foi possível abrir o banco" });
-            }
+            sqlite3_close(db);
         }
+        else {
+            g_tableDataConsulta.push_back({ L"Erro", L"Não foi possível abrir o banco" });
+        }        
 
         // Obter dimensões da janela
         GetClientRect(hWnd, &rect);
@@ -289,7 +294,7 @@ LRESULT CALLBACK WndProcRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
         int startX = 22 - g_scrollX;  // Posição X com scroll
 
         //Título
-        windowsTitle(hdc, startX, startY - 20, L"CONSULTAR REGISTRO", 19);
+        windowsTitle(hdc, startX, startY - 20, L"CONSULTAR AGENDAMENTO", 21);
 
         // Desenhar a grade
         HPEN hPen = CreatePen(PS_SOLID, 1, RGB(0, 0, 0));
@@ -308,7 +313,7 @@ LRESULT CALLBACK WndProcRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
         int colNumber = 0;
         int rowNumber = 0;
 
-        for (size_t col = 0; col < 22; col++) {
+        for (size_t col = 0; col < 24; col++) {
             colNumber++;
 
             HBRUSH hCurrentBrush = (col % 2 == 0) ? hBrushGray : hBrushWhite;
@@ -330,45 +335,87 @@ LRESULT CALLBACK WndProcRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
                     int yPos;
 
                     if (row == 0) {
-                        xPos = startX;
+                        xPos = startX + 10;
                         yPos = startY + colNumber * cellHeight + 7;
                         fonte(L"Header", RGB(0, 0, 0), hdc);
                     }
                     else {
-                        xPos = startX + cellWidth + 2;
+                        xPos = startX + cellWidth + 60;
                         yPos = startY + colNumber * cellHeight + 7;
                         fonte(L"Font", RGB(0, 0, 0), hdc);
                     }
 
-                    if (g_tableDataConsulta[row][col] == L"Nome_do_Pet") {
-                        TextOut(hdc, xPos, yPos, L"Nome do Pet", 11);
+                    if (g_tableDataConsulta[row][col] == L"ID") {
+                        TextOut(hdc, xPos, yPos, L"ID:", 3);
                     }
-                    else if (g_tableDataConsulta[row][col] == L"Nome_do_Tutor") {
-                        TextOut(hdc, xPos, yPos, L"Nome do Tutor", 13);
+                    else if (g_tableDataConsulta[row][col] == L"Nome_do_Pet") {
+                        TextOut(hdc, xPos, yPos, L"Nome do Pet:", 12);
                     }
                     else if (g_tableDataConsulta[row][col] == L"Raca") {
-                        TextOut(hdc, xPos, yPos, L"Raça", 4);
+                        TextOut(hdc, xPos, yPos, L"Raça:", 5);
                     }
-                    else if (g_tableDataConsulta[row][col] == L"Date") {
-                        TextOut(hdc, xPos, yPos, L"Data", 4);
+                    else if (g_tableDataConsulta[row][col] == L"Nome_do_Tutor") {
+                        TextOut(hdc, xPos, yPos, L"Nome do Tutor:", 14);
                     }
-                    else if (g_tableDataConsulta[row][col] == L"Hour") {
-                        TextOut(hdc, xPos, yPos, L"Hora", 4);
+                    else if (g_tableDataConsulta[row][col] == L"CEP") {
+                        TextOut(hdc, xPos, yPos, L"CEP:", 4);
+                    }
+                    else if (g_tableDataConsulta[row][col] == L"Cor") {
+                        TextOut(hdc, xPos, yPos, L"Cor:", 4);
+                    }
+                    else if (g_tableDataConsulta[row][col] == L"Idade") {
+                        TextOut(hdc, xPos, yPos, L"Idade:", 6);
+                    }
+                    else if (g_tableDataConsulta[row][col] == L"Peso") {
+                        TextOut(hdc, xPos, yPos, L"Peso:", 5);
+                    }
+                    else if (g_tableDataConsulta[row][col] == L"Sexo") {
+                        TextOut(hdc, xPos, yPos, L"Sexo:", 5);
+                    }
+                    else if (g_tableDataConsulta[row][col] == L"Castrado") {
+                        TextOut(hdc, xPos, yPos, L"Castrado:", 9);
                     }
                     else if (g_tableDataConsulta[row][col] == L"Endereco") {
-                        TextOut(hdc, xPos, yPos, L"Endereço", 8);
+                        TextOut(hdc, xPos, yPos, L"Endereço:", 9);
                     }
                     else if (g_tableDataConsulta[row][col] == L"Ponto_de_referencia") {
-                        TextOut(hdc, xPos, yPos, L"Ponto de Referência", 19);
+                        TextOut(hdc, xPos, yPos, L"Ponto de Referência:", 20);
+                    }
+                    else if (g_tableDataConsulta[row][col] == L"Banho") {
+                        TextOut(hdc, xPos, yPos, L"Banho:", 6);
+                    }
+                    else if (g_tableDataConsulta[row][col] == L"Tosa") {
+                        TextOut(hdc, xPos, yPos, L"Tosa:", 5);
                     }
                     else if (g_tableDataConsulta[row][col] == L"Obs_Tosa") {
-                        TextOut(hdc, xPos, yPos, L"Observação", 10);
+                        TextOut(hdc, xPos, yPos, L"Observação:", 11);
+                    }
+                    else if (g_tableDataConsulta[row][col] == L"Parasitas") {
+                        TextOut(hdc, xPos, yPos, L"Parasitas:", 10);
                     }
                     else if (g_tableDataConsulta[row][col] == L"Lesoes") {
-                        TextOut(hdc, xPos, yPos, L"Lesões", 6);
+                        TextOut(hdc, xPos, yPos, L"Lesões:", 7);
                     }
                     else if (g_tableDataConsulta[row][col] == L"Obs_Lesoes") {
-                        TextOut(hdc, xPos, yPos, L"Observação", 10);
+                        TextOut(hdc, xPos, yPos, L"Observação:", 11);
+                    }
+                    else if (g_tableDataConsulta[row][col] == L"Telefone") {
+                        TextOut(hdc, xPos, yPos, L"Telefone:", 9);
+                    }
+                    else if (g_tableDataConsulta[row][col] == L"CPF") {
+                        TextOut(hdc, xPos, yPos, L"CPF:", 4);
+                    }
+                    else if (g_tableDataConsulta[row][col] == L"Appointment_Date") {
+                        TextOut(hdc, xPos, yPos, L"Data do Agendamento:", 20);
+                    }
+                    else if (g_tableDataConsulta[row][col] == L"Appointment_Hour") {
+                        TextOut(hdc, xPos, yPos, L"Hora do Agendamento:", 20);
+                    }
+                    else if (g_tableDataConsulta[row][col] == L"Date") {
+                        TextOut(hdc, xPos, yPos, L"Data do Registro:", 17);
+                    }
+                    else if (g_tableDataConsulta[row][col] == L"Hour") {
+                        TextOut(hdc, xPos, yPos, L"Hora do Registro:", 17);
                     }
                     else {
                         TextOut(hdc, xPos, yPos, g_tableDataConsulta[row][col].c_str(),

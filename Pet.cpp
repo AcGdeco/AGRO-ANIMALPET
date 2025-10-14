@@ -108,6 +108,30 @@ int g_contentHeight;   // Altura total do conteúdo
 int g_clientWidth;       // Largura da área cliente
 int g_clientHeight;      // Altura da área cliente
 
+// Função para obter a data atual como string
+std::wstring GetCurrentDate()
+{
+    SYSTEMTIME st;
+    GetLocalTime(&st);
+
+    wchar_t dateStr[80];
+    swprintf_s(dateStr, L"%02d/%02d/%04d", st.wDay, st.wMonth, st.wYear);
+
+    return std::wstring(dateStr);
+}
+
+// Função para obter a hora atual como string
+std::wstring GetCurrentHour()
+{
+    SYSTEMTIME st;
+    GetLocalTime(&st);
+
+    wchar_t timeStr[80];
+    swprintf_s(timeStr, L"%02d:%02d:%02d", st.wHour, st.wMinute, st.wSecond);
+
+    return std::wstring(timeStr);
+}
+
 BOOL fonte(LPCWSTR fonte, COLORREF color, HDC hdc) {
     HFONT hFont;
     if (fonte == L"Header") {
@@ -128,6 +152,9 @@ BOOL fonte(LPCWSTR fonte, COLORREF color, HDC hdc) {
     COLORREF textColor = color;
     SelectObject(hdc, hFont);
     SetTextColor(hdc, textColor);
+
+    //EXCLUIR A FONTE CRIADA PARA LIBERAR O RECURSO GDI, O MÁXIMO É PROVAVELMENTE 10000
+    DeleteObject(hFont);
 
     return 0;
 }
@@ -435,8 +462,13 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    ProcessarMenu(hWnd, message, wParam, lParam);
-
+    // Processar o menu APENAS para mensagens específicas
+    if (message == WM_COMMAND || message == WM_INITMENU || message == WM_MENUSELECT) {
+        if (ProcessarMenu(hWnd, message, wParam, lParam)) {
+            return 0; // Mensagem já processada pelo menu
+        }
+    }
+    
     switch (message)
     {
     case WM_COMMAND:
@@ -460,6 +492,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         {
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hWnd, &ps);
+
+            fonte(L"Font", RGB(0, 0, 0), hdc);
 
             // Obter as dimensões da janela
             RECT rect;
