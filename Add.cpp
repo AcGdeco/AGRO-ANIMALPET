@@ -30,359 +30,8 @@
 #define ID_CHECKBOX_SECRECAO 2013
 #define ID_CHECKBOX_OUVIDO 2014
 
-// Variáveis globais para scroll
-extern int g_scrollY;
-extern int g_scrollX;
-extern int g_clientHeight;
-extern int g_clientWidth;
-extern int g_contentHeight;
-extern int g_contentWidth;
-
-HBRUSH hBrushTransparent = (HBRUSH)GetStockObject(HOLLOW_BRUSH);
-
-// Array para armazenar handles dos controles
-std::vector<HWND> g_editControls;
-HWND g_hButton = NULL;
-
 // Declaração do procedimento da janela
 LRESULT CALLBACK WndProcAdd(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-
-LPCWSTR error = L"0";
-std::wstring mensagem = L"";
-LPCWSTR msg = L"";
-
-bool isNumber(const std::wstring& str) {
-    if (str.empty()) return false;
-
-    for (wchar_t c : str) {
-        if (!std::isdigit(c)) {
-            return false;
-        }
-    }
-    return true;
-}
-
-// Versão que permite números decimais
-bool isDecimalNumber(const std::wstring& str) {
-    if (str.empty()) return false;
-
-    bool hasDecimalPoint = false;
-    for (size_t i = 0; i < str.length(); i++) {
-        if (str[i] == L',' || str[i] == L'.') {
-            if (hasDecimalPoint) return false; // Mais de um ponto decimal
-            hasDecimalPoint = true;
-        }
-        else if (!std::isdigit(str[i])) {
-            return false;
-        }
-    }
-    return true;
-}
-
-bool isValidTime(const std::wstring& time) {
-    // Remover espaços em branco
-    std::wstring hora_limpa = time;
-    hora_limpa.erase(std::remove(hora_limpa.begin(), hora_limpa.end(), L' '), hora_limpa.end());
-
-    // Regex para hh:mm
-    std::wregex time_pattern(L"^([01]?[0-9]|2[0-3]):([0-5][0-9])$");
-
-    if (!std::regex_match(hora_limpa, time_pattern)) {
-        return false;
-    }
-
-    // Extrair hora e minuto
-    int hora = std::stoi(hora_limpa.substr(0, 2));
-    int minuto = std::stoi(hora_limpa.substr(3, 2));
-
-    // Verificações adicionais (redundantes, mas seguras)
-    return (hora >= 0 && hora <= 23) && (minuto >= 0 && minuto <= 59);
-}
-
-bool isValidDate(const std::wstring& date) {
-    // Regex para dd/mm/aaaa
-    std::wregex date_pattern(L"^(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[0-2])/(\\d{4})$");
-
-    if (!std::regex_match(date, date_pattern)) {
-        return false;
-    }
-
-    // Extrair dia, mês e ano
-    int dia = std::stoi(date.substr(0, 2));
-    int mes = std::stoi(date.substr(3, 2));
-    int ano = std::stoi(date.substr(6, 4));
-
-    // Verificar meses com 30 dias
-    if ((mes == 4 || mes == 6 || mes == 9 || mes == 11) && dia > 30) {
-        return false;
-    }
-
-    // Verificar fevereiro
-    if (mes == 2) {
-        // Verificar ano bissexto
-        bool isBissexto = (ano % 4 == 0 && ano % 100 != 0) || (ano % 400 == 0);
-        if (isBissexto && dia > 29) {
-            return false;
-        }
-        if (!isBissexto && dia > 28) {
-            return false;
-        }
-    }
-
-    // Verificar ano (opcional - ajuste conforme necessidade)
-    if (ano < 1900 || ano > 2100) {
-        return false;
-    }
-
-    return true;
-}
-
-std::wstring treatData(std::wstring dado, int number) {
-    std::wstring dado_escaped = dado;
-    size_t pos = 0;
-
-    if (number == 2 && dado.empty()) {
-        error = L"1";
-        mensagem = L"Insira: 'Nome do Pet'.\n" + mensagem;
-    }
-    else if (number == 4 && dado.empty()) {
-        error = L"1";
-        mensagem = L"Insira: 'Nome do Tutor'.\n" + mensagem;
-    }
-    else if (number == 13 && dado.empty()) {
-        error = L"1";
-        mensagem = L"Insira: 'Banho'.\n" + mensagem;
-    }
-    else if (number == 14 && dado.empty()) {
-        error = L"1";
-        mensagem = L"Insira: 'Tosa'.\n" + mensagem;
-    }
-    else if (number == 21) {
-        if (dado.empty()) {
-            error = L"1";
-            mensagem = L"Insira: 'Data'.\n" + mensagem;
-        }
-        else if (!isValidDate(dado)) {
-            error = L"1";
-            mensagem = L"Escreva a data no formato: dd/mm/aaaa.\n" + mensagem;
-        }
-    }
-    else if (number == 22) {
-        if (dado.empty()) {
-            error = L"1";
-            mensagem = L"Insira: 'Hora'.\n" + mensagem;
-        }
-        else if (!isValidTime(dado)) {
-            error = L"1";
-            mensagem = L"Escreva a hora no formato: hh:mm.\n" + mensagem;
-        }
-    }
-    else if (number == 5 && !dado.empty()) {
-        if (!isNumber(dado)) {
-            error = L"1";
-            mensagem = L"Insira apenas números em 'CEP'.\n" + mensagem;
-        }
-    }
-    else if (number == 7 && !dado.empty()) {
-        if (!isNumber(dado)) {
-            error = L"1";
-            mensagem = L"Insira apenas números em 'Idade'.\n" + mensagem;
-        }
-    }
-    else if (number == 19 && !dado.empty()) {
-        if (!isNumber(dado)) {
-            error = L"1";
-            mensagem = L"Insira apenas números em 'Telefone'.\n" + mensagem;
-        }
-    }
-    else if (number == 20 && !dado.empty()) {
-        if (!isNumber(dado)) {
-            error = L"1";
-            mensagem = L"Insira apenas números em 'CPF'.\n" + mensagem;
-        }
-    }
-    else if (number == 8 && !dado.empty()) {
-        if (!isDecimalNumber(dado)) {
-            error = L"1";
-            mensagem = L"Insira apenas números decimais ou inteiros em 'Peso'.\n" + mensagem;
-        }
-    }
-    else if(dado.empty()) {
-        dado_escaped = L"N/A";
-    }
-
-    while ((pos = dado_escaped.find(L"'", pos)) != std::wstring::npos) {
-        dado_escaped.replace(pos, 1, L"''");
-        pos += 2;
-    }
-
-    msg = mensagem.c_str();
-
-    return dado_escaped;
-}
-
-// Função para configurar scroll bars
-void ConfigurarScrollBarsAdd(HWND hWnd)
-{
-    RECT rect;
-    GetClientRect(hWnd, &rect);
-    g_clientHeight = rect.bottom - rect.top;
-    g_clientWidth = rect.right - rect.left;
-
-    // Calcular altura total do conteúdo (19 linhas + título + botão)
-    int cellHeight = 32;
-    g_contentHeight = 22 * cellHeight + 100; // 19 campos + título + botão + margem
-    g_contentWidth = 2000; // Largura fixa para conteúdo largo
-
-    SCROLLINFO si = {};
-    si.cbSize = sizeof(SCROLLINFO);
-    si.fMask = SIF_RANGE | SIF_PAGE | SIF_POS;
-
-    // Scroll vertical
-    si.nMin = 0;
-    si.nMax = g_contentHeight;
-    si.nPage = g_clientHeight;
-    si.nPos = g_scrollY;
-    SetScrollInfo(hWnd, SB_VERT, &si, TRUE);
-
-    // Scroll horizontal
-    si.nMin = 0;
-    si.nMax = g_contentWidth;
-    si.nPage = g_clientWidth;
-    si.nPos = g_scrollX;
-    SetScrollInfo(hWnd, SB_HORZ, &si, TRUE);
-}
-
-// Função para atualizar posição dos controles com scroll
-void AtualizarPosicoesControles(HWND hWnd)
-{
-    RECT rect;
-    GetClientRect(hWnd, &rect);
-    int width = (rect.right - rect.left) - 44;
-
-    int cellHeight = 32;
-    int numColumns = 21;
-    int cellWidth = (width + 2000) / (numColumns > 0 ? numColumns : 1);
-    int startY = 40 - g_scrollY;
-    int startX = 22 - g_scrollX;
-    int xPos = 0;
-    int yPos = 0;
-    int colNumber;
-    int countRow = 0;
-
-    // Atualizar posição dos campos de entrada
-    for (size_t i = 0; i < g_editControls.size(); i++) {
-        colNumber = countRow + 1;
-
-        if (i == 11) {
-            xPos = startX + cellWidth + 10;
-            yPos = startY + colNumber * cellHeight + 3;
-            SetWindowPos(g_editControls[i], NULL, xPos, yPos, 110, 25,
-                SWP_NOZORDER | SWP_NOACTIVATE);
-            countRow++;
-        }
-        else if (i == 12) {
-            SetWindowPos(g_editControls[i], NULL, xPos + 150, yPos, 110, 25,
-                SWP_NOZORDER | SWP_NOACTIVATE);
-        }
-        else if (i == 13) {
-            SetWindowPos(g_editControls[i], NULL, xPos + 300, yPos, 110, 25,
-                SWP_NOZORDER | SWP_NOACTIVATE);
-        }
-        else if (i == 14) {
-            xPos = startX + cellWidth + 10;
-            yPos = startY + colNumber * cellHeight + 3;
-            SetWindowPos(g_editControls[i], NULL, xPos, yPos, 110, 25,
-                SWP_NOZORDER | SWP_NOACTIVATE);
-            countRow++;
-        }
-        else if (i == 15) {
-            SetWindowPos(g_editControls[i], NULL, xPos + 150, yPos, 110, 25,
-                SWP_NOZORDER | SWP_NOACTIVATE);
-        }
-        else if (i == 16) {
-            SetWindowPos(g_editControls[i], NULL, xPos + 300, yPos, 110, 25,
-                SWP_NOZORDER | SWP_NOACTIVATE);
-        }
-        else if (i == 17) {
-            SetWindowPos(g_editControls[i], NULL, xPos + 450, yPos, 110, 25,
-                SWP_NOZORDER | SWP_NOACTIVATE);
-        }
-        else if (i == 18) {
-            SetWindowPos(g_editControls[i], NULL, xPos + 600, yPos, 110, 25,
-                SWP_NOZORDER | SWP_NOACTIVATE);
-        }
-        else if (i == 8) {
-            xPos = startX + cellWidth + 10;
-            yPos = startY + colNumber * cellHeight + 3;
-            SetWindowPos(g_editControls[i], NULL, xPos, yPos, 25, 25, // Ajustado para checkbox
-                SWP_NOZORDER | SWP_NOACTIVATE);
-            countRow++;
-        }
-        else if (i == 20) {
-            xPos = startX + cellWidth + 10;
-            yPos = startY + colNumber * cellHeight + 3;
-            SetWindowPos(g_editControls[i], NULL, xPos, yPos, 110, 25, // Ajustado para checkbox
-                SWP_NOZORDER | SWP_NOACTIVATE);
-            countRow++;
-        }
-        else if (i == 21) {
-            SetWindowPos(g_editControls[i], NULL, xPos + 150, yPos, 110, 25,
-                SWP_NOZORDER | SWP_NOACTIVATE);
-        }
-        else if (i == 22) {
-            xPos = startX + cellWidth + 10;
-            yPos = startY + colNumber * cellHeight + 3;
-            SetWindowPos(g_editControls[i], NULL, xPos, yPos, 110, 25, // Ajustado para checkbox
-                SWP_NOZORDER | SWP_NOACTIVATE);
-            countRow++;
-        }
-        else if (i == 23) {
-            SetWindowPos(g_editControls[i], NULL, xPos + 150, yPos, 110, 25,
-                SWP_NOZORDER | SWP_NOACTIVATE);
-        }
-        else if (i == 24) {
-            SetWindowPos(g_editControls[i], NULL, xPos + 300, yPos, 110, 25,
-                SWP_NOZORDER | SWP_NOACTIVATE);
-        }
-        else if (i == 25) {
-            SetWindowPos(g_editControls[i], NULL, xPos + 450, yPos, 110, 25,
-                SWP_NOZORDER | SWP_NOACTIVATE);
-        }
-        else {
-            xPos = startX + cellWidth + 10;
-            yPos = startY + colNumber * cellHeight + 3;
-            SetWindowPos(g_editControls[i], NULL, xPos, yPos, 700, 25,
-                SWP_NOZORDER | SWP_NOACTIVATE);
-            countRow++;
-        }
-    }
-
-    // Atualizar posição do botão
-    if (g_hButton) {
-        int buttonY = startY + 22 * cellHeight + 3;
-        SetWindowPos(g_hButton, NULL, startX, buttonY, 150, 30,
-            SWP_NOZORDER | SWP_NOACTIVATE);
-    }
-}
-
-// Converter std::wstring para std::string UTF-8
-std::string WideToUTF8(const std::wstring& wstr)
-{
-    int size_needed = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.size(), NULL, 0, NULL, NULL);
-    std::string str(size_needed, 0);
-    WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.size(), &str[0], size_needed, NULL, NULL);
-    return str;
-}
-
-// Converter std::string UTF-8 para std::wstring
-std::wstring UTF8ToWide(const std::string& str)
-{
-    int size_needed = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), (int)str.size(), NULL, 0);
-    std::wstring wstr(size_needed, 0);
-    MultiByteToWideChar(CP_UTF8, 0, str.c_str(), (int)str.size(), &wstr[0], size_needed);
-    return wstr;
-}
 
 // Função para registrar a classe da janela
 BOOL RegisterAddClass(HINSTANCE hInstance)
@@ -424,7 +73,7 @@ LRESULT CALLBACK WndProcAdd(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
         // Limpar array de controles
         g_editControls.clear();
 
-        ConfigurarScrollBarsAdd(hWnd);
+        ConfigurarScrollBarsAgendamento(hWnd);
 
         RECT rect;
         GetClientRect(hWnd, &rect);
@@ -679,7 +328,7 @@ LRESULT CALLBACK WndProcAdd(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
         // Criar botão
         int buttonY = startY + 22 * cellHeight + 3;
         g_hButton = CreateWindowW(
-            L"BUTTON", L"Salvar Agendamento",
+            L"BUTTON", L"Salvar",
             WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
             startX, buttonY, 150, 30,
             hWnd, (HMENU)(1),
@@ -716,7 +365,7 @@ LRESULT CALLBACK WndProcAdd(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
         if (si.nPos != oldPos) {
             g_scrollY = si.nPos;
             // Atualizar posições dos controles ANTES do redraw
-            AtualizarPosicoesControles(hWnd);
+            AtualizarPosicoesControlesAgendamento(hWnd);
             InvalidateRect(hWnd, NULL, TRUE);
             UpdateWindow(hWnd);
         }
@@ -749,7 +398,7 @@ LRESULT CALLBACK WndProcAdd(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
         if (si.nPos != oldPos) {
             g_scrollX = si.nPos;
             // Atualizar posições dos controles ANTES do redraw
-            AtualizarPosicoesControles(hWnd);
+            AtualizarPosicoesControlesAgendamento(hWnd);
             InvalidateRect(hWnd, NULL, TRUE);
             UpdateWindow(hWnd);
         }
@@ -763,9 +412,9 @@ LRESULT CALLBACK WndProcAdd(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
         g_clientWidth = newWidth;
         g_clientHeight = newHeight;
 
-        ConfigurarScrollBarsAdd(hWnd);
+        ConfigurarScrollBarsAgendamento(hWnd);
         // Atualizar posições dos controles após redimensionamento
-        AtualizarPosicoesControles(hWnd);
+        AtualizarPosicoesControlesAgendamento(hWnd);
 
         InvalidateRect(hWnd, NULL, TRUE);
         break;
@@ -792,7 +441,7 @@ LRESULT CALLBACK WndProcAdd(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
         if (si.nPos != oldPos) {
             g_scrollY = si.nPos;
             // Atualizar posições dos controles ANTES do redraw
-            AtualizarPosicoesControles(hWnd);
+            AtualizarPosicoesControlesAgendamento(hWnd);
             InvalidateRect(hWnd, NULL, TRUE);
             UpdateWindow(hWnd);
         }
@@ -900,7 +549,7 @@ LRESULT CALLBACK WndProcAdd(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 
                     // Lógica para determinar o texto baseado nas combinações
                     if (countChecked == 0) {
-                        dados[i] = L"N/A"; // ou L"", dependendo do que você preferir
+                        dados[i] = L""; // ou L"", dependendo do que você preferir
                     }
                     else if (countChecked == 4) {
                         dados[i] = L"Pele, Olhos, Secreção e Ouvido";
@@ -945,7 +594,7 @@ LRESULT CALLBACK WndProcAdd(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
                 std::wstring currentDate = GetCurrentDate();
                 std::wstring currentHour = GetCurrentHour();
 
-                std::wstring sqlInsertW = L"INSERT INTO Pets (Nome_do_Pet, Raca, Nome_do_Tutor, CEP, Cor, Idade, Peso, Sexo, Castrado, Endereco, Ponto_de_referencia, Banho, Tosa, Obs_Tosa, Parasitas, Lesoes, Obs_Lesoes, Telefone, CPF, Appointment_Date, Appointment_Hour, Date, Hour) VALUES ('" + treatData(dados[2], 2) + L"', '" + treatData(dados[3], 3) + L"', '" + treatData(dados[4], 4) + L"', '" + treatData(dados[5], 5) + L"', '" + treatData(dados[6], 6) + L"', '" + treatData(dados[7], 7) + L"', '" + treatData(dados[8], 8) + L"', '" + treatData(dados[9], 9) + L"', '" + treatData(dados[10], 10) + L"', '" + treatData(dados[11], 11) + L"', '" + treatData(dados[12], 12) + L"', '" + treatData(dados[13], 13) + L"', '" + treatData(dados[14], 14) + L"', '" + treatData(dados[15], 15) + L"', '" + treatData(dados[16], 16) + L"', '" + treatData(dados[17], 17) + L"', '" + treatData(dados[18], 18) + L"', '" + treatData(dados[19], 19) + L"', '" + treatData(dados[20], 20) + L"', '" + treatData(dados[21], 21) + L"', '" + treatData(dados[22], 22) + L"', '" + currentDate + L"', '" + currentHour + L"');";
+                std::wstring sqlInsertW = L"INSERT INTO Pets (Nome_do_Pet, Raca, Nome_do_Tutor, CEP, Cor, Idade, Peso, Sexo, Castrado, Endereco, Ponto_de_referencia, Banho, Tosa, Obs_Tosa, Parasitas, Lesoes, Obs_Lesoes, Telefone, CPF, Appointment_Date, Appointment_Hour, Date, Hour) VALUES ('" + treatDataAppointment(dados[2], 2) + L"', '" + treatDataAppointment(dados[3], 3) + L"', '" + treatDataAppointment(dados[4], 4) + L"', '" + treatDataAppointment(dados[5], 5) + L"', '" + treatDataAppointment(dados[6], 6) + L"', '" + treatDataAppointment(dados[7], 7) + L"', '" + treatDataAppointment(dados[8], 8) + L"', '" + treatDataAppointment(dados[9], 9) + L"', '" + treatDataAppointment(dados[10], 10) + L"', '" + treatDataAppointment(dados[11], 11) + L"', '" + treatDataAppointment(dados[12], 12) + L"', '" + treatDataAppointment(dados[13], 13) + L"', '" + treatDataAppointment(dados[14], 14) + L"', '" + treatDataAppointment(dados[15], 15) + L"', '" + treatDataAppointment(dados[16], 16) + L"', '" + treatDataAppointment(dados[17], 17) + L"', '" + treatDataAppointment(dados[18], 18) + L"', '" + treatDataAppointment(dados[19], 19) + L"', '" + treatDataAppointment(dados[20], 20) + L"', '" + treatDataAppointment(dados[21], 21) + L"', '" + treatDataAppointment(dados[22], 22) + L"', '" + currentDate + L"', '" + currentHour + L"');";
 
                 if (error == L"1") {
                     MessageBox(hWnd, msg, L"Erro", MB_OK | MB_ICONERROR);
@@ -963,6 +612,7 @@ LRESULT CALLBACK WndProcAdd(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
                         sqlite3_free(errMsg);
                     }
                     else {
+                        updateWindow(L"JanelaSelectClasse");
                         MessageBox(hWnd, L"Dados inseridos com sucesso!", L"Sucesso", MB_OK);
                     }
                 }

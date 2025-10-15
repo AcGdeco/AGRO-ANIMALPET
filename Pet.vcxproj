@@ -127,6 +127,7 @@
     <ClInclude Include="..\..\..\OneDrive\Área de Trabalho\Programação\SQLite\sqlite-amalgamation-3500400\sqlite3.h" />
     <ClInclude Include="Add.h" />
     <ClInclude Include="Consultar.h" />
+    <ClInclude Include="Edit.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="MenuUniversal.h" />
     <ClInclude Include="Select.h" />
@@ -138,6 +139,7 @@
     <ClCompile Include="..\..\..\OneDrive\Área de Trabalho\Programação\SQLite\sqlite-amalgamation-3500400\sqlite3.c" />
     <ClCompile Include="Add.cpp" />
     <ClCompile Include="Consultar.cpp" />
+    <ClCompile Include="Edit.cpp" />
     <ClCompile Include="MenuUniversal.cpp">
       <UseUnicodeForAssemblerListing Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</UseUnicodeForAssemblerListing>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'"> /source-charset:utf-8 %(AdditionalOptions)</AdditionalOptions>

@@ -13,147 +13,8 @@ extern int g_scrollY;
 extern int g_clientHeight;
 extern int g_contentHeight;
 
-std::vector<std::vector<std::wstring>> g_tableData;
-std::vector<HWND> g_buttons;
-
-// Definições de ações (usadas para identificar o tipo de botão)
-enum ButtonAction { CONSULTAR, EDITAR, DELETAR };
-
-LONG_PTR idRecord;
-
 // Declaração do procedimento da janela
 LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-
-void CriarBotoesTabela(HWND hWnd)
-{
-    // Limpar botões existentes
-    for (HWND hButton : g_buttons) {
-        DestroyWindow(hButton);
-    }
-    g_buttons.clear();
-
-    if (g_tableData.size() <= 1) return;
-
-    RECT rect;
-    GetClientRect(hWnd, &rect);
-    int width = (rect.right - rect.left) - 44;
-    int numColumns = g_tableData.empty() ? 0 : g_tableData[0].size() + 3;
-    int cellWidth = width / (numColumns > 0 ? numColumns : 1);
-    int startX = 22;
-    int startY = 80;
-    int cellHeight = 32;
-
-    for (size_t row = 1; row < g_tableData.size(); row++) {
-        LONG_PTR recordId = _wtoi(g_tableData[row][0].c_str());
-        int yPos = startY + row * cellHeight + 2;
-
-        // Botão Consultar
-        int xPos = startX + 7 * cellWidth + 2;
-        HWND hButton = CreateWindowW(
-            L"BUTTON", L"Consultar",
-            WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
-            xPos, yPos, 70, 30,
-            hWnd, (HMENU)(CONSULTAR),
-            (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL
-        );
-        if (hButton) {
-            SetWindowLongPtr(hButton, GWLP_USERDATA, recordId);
-            g_buttons.push_back(hButton);
-        }
-
-        // Botão Editar
-        xPos = startX + 8 * cellWidth + 2;
-        hButton = CreateWindowW(
-            L"BUTTON", L"Editar",
-            WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
-            xPos, yPos, 70, 30,
-            hWnd, (HMENU)(EDITAR),
-            (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL
-        );
-        if (hButton) {
-            SetWindowLongPtr(hButton, GWLP_USERDATA, recordId);
-            g_buttons.push_back(hButton);
-        }
-
-        // Botão Deletar
-        xPos = startX + 9 * cellWidth + 2;
-        hButton = CreateWindowW(
-            L"BUTTON", L"Deletar",
-            WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
-            xPos, yPos, 70, 30,
-            hWnd, (HMENU)(DELETAR),
-            (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL
-        );
-        if (hButton) {
-            SetWindowLongPtr(hButton, GWLP_USERDATA, recordId);
-            g_buttons.push_back(hButton);
-        }
-    }
-}
-
-// Função para atualizar posições dos botões com scroll
-void AtualizarPosicoesBotoes(HWND hWnd)
-{
-    RECT rect;
-    GetClientRect(hWnd, &rect);
-    int width = (rect.right - rect.left) - 44;
-    int numColumns = g_tableData.empty() ? 0 : g_tableData[0].size() + 3;
-    int cellWidth = width / (numColumns > 0 ? numColumns : 1);
-    int startX = 22;
-    int startY = 80;
-    int cellHeight = 32;
-
-    // Desabilitar redesenho durante a atualização
-    SendMessage(hWnd, WM_SETREDRAW, FALSE, 0);
-
-    for (size_t i = 0; i < g_buttons.size(); i++) {
-        size_t row = (i / 3) + 1;
-        int buttonType = i % 3;
-
-        int yPos = startY + row * cellHeight + 2 - g_scrollY;
-        int xPos = startX + (7 + buttonType) * cellWidth + 2;
-
-        // Verificar se o botão está visível na área da janela
-        BOOL isVisible = (yPos >= -cellHeight && yPos <= rect.bottom);
-
-        if (isVisible) {
-            SetWindowPos(g_buttons[i], NULL, xPos, yPos, 0, 0,
-                SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
-        }
-        else {
-            // Esconder botões que estão fora da área visível
-            SetWindowPos(g_buttons[i], NULL, xPos, yPos, 0, 0,
-                SWP_NOSIZE | SWP_NOZORDER | SWP_HIDEWINDOW);
-        }
-    }
-
-    // Reabilitar redesenho e forçar atualização
-    SendMessage(hWnd, WM_SETREDRAW, TRUE, 0);
-
-    RedrawWindow(hWnd, NULL, NULL,
-        RDW_ERASE | RDW_FRAME | RDW_INVALIDATE | RDW_ALLCHILDREN);
-}
-
-// Função para configurar scroll bars
-void ConfigurarScrollBars(HWND hWnd)
-{
-    RECT rect;
-    GetClientRect(hWnd, &rect);
-    g_clientHeight = rect.bottom - rect.top;
-
-    int cellHeight = 32;
-    g_contentHeight = static_cast<int>(g_tableData.size()) * cellHeight + 130;
-
-    SCROLLINFO si = {};
-    si.cbSize = sizeof(SCROLLINFO);
-    si.fMask = SIF_RANGE | SIF_PAGE | SIF_POS;
-    si.nMin = 0;
-    si.nMax = g_contentHeight;
-    si.nPage = g_clientHeight;
-    si.nPos = g_scrollY;
-
-    SetScrollInfo(hWnd, SB_VERT, &si, TRUE);
-}
 
 // Função auxiliar para converter de UTF-8 (char*) para std::wstring (UTF-16)
 std::wstring utf8_to_wstring(const char* str) {
@@ -163,27 +24,6 @@ std::wstring utf8_to_wstring(const char* str) {
     std::wstring wstr(size_needed - 1, 0); // -1 para não incluir o caractere nulo
     MultiByteToWideChar(CP_UTF8, 0, str, -1, &wstr[0], size_needed);
     return wstr;
-}
-
-int sqlite_callback(void* data, int argc, char** argv, char** azColName) {
-    std::vector<std::vector<std::wstring>>* table = static_cast<std::vector<std::vector<std::wstring>>*>(data);
-    // Primeira chamada: adicionar cabeçalhos (nomes das colunas)
-    if (table->empty()) {
-        std::vector<std::wstring> headers;
-        for (int i = 0; i < argc; i++) {
-            headers.push_back(azColName[i] ? utf8_to_wstring(azColName[i]) : L"NULL");
-        }
-        table->push_back(headers);
-    }
-
-    // Adicionar linha de dados
-    std::vector<std::wstring> row;
-    for (int i = 0; i < argc; i++) {
-        row.push_back(argv[i] ? utf8_to_wstring(argv[i]) : L"NULL");
-    }
-    table->push_back(row);
-
-    return 0;
 }
 
 // Função para registrar a classe da janela (pode ser chamada de outro lugar, como Pet.cpp)
@@ -294,6 +134,9 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
             }
             sqlite3_close(db);
 
+            // 1. LIMPAR DADOS ANTIGOS ANTES DE CADA CONSULTA
+            g_tableData.clear();
+
             // Consultar o banco apenas se a tabela estiver vazia
             sqlite3* db;
             char* errMsg = 0;
@@ -345,7 +188,7 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 
             idRecord = id;
 
-            if (!CreateNewWindow(hWnd, hInst, L"JanelaReadClasse", L"AGRO ANIMAL PET - CONSULTAR REGISTRO"))
+            if (!CreateNewWindow(hWnd, hInst, L"JanelaReadClasse", L"AGRO ANIMAL PET - CONSULTAR AGENDAMENTO"))
             {
                 // O erro já é tratado dentro da função
                 break;
@@ -353,17 +196,30 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
         }
         else if (wmId == EDITAR) // Botões "Editar"
         {
-            wchar_t msg[50];
-            swprintf_s(msg, L"Botão %s%d clicado! Id: %d", L"Editar", (int)id, (int)id);
-            MessageBoxW(hWnd, msg, L"Info", MB_OK);
+            //wchar_t msg[50];
+            //swprintf_s(msg, L"Botão %s%d clicado! Id: %d", L"Editar", (int)id, (int)id);
+            //MessageBoxW(hWnd, msg, L"Info", MB_OK);
 
-            InvalidateRect(hWnd, NULL, TRUE);
+            idRecord = id;
+
+            if (!CreateNewWindow(hWnd, hInst, L"JanelaEditClasse", L"AGRO ANIMAL PET - EDITAR AGENDAMENTO"))
+            {
+                // O erro já é tratado dentro da função
+                break;
+            }
         }
         else if (wmId == DELETAR) // Botões "Deletar"
         {
-            wchar_t msg[50];
-            swprintf_s(msg, L"Botão %s%d clicado! Id: %d", L"Deletar", (int)id, (int)id);
-            MessageBoxW(hWnd, msg, L"Info", MB_OK);
+            //wchar_t msg[50];
+            //swprintf_s(msg, L"Botão %s%d clicado! Id: %d", L"Deletar", (int)id, (int)id);
+            //MessageBoxW(hWnd, msg, L"Info", MB_OK);
+
+            idRecord = id;
+            std::wstring msg = L"Deletar registro ID " + std::to_wstring(idRecord) + L"?";
+            if (MessageBoxW(hWnd, msg.c_str(), L"Confirmar", MB_YESNO | MB_ICONQUESTION) == IDYES) {
+                deleteRecordById("pet.db", idRecord, hWnd);
+                RecarregarDadosTabela(hWnd);
+            }
         }
         break;
     }

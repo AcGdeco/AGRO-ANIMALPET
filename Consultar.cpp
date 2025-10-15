@@ -62,7 +62,7 @@ void ConfigurarScrollBarsConsulta(HWND hWnd)
 
     // Calcular altura total do conteúdo baseado na tabela
     int cellHeight = 32;
-    g_contentHeight = 22 * cellHeight + 100; // 22 colunas + margem
+    g_contentHeight = 24 * cellHeight + 100; // 22 colunas + margem
     g_contentWidth = 2000; // Largura fixa para conteúdo largo
 
     SCROLLINFO si = {};
@@ -252,6 +252,9 @@ LRESULT CALLBACK WndProcRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
 
         // Fundo branco
         FillRect(hdc, &rect, (HBRUSH)(COLOR_WINDOW + 1));
+
+        // 1. LIMPAR DADOS ANTIGOS ANTES DE CADA CONSULTA
+        g_tableData.clear();
 
         // Consultar o banco apenas se a tabela estiver vazia
         sqlite3* db;
