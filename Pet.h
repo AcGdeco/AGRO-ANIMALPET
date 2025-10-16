@@ -50,7 +50,7 @@ std::wstring UTF8ToWide(const std::string& str);
 void ConfigurarScrollBarsAgendamento(HWND hWnd);
 void AtualizarPosicoesControlesAgendamento(HWND hWnd);
 int sqlite_callback(void* data, int argc, char** argv, char** azColName);
-void checarInput(HWND hinput, int col, std::wstring word);
+void checarInput(HWND hinput, int col, std::wstring word, std::wstring tableData);
 bool deleteRecordById(const std::string& databasePath, int id, HWND hWnd);
 void RecarregarDadosTabela(HWND hWnd);
 void CriarBotoesTabela(HWND hWnd);

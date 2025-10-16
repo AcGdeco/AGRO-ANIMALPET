@@ -444,10 +444,10 @@ void RecarregarDadosTabela(HWND hWnd) {
     UpdateWindow(hWnd);
 }
 
-void checarInput(HWND hinput, int col, std::wstring word) {
+void checarInput(HWND hinput, int col, std::wstring word, std::wstring tableData) {
 
     // 1. Variáveis que você quer exibir (col precisa ser convertido)
-    std::wstring displayText = g_tableDataEditar[1][col + 1]; // Seu valor do BD
+    std::wstring displayText = tableData; // Seu valor do BD
 
     // 2. Converta o inteiro 'col' para uma std::wstring
     std::wstring col_str = std::to_wstring(col);

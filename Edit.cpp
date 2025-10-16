@@ -141,6 +141,7 @@ LRESULT CALLBACK WndProcEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
             int controlID = col + 2; // IDs de 2 a 22
             int xPos = startX + cellWidth + 10;
             int yPos = startY + colNumber * cellHeight + 3;
+            std::wstring displayText = g_tableDataEditar[1][col + 1];
 
             if (col == 8) {
                 HWND hCheckbox = CreateWindowW(
@@ -154,8 +155,8 @@ LRESULT CALLBACK WndProcEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
                     NULL,                       // Instância
                     NULL
                 );
-
-                checarInput(hCheckbox, col, L"Sim");
+                
+                checarInput(hCheckbox, col, L"Sim", displayText);
 
                 g_editControls.push_back(hCheckbox);
             }
@@ -175,7 +176,7 @@ LRESULT CALLBACK WndProcEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
                     NULL
                 );
 
-                checarInput(hRadio, col, L"Padrão");
+                checarInput(hRadio, col, L"Padrão", displayText);
 
                 SetWindowTheme(hRadio, L"", L""); // Desativar tema para fundo transparente
                 g_editControls.push_back(hRadio);
@@ -193,7 +194,7 @@ LRESULT CALLBACK WndProcEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
                     NULL
                 );
 
-                checarInput(hRadio, col, L"Hidratação");
+                checarInput(hRadio, col, L"Hidratação", displayText);
 
                 SetWindowTheme(hRadio, L"", L""); // Desativar tema para fundo transparente
                 g_editControls.push_back(hRadio);
@@ -211,7 +212,7 @@ LRESULT CALLBACK WndProcEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
                     NULL
                 );
 
-                checarInput(hRadio, col, L"Nenhum");
+                checarInput(hRadio, col, L"Nenhum", displayText);
 
                 SetWindowTheme(hRadio, L"", L""); // Desativar tema para fundo transparente
                 g_editControls.push_back(hRadio);
@@ -232,7 +233,7 @@ LRESULT CALLBACK WndProcEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
                     NULL
                 );
 
-                checarInput(hRadio, col, L"Tesoura");
+                checarInput(hRadio, col, L"Tesoura", displayText);
 
                 SetWindowTheme(hRadio, L"", L""); // Desativar tema para fundo transparente
                 g_editControls.push_back(hRadio);
@@ -250,7 +251,7 @@ LRESULT CALLBACK WndProcEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
                     NULL
                 );
 
-                checarInput(hRadio, col, L"Máquina");
+                checarInput(hRadio, col, L"Máquina", displayText);
 
                 SetWindowTheme(hRadio, L"", L""); // Desativar tema para fundo transparente
                 g_editControls.push_back(hRadio);
@@ -268,7 +269,7 @@ LRESULT CALLBACK WndProcEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
                     NULL
                 );
 
-                checarInput(hRadio, col, L"Higiênica");
+                checarInput(hRadio, col, L"Higiênica", displayText);
 
                 SetWindowTheme(hRadio, L"", L""); // Desativar tema para fundo transparente
                 g_editControls.push_back(hRadio);
@@ -286,7 +287,7 @@ LRESULT CALLBACK WndProcEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
                     NULL
                 );
 
-                checarInput(hRadio, col, L"Tosa da Raça");
+                checarInput(hRadio, col, L"Tosa da Raça", displayText);
 
                 SetWindowTheme(hRadio, L"", L""); // Desativar tema para fundo transparente
                 g_editControls.push_back(hRadio);
@@ -304,7 +305,7 @@ LRESULT CALLBACK WndProcEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
                     NULL
                 );
 
-                checarInput(hRadio, col, L"Nenhum");
+                checarInput(hRadio, col, L"Nenhum", displayText);
 
                 SetWindowTheme(hRadio, L"", L""); // Desativar tema para fundo transparente
                 g_editControls.push_back(hRadio);
@@ -323,7 +324,7 @@ LRESULT CALLBACK WndProcEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
                     NULL
                 );
 
-                checarInput(hCheckbox, col, L"Pulgas");
+                checarInput(hCheckbox, col, L"Pulgas", displayText);
 
                 g_editControls.push_back(hCheckbox);
 
@@ -339,7 +340,7 @@ LRESULT CALLBACK WndProcEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
                     NULL
                 );
 
-                checarInput(hCheckbox, col, L"Carrapatos");
+                checarInput(hCheckbox, col, L"Carrapatos", displayText);
 
                 g_editControls.push_back(hCheckbox);
             }
@@ -357,7 +358,7 @@ LRESULT CALLBACK WndProcEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
                     NULL
                 );
 
-                checarInput(hCheckbox, col, L"Pele");
+                checarInput(hCheckbox, col, L"Pele", displayText);
 
                 g_editControls.push_back(hCheckbox);
 
@@ -373,7 +374,7 @@ LRESULT CALLBACK WndProcEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
                     NULL
                 );
 
-                checarInput(hCheckbox, col, L"Olhos");
+                checarInput(hCheckbox, col, L"Olhos", displayText);
 
                 g_editControls.push_back(hCheckbox);
 
@@ -389,7 +390,7 @@ LRESULT CALLBACK WndProcEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
                     NULL
                 );
 
-                checarInput(hCheckbox, col, L"Secreção");
+                checarInput(hCheckbox, col, L"Secreção", displayText);
 
                 g_editControls.push_back(hCheckbox);
 
@@ -405,7 +406,7 @@ LRESULT CALLBACK WndProcEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
                     NULL
                 );
 
-                checarInput(hCheckbox, col, L"Ouvido");
+                checarInput(hCheckbox, col, L"Ouvido", displayText);
 
                 g_editControls.push_back(hCheckbox);
             }
