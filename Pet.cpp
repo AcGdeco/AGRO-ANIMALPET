@@ -25,6 +25,7 @@ int g_clientHeight;      // Altura da área cliente
 
 std::vector<HWND> g_editControls; // Array global para armazenar handles dos controles de edição
 std::vector<std::vector<std::wstring>> g_tableData;
+std::vector<std::vector<std::wstring>> g_tableDataFull;
 LONG_PTR idRecord;
 
 std::vector<HWND> g_buttons;
@@ -116,6 +117,106 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
     wcex.hIconSm        = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
 
     return RegisterClassExW(&wcex);
+}
+
+void createInputsFilters(HDC hdc, HWND hWnd) {
+    g_tableDataFull.clear();
+
+    sqlite3* db;
+    char* errMsg = 0;
+    int rc = sqlite3_open("pet.db", &db);
+
+    if (rc == SQLITE_OK) {
+        const char* sqlSelect = "SELECT * FROM Pets LIMIT 1;";
+        rc = sqlite3_exec(db, sqlSelect, sqlite_callback, &g_tableDataFull, &errMsg);
+
+        if (rc != SQLITE_OK) {
+            if (errMsg) {
+                size_t len = strlen(errMsg) + 1;
+                std::wstring wErrMsg(len, L'\0');
+                mbstowcs_s(nullptr, &wErrMsg[0], len, errMsg, _TRUNCATE);
+                wErrMsg.resize(wcslen(wErrMsg.c_str()));
+                g_tableDataFull.push_back({ L"Erro", wErrMsg });
+                sqlite3_free(errMsg);
+            }
+        }
+        sqlite3_close(db);
+    }
+    else {
+        g_tableDataFull.push_back({ L"Erro", L"Não foi possível abrir o banco" });
+    }
+
+    // Obter dimensões da janela
+    RECT rect;
+    GetClientRect(hWnd, &rect);
+    int width = (rect.right - rect.left) - 44;
+    int height = rect.bottom - rect.top;
+
+    // LIMPAR a área de desenho primeiro
+    HBRUSH hBgBrush = CreateSolidBrush(GetSysColor(COLOR_WINDOW));
+    FillRect(hdc, &rect, hBgBrush);
+    DeleteObject(hBgBrush);
+
+    // Desenhar fundos alternados para as linhas
+    HBRUSH hBrushHeader = CreateSolidBrush(RGB(150, 150, 150));
+    HBRUSH hBrushWhite = CreateSolidBrush(RGB(255, 255, 255));
+    HBRUSH hBrushGray = CreateSolidBrush(RGB(240, 240, 240));
+
+    // Configurar a tabela
+    int cellHeight = 32;
+    int numColumns = g_tableDataFull.empty() ? 0 : g_tableDataFull[0].size();
+    int cellWidth = width / (numColumns > 0 ? numColumns + 3 : 1); // +3 para os botões
+    int startY = 80 - g_scrollY;  // Posição Y com scroll
+    int startX = 22 - g_scrollX;  // Posição X com scroll
+
+    // DESENHAR APENAS UMA VEZ - REMOVER loops desnecessários
+    for (size_t row = 0; row < 1; row++) {
+        // Desenhar o texto nas células
+        SetBkMode(hdc, TRANSPARENT);
+
+        HBRUSH hCurrentBrush = (row % 2 == 0) ? hBrushGray : hBrushWhite;
+
+        if (row == 0) {
+            hCurrentBrush = hBrushHeader;
+            fonte(L"Header", RGB(255, 255, 255), hdc);
+        }
+        else {
+            fonte(L"Font", RGB(0, 0, 0), hdc);
+        }
+
+        // Desenhar o fundo da linha
+        RECT rowRect = {
+            startX,
+            startY + static_cast<int>(row) * cellHeight,
+            startX + width,
+            startY + (static_cast<int>(row) + 1) * cellHeight
+        };
+        FillRect(hdc, &rowRect, hCurrentBrush);
+
+        // Desenhar as células de dados
+        for (size_t col = 0; col < g_tableDataFull[row].size(); col++) {
+            int xPos = startX + col * cellWidth + 10;
+            int yPos = startY + row * cellHeight + 7;
+
+            std::wstring displayText = g_tableDataFull[row][col];
+
+            // Traduzir cabeçalhos se necessário
+            if (row == 0) {
+                if (displayText == L"Nome_do_Pet") displayText = L"Nome do Pet";
+                else if (displayText == L"Nome_do_Tutor") displayText = L"Nome do Tutor";
+                else if (displayText == L"Raca") displayText = L"Raça";
+                else if (displayText == L"Appointment_Date") displayText = L"Data";
+                else if (displayText == L"Appointment_Hour") displayText = L"Hora";
+                else if (displayText == L"Date") displayText = L"Data Registro";
+                else if (displayText == L"Hour") displayText = L"Hora Registro";
+            }
+
+            TextOut(hdc, xPos, yPos, displayText.c_str(), static_cast<int>(displayText.length()));
+        }
+
+        // Desenhar cabeçalhos dos botões apenas na linha do cabeçalho
+        // REMOVER o código duplicado de desenho de botões que estava criando tabelas sobrepostas
+    }
 }
 
 void updateWindow(LPCWSTR className) {
@@ -346,7 +447,7 @@ void RecarregarDadosTabela(HWND hWnd) {
 void checarInput(HWND hinput, int col, std::wstring word) {
 
     // 1. Variáveis que você quer exibir (col precisa ser convertido)
-    std::wstring displayText = g_tableData[1][col + 1]; // Seu valor do BD
+    std::wstring displayText = g_tableDataEditar[1][col + 1]; // Seu valor do BD
 
     // 2. Converta o inteiro 'col' para uma std::wstring
     std::wstring col_str = std::to_wstring(col);
@@ -365,7 +466,7 @@ void checarInput(HWND hinput, int col, std::wstring word) {
         //MB_OK | MB_ICONINFORMATION      // Estilos
     //);
 
-    //std::wstring displayText = g_tableData[1][col + 1];
+    //std::wstring displayText = g_tableDataEditar[1][col + 1];
     if (displayText.find(word) != std::wstring::npos) {
         SendMessage(hinput, BM_SETCHECK, BST_CHECKED, 0);
     }

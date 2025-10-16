@@ -30,9 +30,11 @@
 #define ID_CHECKBOX_EDIT_SECRECAO 2027
 #define ID_CHECKBOX_EDIT_OUVIDO 2028
 
+std::vector<std::vector<std::wstring>> g_tableDataEditar;
+
 void selectBD() {
     // 1. LIMPAR DADOS ANTIGOS ANTES DE CADA CONSULTA
-    g_tableData.clear();
+    g_tableDataEditar.clear();
 
     // Consultar o banco apenas se a tabela estiver vazia
     sqlite3* db;
@@ -42,7 +44,7 @@ void selectBD() {
         std::string idRecordStr = std::to_string(idRecord);
         std::string sqlSelect = "SELECT * FROM Pets WHERE ID = '" + idRecordStr + "';";
 
-        rc = sqlite3_exec(db, sqlSelect.c_str(), sqlite_callback, &g_tableData, &errMsg);
+        rc = sqlite3_exec(db, sqlSelect.c_str(), sqlite_callback, &g_tableDataEditar, &errMsg);
         if (rc != SQLITE_OK) {
             if (errMsg) {
                 // Converte char* para wchar_t* corretamente
@@ -54,24 +56,24 @@ void selectBD() {
                 if (convertedChars > 0) {
                     wErrMsg.resize(convertedChars - 1);
                 }
-                g_tableData.push_back({ L"Erro", wErrMsg });
+                g_tableDataEditar.push_back({ L"Erro", wErrMsg });
                 sqlite3_free(errMsg);
             }
             else {
-                g_tableData.push_back({ L"Erro", L"Erro desconhecido no SQLite: " + std::to_wstring(rc) });
+                g_tableDataEditar.push_back({ L"Erro", L"Erro desconhecido no SQLite: " + std::to_wstring(rc) });
             }
         }
         else {
             // Sucesso - talvez adicionar uma mensagem de confirmação
-            if (g_tableData.empty()) {
-                g_tableData.push_back({ L"Info", L"Nenhum registro encontrado com ID: " + std::to_wstring(idRecord) });
+            if (g_tableDataEditar.empty()) {
+                g_tableDataEditar.push_back({ L"Info", L"Nenhum registro encontrado com ID: " + std::to_wstring(idRecord) });
             }
         }
 
         sqlite3_close(db);
     }
     else {
-        g_tableData.push_back({ L"Erro", L"Não foi possível abrir o banco" });
+        g_tableDataEditar.push_back({ L"Erro", L"Não foi possível abrir o banco" });
     }
 }
 
@@ -172,7 +174,7 @@ LRESULT CALLBACK WndProcEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
                     NULL,                            // Instância
                     NULL
                 );
-                
+
                 checarInput(hRadio, col, L"Padrão");
 
                 SetWindowTheme(hRadio, L"", L""); // Desativar tema para fundo transparente
@@ -408,7 +410,8 @@ LRESULT CALLBACK WndProcEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
                 g_editControls.push_back(hCheckbox);
             }
             else {
-                std::wstring displayText = g_tableData[1][col + 1];
+               
+                std::wstring displayText = g_tableDataEditar[1][col + 1];
 
                 HWND hEdit = CreateWindowEx(
                     0, L"EDIT", displayText.c_str(),

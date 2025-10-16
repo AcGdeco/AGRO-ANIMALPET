@@ -255,9 +255,12 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 
         // Desenhar o texto nas células
         SetBkMode(hdc, TRANSPARENT);
-       
+
         //Título
         windowsTitle(hdc, startX, startY - 60, L"AGENDAMENTOS", 12);
+
+        // Desenhar filtros
+        //createInputsFilters(hdc, hWnd);
 
         // DESENHAR APENAS UMA VEZ - REMOVER loops desnecessários
         for (size_t row = 0; row < g_tableData.size(); row++) {

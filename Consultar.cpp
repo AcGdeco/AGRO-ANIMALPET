@@ -254,7 +254,7 @@ LRESULT CALLBACK WndProcRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
         FillRect(hdc, &rect, (HBRUSH)(COLOR_WINDOW + 1));
 
         // 1. LIMPAR DADOS ANTIGOS ANTES DE CADA CONSULTA
-        g_tableData.clear();
+        g_tableDataConsulta.clear();
 
         // Consultar o banco apenas se a tabela estiver vazia
         sqlite3* db;
