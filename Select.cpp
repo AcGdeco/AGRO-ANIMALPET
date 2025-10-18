@@ -7,11 +7,14 @@
 #include <string>
 #include "sqlite3.h"
 #include <vector>
+#include <cmath>
 
 // ADICIONE estas linhas para usar as variáveis externas:
 extern int g_scrollY;
 extern int g_clientHeight;
 extern int g_contentHeight;
+
+std::vector<int> naoDesenhar;
 
 // Declaração do procedimento da janela
 LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
@@ -134,42 +137,24 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
             }
             sqlite3_close(db);
 
-            // 1. LIMPAR DADOS ANTIGOS ANTES DE CADA CONSULTA
-            g_tableData.clear();
+            selectDB();
 
-            // Consultar o banco apenas se a tabela estiver vazia
-            sqlite3* db;
-            char* errMsg = 0;
-            int rc = sqlite3_open("pet.db", &db);
-            if (rc == SQLITE_OK) {
-                const char* sqlSelect = "SELECT ID, Nome_do_Pet, Nome_do_Tutor, Banho, Tosa, Appointment_Date, Appointment_Hour FROM Pets;";
-                rc = sqlite3_exec(db, sqlSelect, sqlite_callback, &g_tableData, &errMsg);
-                if (rc != SQLITE_OK) {
-                    if (errMsg) {
-                        // Converte char* para wchar_t* corretamente
-                        size_t len = strlen(errMsg) + 1;
-                        std::wstring wErrMsg(len, L'\0');
-                        mbstowcs_s(nullptr, &wErrMsg[0], len, errMsg, _TRUNCATE);
-                        // Remove o caractere nulo extra do final
-                        wErrMsg.resize(wcslen(wErrMsg.c_str()));
-                        g_tableData.push_back({ L"Erro", wErrMsg });
-                    }
-                    else {
-                        g_tableData.push_back({ L"Erro", L"Desconhecido" });
-                    }
-                    if (errMsg) sqlite3_free(errMsg);
-                }
-                sqlite3_close(db);
-            }
-            else {
-                g_tableData.push_back({ L"Erro", L"Não foi possível abrir o banco" });
-            }
+            // Criar botões de ordenamento das colunas da tabela
+            createOrderBtn(hWnd);
+
+            //Criar inputs dos filtros
+            criarInputsFilters(hWnd);
+
+            naoDesenhar.resize(g_tableData.size());
+			//Verificar filtros
+            verificarFiltro(dados, naoDesenhar);
 
             // Criar botões após carregar os dados
             CriarBotoesTabela(hWnd);
 
             // Configurar scroll bars após criar tudo
             ConfigurarScrollBars(hWnd);
+            
         }
         return 0;
     }
@@ -221,6 +206,107 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
                 RecarregarDadosTabela(hWnd);
             }
         }
+        else if (wmId == FILTRAR)
+        {
+            //wchar_t msg[50];
+            //swprintf_s(msg, L"Botão %s%d clicado!", L"Filtrar", (int)id, (int)id);
+            //MessageBoxW(hWnd, msg, L"Info", MB_OK);
+
+            for (int i = 0; i <= 23; i++) {
+                std::wstring controlIDStr = std::to_wstring(i);
+                HWND input = GetDlgItem(hWnd, i + 100000);
+                if (i == 9 || i == 12 || i == 13 || i == 15 || i == 16) { // Se o comando veio do nosso ComboBox
+                    // 1. Obter o índice do item selecionado
+                    int indiceSelecionado = (int)SendMessageW(
+                        input, CB_GETCURSEL, 0, 0
+                    );
+
+                    // 2. Obter o texto do item selecionado
+                    if (indiceSelecionado != CB_ERR) {
+                        wchar_t buffer[256];
+
+                        // Obter o texto do índice
+                        SendMessageW(
+                            input,
+                            CB_GETLBTEXT,
+                            (WPARAM)indiceSelecionado,
+                            (LPARAM)buffer
+                        );
+                        dados[i] = std::wstring(buffer);
+
+                        // O valor selecionado está em 'buffer' (ex: L"Opção B")
+                        // Faça algo com o valor, como atualizar o filtro:
+                        // std::wstring valorFiltro = buffer;
+                        // aplicarFiltro(valorFiltro);
+                    }
+                }
+                else if (input) {
+                    wchar_t buffer[256];
+                    GetWindowText(input, buffer, 256);
+                    dados[i] = std::wstring(buffer);
+                }
+            }
+
+            HWND input = GetDlgItem(hWnd, 20 + 2 * 100000);
+            wchar_t buffer[256];
+            GetWindowText(input, buffer, 256);
+            dataAte = std::wstring(buffer);
+
+            input = GetDlgItem(hWnd, 22 + 2 * 100000);
+            GetWindowText(input, buffer, 256);
+            dataRegistroAte = std::wstring(buffer);
+
+            RecarregarDadosTabela(hWnd);
+        }
+        else if (wmId == ORDENAR) // Botões "Ordenar"
+        {
+            std::string oldOrderColumn = orderColumn;
+
+            switch (id)
+            {
+                case 0:
+					orderColumn = "ID";
+				break;
+				case 1: 
+                    orderColumn = "Nome_do_Pet";    
+                break;
+                case 2:
+                    orderColumn = "Nome_do_Tutor";
+                    break;
+                case 3:
+                    orderColumn = "Banho";
+                    break;
+                case 4:
+                    orderColumn = "Tosa";
+                    break;
+                case 5:
+                    orderColumn = "Appointment_Date";
+                    break;
+                case 6:
+                    orderColumn = "Appointment_Hour";
+                    break;
+            default:
+                break;
+            }
+
+            if (orderAscDesc == "DESC" && orderColumn == oldOrderColumn) {
+                orderAscDesc = "ASC";
+            }
+            else if (orderAscDesc == "ASC" && orderColumn == oldOrderColumn) {
+                orderAscDesc = "DESC";
+            }
+            else if(orderColumn != oldOrderColumn){
+                if (id == 0) {
+                    orderAscDesc = "DESC";
+                }
+                else {
+                    orderAscDesc = "ASC";
+                }
+            }
+
+            RecarregarDadosTabela(hWnd);
+            
+        }
         break;
     }
     case WM_PAINT:
@@ -237,10 +323,11 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
         int height = rect.bottom - rect.top;
 
         // Configurar a tabela
+        int columnNumber = 7;
         int cellHeight = 32;
-        int numColumns = g_tableData.empty() ? 0 : g_tableData[0].size();
+        int numColumns = g_tableData.empty() ? 0 : 7;
         int cellWidth = width / (numColumns > 0 ? numColumns + 3 : 1); // +3 para os botões
-        int startY = 80 - g_scrollY;  // Posição Y com scroll
+        int startY = 350 - g_scrollY;  // Posição Y com scroll
         int startX = 22 - g_scrollX;  // Posição X com scroll
 
         // LIMPAR a área de desenho primeiro
@@ -257,51 +344,73 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
         SetBkMode(hdc, TRANSPARENT);
 
         //Título
-        windowsTitle(hdc, startX, startY - 60, L"AGENDAMENTOS", 12);
+        windowsTitle(hdc, startX, startY - 330, L"AGENDAMENTOS", 12);
 
         // Desenhar filtros
-        //createInputsFilters(hdc, hWnd);
+        createHeaderFilters(hdc, hWnd);
 
+        int linha = 0;
+        int counter = 0;
         // DESENHAR APENAS UMA VEZ - REMOVER loops desnecessários
         for (size_t row = 0; row < g_tableData.size(); row++) {
-            HBRUSH hCurrentBrush = (row % 2 == 0) ? hBrushGray : hBrushWhite;
+            if (naoDesenhar[row] != 1) {
+                HBRUSH hCurrentBrush = (linha % 2 == 0) ? hBrushGray : hBrushWhite;
 
-            if (row == 0) {
-                hCurrentBrush = hBrushHeader;
-                fonte(L"Header", RGB(255, 255, 255), hdc);
-            }
-            else {
-                fonte(L"Font", RGB(0, 0, 0), hdc);
-            }
-
-            // Desenhar o fundo da linha
-            RECT rowRect = {
-                startX,
-                startY + static_cast<int>(row) * cellHeight,
-                startX + width,
-                startY + (static_cast<int>(row) + 1) * cellHeight
-            };
-            FillRect(hdc, &rowRect, hCurrentBrush);
-
-            // Desenhar as células de dados
-            for (size_t col = 0; col < g_tableData[row].size(); col++) {
-                int xPos = startX + col * cellWidth + 10;
-                int yPos = startY + row * cellHeight + 7;
-
-                std::wstring displayText = g_tableData[row][col];
-
-                // Traduzir cabeçalhos se necessário
-                if (row == 0) {
-                    if (displayText == L"Nome_do_Pet") displayText = L"Nome do Pet";
-                    else if (displayText == L"Nome_do_Tutor") displayText = L"Nome do Tutor";
-                    else if (displayText == L"Raca") displayText = L"Raça";
-                    else if (displayText == L"Appointment_Date") displayText = L"Data";
-                    else if (displayText == L"Appointment_Hour") displayText = L"Hora";
-                    else if (displayText == L"Date") displayText = L"Data Registro";
-                    else if (displayText == L"Hour") displayText = L"Hora Registro";
+                if (linha == 0) {
+                    hCurrentBrush = hBrushHeader;
+                    fonte(L"Header", RGB(255, 255, 255), hdc);
+                }
+                else {
+                    fonte(L"Font", RGB(0, 0, 0), hdc);
                 }
 
-                TextOut(hdc, xPos, yPos, displayText.c_str(), static_cast<int>(displayText.length()));
+                // Desenhar o fundo da linha
+                RECT rowRect = {
+                    startX,
+                    startY + static_cast<int>(linha) * cellHeight,
+                    startX + width,
+                    startY + (static_cast<int>(linha) + 1) * cellHeight
+                };
+                FillRect(hdc, &rowRect, hCurrentBrush);
+            }
+            
+            counter = 0;
+            // Desenhar as células de dados
+            for (size_t col = 0; col < g_tableData[row].size(); col++) {
+                std::wstring displayText = g_tableData[row][col];
+
+                if (naoDesenhar[row] == 1) {
+                    break;
+                }
+
+                if (col == 0 || col == 1 || col == 3 || col == 12 || col == 13 || col == 20 || col == 21) {
+                    int xPos = startX + counter * cellWidth + 10;
+                    int yPos = startY + linha * cellHeight + 7;
+
+                    // Traduzir cabeçalhos se necessário
+                    if (linha == 0) {
+                        if (displayText == L"Nome_do_Pet") displayText = L"Nome do Pet";
+                        else if (displayText == L"Nome_do_Tutor") displayText = L"Nome do Tutor";
+                        else if (displayText == L"Raca") displayText = L"Raça";
+                        else if (displayText == L"Appointment_Date") displayText = L"Data";
+                        else if (displayText == L"Appointment_Hour") displayText = L"Hora";
+                        else if (displayText == L"Date") displayText = L"Data Registro";
+                        else if (displayText == L"Hour") displayText = L"Hora Registro";
+                    }
+
+                    int qtyCaracters = displayText.length();
+                    if (width <= 1600 && displayText.length() > 15) {
+                        qtyCaracters = 15;
+                        
+                    }
+                    TextOut(hdc, xPos, yPos, displayText.c_str(), static_cast<int>(qtyCaracters));
+                    counter++;
+                    
+                }
+            }
+
+            if (counter != 0) {
+                linha++;
             }
 
             // Desenhar cabeçalhos dos botões apenas na linha do cabeçalho
@@ -315,15 +424,15 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
             int headerY = startY + 7;
 
             // Consultar
-            int xPos = startX + g_tableData[0].size() * cellWidth + 10;
+            int xPos = startX + columnNumber * cellWidth + 10;
             TextOut(hdc, xPos, headerY, L"Consultar", 9);
 
             // Editar
-            xPos = startX + (g_tableData[0].size() + 1) * cellWidth + 2;
+            xPos = startX + (columnNumber + 1) * cellWidth + 2;
             TextOut(hdc, xPos, headerY, L"Editar", 6);
 
             // Deletar
-            xPos = startX + (g_tableData[0].size() + 2) * cellWidth + 2;
+            xPos = startX + (columnNumber + 2) * cellWidth + 2;
             TextOut(hdc, xPos, headerY, L"Deletar", 7);
         }
 
@@ -349,11 +458,21 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
     }
     case WM_SIZE:
     {
+        naoDesenhar.resize(g_tableData.size());
+        //Verificar filtros
+        verificarFiltro(dados, naoDesenhar);
+
         g_clientHeight = HIWORD(lParam);
         ConfigurarScrollBars(hWnd);
 
+        // Atualizar order botões
+        AtualizarPosicoesOrder(hWnd);
+
         // Apenas atualizar botões, NÃO chamar InvalidateRect aqui
         AtualizarPosicoesBotoes(hWnd);
+
+        // Atualizar posições dos inputs dos filtros
+        AtualizarPosicoesInputs(hWnd);
     }
 
     case WM_VSCROLL: {
@@ -384,8 +503,14 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
         if (si.nPos != oldPos) {
             g_scrollY = si.nPos;
 
+            // Atualizar order botões
+            AtualizarPosicoesOrder(hWnd);
+
             // Apenas atualizar botões, NÃO chamar InvalidateRect
             AtualizarPosicoesBotoes(hWnd);
+
+			// Atualizar posições dos inputs dos filtros
+            AtualizarPosicoesInputs(hWnd);
         }
         break;
     }
@@ -410,8 +535,14 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
         if (si.nPos != oldPos) {
             g_scrollY = si.nPos;
 
+            // Atualizar order botões
+            AtualizarPosicoesOrder(hWnd);
+
             // Apenas atualizar botões, NÃO chamar InvalidateRect
             AtualizarPosicoesBotoes(hWnd);
+
+            // Atualizar posições dos inputs dos filtros
+            AtualizarPosicoesInputs(hWnd);
         }
         return 0;
     }

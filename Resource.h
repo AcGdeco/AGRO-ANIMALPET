@@ -15,6 +15,7 @@
 #define IDC_MYICON				2
 #ifndef IDC_STATIC
 #define IDC_STATIC				-1
+#define IDB_SETAS 200
 #endif
 // Próximos valores padrão para novos objetos
 //

@@ -5,6 +5,8 @@
 
 extern HINSTANCE hInst;
 extern std::vector<std::vector<std::wstring>> g_tableData;
+extern std::vector<int> naoDesenhar;
+
 std::wstring utf8_to_wstring(const char* str);
 
 LRESULT CALLBACK NewWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);

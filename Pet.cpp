@@ -15,6 +15,8 @@
 #include <Consultar.h>
 #include <regex>
 #include <Edit.h>
+#include <sstream>
+#include <tuple>
 
 int g_scrollX;      // Posição horizontal do scroll
 int g_scrollY;      // Posição vertical do scroll
@@ -22,11 +24,20 @@ int g_contentWidth;   // Largura total do conteúdo
 int g_contentHeight;   // Altura total do conteúdo
 int g_clientWidth;       // Largura da área cliente
 int g_clientHeight;      // Altura da área cliente
+int rowsNumber;
 
 std::vector<HWND> g_editControls; // Array global para armazenar handles dos controles de edição
+std::vector<HWND> g_editControlsFilters;
+std::vector<HWND> g_editControlsOrder;
 std::vector<std::vector<std::wstring>> g_tableData;
 std::vector<std::vector<std::wstring>> g_tableDataFull;
 LONG_PTR idRecord;
+std::string orderColumn = "ID";
+std::string orderAscDesc = "DESC";
+
+std::vector<std::wstring> dados(24);
+std::wstring dataAte;
+std::wstring dataRegistroAte;
 
 std::vector<HWND> g_buttons;
 
@@ -119,7 +130,683 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
     return RegisterClassExW(&wcex);
 }
 
-void createInputsFilters(HDC hdc, HWND hWnd) {
+void AtualizarPosicoesOrder(HWND hWnd) {
+    // Obter dimensões da janela
+    RECT rect;
+    GetClientRect(hWnd, &rect);
+    int width = (rect.right - rect.left) - 44;
+    int height = rect.bottom - rect.top;
+
+    // Configurar a tabela
+    int columnNumber = 7;
+    int cellHeight = 32;
+    int numColumns = g_tableData.empty() ? 0 : 7;
+    int cellWidth = width / (numColumns > 0 ? numColumns + 3 : 1); // +3 para os botões
+    int startY = 350 - g_scrollY;  // Posição Y com scroll
+    int startX = 22 - g_scrollX;  // Posição X com scroll
+
+    for (int col = 0; col < 7; col++) {
+        int xPos = startX + col * cellWidth + 10;
+        int yPos = startY + 0 * cellHeight + 7;
+
+        SetWindowPos(g_editControlsOrder[col], NULL, xPos - 10, yPos, 0, 0,
+            SWP_NOSIZE | SWP_NOZORDER | SWP_HIDEWINDOW);
+        
+        SetWindowPos(g_editControlsOrder[col], NULL, xPos - 10, yPos, 0, 0,
+            SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
+    }
+}
+
+void createOrderBtn(HWND hWnd){
+    // Obter dimensões da janela
+    RECT rect;
+    GetClientRect(hWnd, &rect);
+    int width = (rect.right - rect.left) - 44;
+    int height = rect.bottom - rect.top;
+
+    // Configurar a tabela
+    int columnNumber = 7;
+    int cellHeight = 32;
+    int numColumns = g_tableData.empty() ? 0 : 7;
+    int cellWidth = width / (numColumns > 0 ? numColumns + 3 : 1); // +3 para os botões
+    int startY = 350 - g_scrollY;  // Posição Y com scroll
+    int startX = 22 - g_scrollX;  // Posição X com scroll
+
+    for (int i = 0; i < 7; i++) {
+        int xPos = startX + i * cellWidth + 10;
+        int yPos = startY + 0 * cellHeight + 7;
+
+        // 1. Mude o tipo de HBITMAP para HICON
+        HICON hIcon;
+        hIcon = (HICON)LoadImageW(
+            (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), // Handle da instância
+            MAKEINTRESOURCE(IDB_SETAS), // ID do recurso (definido no resource.h)
+            IMAGE_ICON, // <-- CORREÇÃO: Carregue como Ícone (ICON)
+            10, 15,
+            LR_SHARED
+        );
+
+        // 2. Mude o estilo do botão de BS_BITMAP para BS_ICON
+        HWND hButton = CreateWindowW(
+            L"BUTTON",
+            L"", // Remova o texto, pois a imagem será exibida
+            WS_VISIBLE | WS_CHILD | BS_ICON, // <-- CORREÇÃO: Use BS_ICON
+            xPos - 10, yPos, 10, 15, // Ajuste X, Y, Largura e Altura conforme necessário
+            hWnd,
+            (HMENU)(ORDENAR), // Seu ID de controle (555 é um valor válido)
+            (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
+            NULL
+        );
+        
+        SetWindowLongPtr(hButton, GWLP_USERDATA, i);
+
+        // 3. Mude o tipo de objeto em BM_SETIMAGE e use hIcon
+        if (hButton && hIcon) {
+            // Envia o handle da imagem (hIcon) para o botão
+            SendMessage(
+                hButton,
+                BM_SETIMAGE,
+                (WPARAM)IMAGE_ICON, // <-- CORREÇÃO: O tipo de objeto que está sendo definido (Icon)
+                (LPARAM)hIcon       // <-- Mude para hIcon
+            );
+        }
+
+        g_editControlsOrder.push_back(hButton);
+    }
+}
+
+// Função auxiliar para converter a string "dd/mm/aa" para a struct Data
+// Retorna um std::optional<Data> (C++17) ou uma struct com valores -1 em caso de erro.
+// Aqui, usaremos um retorno com tupla e flag de sucesso para ser compatível com C++ mais antigo.
+std::tuple<Data, bool> parseData(const std::wstring& dataStr) {
+    Data data = { 0, 0, 0 };
+    bool sucesso = false;
+
+    // Garante que a string tem o tamanho esperado (8 caracteres + 2 separadores = 10)
+    if (dataStr.length() == 10 && dataStr[2] == L'/' && dataStr[5] == L'/') {
+        try {
+            // Extrai as partes. Exemplo: "25/12/23"
+            std::wstring diaStr = dataStr.substr(0, 2);
+            std::wstring mesStr = dataStr.substr(3, 2);
+            std::wstring anoStr = dataStr.substr(6, 4);
+
+            // Converte para inteiro. 'aa' (ex: 23) vira 2023.
+            // Nota: Esta conversão de 'aa' para '20aa' assume o século 21.
+            data.dia = std::stoi(diaStr);
+            data.mes = std::stoi(mesStr);
+            data.ano = std::stoi(anoStr); // Assume o século atual
+
+            sucesso = true;
+        }
+        catch (...) {
+            // Lidar com erro de conversão (se o formato não for numérico)
+            sucesso = false;
+        }
+    }
+
+    return std::make_tuple(data, sucesso);
+}
+
+/**
+ * @brief Verifica se uma data está entre (ou é igual a) duas outras datas.
+ * * @param dataIntervalo1 Data inicial do intervalo ("dd/mm/aa").
+ * @param dataIntervalo2 Data final do intervalo ("dd/mm/aa").
+ * @param dataParaTestar A data a ser testada ("dd/mm/aa").
+ * @return true Se a dataParaTestar estiver entre dataIntervalo1 e dataIntervalo2.
+ * @return false Caso contrário, ou se houver falha na conversão de formato.
+ */
+bool estaEntreDatas(const std::wstring& dataIntervalo1,
+    const std::wstring& dataIntervalo2,
+    const std::wstring& dataParaTestar) {
+
+    Data dataA;
+    bool sucessoA;
+    std::tie(dataA, sucessoA) = parseData(dataIntervalo1);
+
+    Data dataB;
+    bool sucessoB;
+    std::tie(dataB, sucessoB) = parseData(dataIntervalo2);
+
+    Data dataTeste;
+    bool sucessoTeste;
+    std::tie(dataTeste, sucessoTeste) = parseData(dataParaTestar);
+
+    if (dataIntervalo1.empty()) {
+        sucessoA = true;
+    }
+
+    if (dataIntervalo2.empty()) {
+        sucessoB = true;
+    }
+
+    // Se a conversão de qualquer data falhar, retorna false
+    if (!sucessoA || !sucessoB || !sucessoTeste) {
+        // Opcional: imprimir mensagem de erro
+        // std::wcerr << L"Erro de formato de data." << std::endl;
+        return false;
+    }
+
+    else if (dataIntervalo1 != dataIntervalo2 && !dataIntervalo1.empty() && !dataIntervalo2.empty() && dataB <= dataA) {
+        return false;
+    }
+
+    if (!dataIntervalo1.empty() && !dataIntervalo2.empty()) {
+        // 1. Garante que dataA é a data de início e dataB é a data de fim.
+        //    Se a ordem estiver invertida, troca.
+        const Data& dataInicio = (dataA <= dataB) ? dataA : dataB;
+        const Data& dataFim = (dataA <= dataB) ? dataB : dataA;
+
+        // 2. Verifica se a dataTeste está depois/igual ao início E antes/igual ao fim.
+        // dataInicio <= dataTeste   => A data de teste é posterior ou igual ao início
+        // dataTeste <= dataFim      => A data de teste é anterior ou igual ao fim
+        return (dataInicio <= dataTeste) && (dataTeste <= dataFim);
+    }
+    else if(!dataIntervalo1.empty() || !dataIntervalo2.empty()){
+        if (dataIntervalo1 == dataParaTestar || dataIntervalo2 == dataParaTestar) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    else {
+        return true;
+    }
+}
+
+std::wstring arrumarNomesColunas(std::wstring displayText) {
+    if (displayText == L"Nome_do_Pet") displayText = L"Nome do Pet";
+    else if (displayText == L"Nome_do_Tutor") displayText = L"Nome do Tutor";
+    else if (displayText == L"Raca") displayText = L"Raça";
+    else if (displayText == L"Appointment_Date") displayText = L"Data (de - até)";
+    else if (displayText == L"Appointment_Hour") displayText = L"Hora";
+    else if (displayText == L"Date") displayText = L"Data Registro (de - até)";
+    else if (displayText == L"Hour") displayText = L"Hora Registro";
+    else if (displayText == L"Ponto_de_referencia") displayText = L"Ponto de Referência";
+    else if (displayText == L"Obs_Tosa") displayText = L"Observação";
+    else if (displayText == L"Lesoes") displayText = L"Lesões";
+    else if (displayText == L"Obs_Lesoes") displayText = L"Observação";
+    else if (displayText == L"Obs_Lesoes") displayText = L"Observação";
+    else if (displayText == L"Endereco") displayText = L"Endereço";
+
+	return displayText;
+}
+
+void AtualizarPosicoesInputs(HWND hWnd) {
+    RECT rect;
+    GetClientRect(hWnd, &rect);
+    int width = (rect.right - rect.left) - 44;
+    int numColumnsFull = 10;
+    int cellWidthFull = width / numColumnsFull;
+    int cellHeight = 32;
+    int startXFull = 22 - g_scrollX;
+    int startYFull = 80 - g_scrollY;
+    int row = 1;
+    int xPos;
+    int yPos;
+
+    for (int col = 0; col < 10; col++) {
+        xPos = startXFull + col * cellWidthFull + 10;
+        yPos = startYFull + row * cellHeight + 7;
+        SetWindowPos(g_editControlsFilters[col], NULL, xPos, yPos,
+            cellWidthFull - 15, 25, SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE);
+    }
+
+    // Configurar a linha do input
+    startYFull = startYFull + 2 * cellHeight + 7;  // Posição Y com scroll
+    startXFull = 22 - g_scrollX;  // Posição X com scroll
+    int colNumber = 10;
+    int colFinalNumber = colNumber + 10;
+
+    for (int col = 10; col < 20; col++) {
+        yPos = startYFull + row * cellHeight + 7;
+        xPos = startXFull + (col - colNumber) * cellWidthFull + 10;
+        SetWindowPos(g_editControlsFilters[col], NULL, xPos, yPos,
+            cellWidthFull - 15, 25, SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE);
+    }
+
+    // Configurar a linha do input
+    startYFull = startYFull + 2 * cellHeight + 7;  // Posição Y com scroll
+    startXFull = 22 - g_scrollX;  // Posição X com scroll
+    colNumber = 20;
+    colFinalNumber = colNumber + 10;
+
+    for (int col = 20; col < g_editControlsFilters.size(); col++) {
+        yPos = startYFull + row * cellHeight + 7;
+        xPos = startXFull + (col - colNumber) * cellWidthFull + 10;
+        int widthDate = 68;
+
+        if (col == 20) {
+            SetWindowPos(g_editControlsFilters[col], NULL, xPos, yPos,
+                widthDate, 25, SWP_NOZORDER | SWP_NOACTIVATE);
+        }
+        else if (col == 21) {
+            xPos = startXFull + (col - 1 - colNumber) * cellWidthFull + 10;
+            SetWindowPos(g_editControlsFilters[col], NULL, xPos + widthDate, yPos,
+                widthDate, 25, SWP_NOZORDER | SWP_NOACTIVATE);
+        }
+        else if (col == 23) {
+            xPos = startXFull + (col - 1 - colNumber) * cellWidthFull + 10;
+            SetWindowPos(g_editControlsFilters[col], NULL, xPos, yPos,
+                widthDate, 25, SWP_NOZORDER | SWP_NOACTIVATE);
+        }
+        else if (col == 24) {
+            xPos = startXFull + (col - 2 - colNumber) * cellWidthFull + 10;
+            SetWindowPos(g_editControlsFilters[col], NULL, xPos + widthDate, yPos,
+                widthDate, 25, SWP_NOZORDER | SWP_NOACTIVATE);
+        }
+        else {
+            int column;
+            if (col == 22) {
+                xPos = startXFull + (col - 1 - colNumber) * cellWidthFull + 10;
+            }
+            else if (col == 25) {
+                xPos = startXFull + (col - 2 - colNumber) * cellWidthFull + 10;
+            }
+           
+            SetWindowPos(g_editControlsFilters[col], NULL, xPos, yPos,
+                cellWidthFull - 15, 25, SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE);
+        }
+    }
+
+    startXFull = 22 - g_scrollX;  // Posição X com scroll
+    startYFull = startYFull + 2 * cellHeight + 7;  // Posição Y com scroll
+    xPos = startXFull;
+    yPos = startYFull;
+    SetWindowPos(g_editControlsFilters[26], NULL, xPos, yPos,
+        70, 30, SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE);
+}
+
+void criarInputsFilters(HWND hWnd) {
+
+    // Obter dimensões da janela
+    RECT rect;
+    GetClientRect(hWnd, &rect);
+    int width = (rect.right - rect.left) - 44;
+    int height = rect.bottom - rect.top;
+
+    // Configurar a tabela
+    int cellHeight = 32;
+    int numColumnsFull = 10;
+    int cellWidthFull = width / (numColumnsFull > 0 ? numColumnsFull : 1); // +3 para os botões
+
+    // Configurar a linha do header
+    int startYFull = 80 - g_scrollY;  // Posição Y com scroll
+    int startXFull = 22 - g_scrollX;  // Posição X com scroll
+
+    int xPos;
+    int yPos;
+    int row = 1;
+
+    for (int col = 0; col < 10; col++) {
+        int controlID = col + 100000;
+        yPos = startYFull + row * cellHeight + 7;
+        xPos = startXFull + col * cellWidthFull + 10;
+
+        if (col == 9) {
+            HWND hComboBox = CreateWindowEx(
+                0,                                 // Estilos estendidos
+                L"ComboBox",                       // Nome da classe do controle ComboBox
+                L"",                               // Texto inicial (vazio)
+                WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST | WS_VSCROLL, // Estilos: Filho, Visível, e lista suspensa que não pode ser editada (SELECT)
+                xPos, yPos, cellWidthFull, 150,
+                hWnd,                        // Janela pai
+                (HMENU)(controlID),                        // ID único do controle (para o WM_COMMAND)
+                (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
+                NULL
+            );
+
+            // Traga o ComboBox para a frente, acima de todos os outros controles irmãos (siblings)
+            SetWindowPos(hComboBox, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+
+            // Adicionar a opção A
+            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"");
+            // Adicionar a opção A
+            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Sim");
+            // Adicionar a opção B
+            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Não");
+
+            g_editControlsFilters.push_back(hComboBox);
+        }
+        else {
+            HWND hEdit = CreateWindowEx(
+                0, L"EDIT", L"",
+                WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL,
+                xPos, yPos, cellWidthFull, 25, hWnd, (HMENU)(controlID), NULL, NULL
+            );
+            g_editControlsFilters.push_back(hEdit);
+        }
+    }
+
+    // Configurar a linha do input
+    startYFull = startYFull + 2 * cellHeight + 7;  // Posição Y com scroll
+    startXFull = 22 - g_scrollX;  // Posição X com scroll
+    int colNumber = 10;
+    int colFinalNumber = colNumber + 10;
+
+    for (int col = colNumber; col < colFinalNumber; col++) {
+        int controlID = col + 100000;
+        yPos = startYFull + row * cellHeight + 7;
+        xPos = startXFull + (col - colNumber) * cellWidthFull + 10;
+
+        if (col == 12) {
+            HWND hComboBox = CreateWindowEx(
+                0,                                 // Estilos estendidos
+                L"ComboBox",                       // Nome da classe do controle ComboBox
+                L"",                               // Texto inicial (vazio)
+                WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST | WS_VSCROLL, // Estilos: Filho, Visível, e lista suspensa que não pode ser editada (SELECT)
+                xPos, yPos, cellWidthFull, 150,
+                hWnd,                        // Janela pai
+                (HMENU)(controlID),                        // ID único do controle (para o WM_COMMAND)
+                (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
+                NULL
+            );
+
+            // Traga o ComboBox para a frente, acima de todos os outros controles irmãos (siblings)
+            SetWindowPos(hComboBox, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+
+            // Adicionar a opção A
+            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"");
+            // Adicionar a opção A
+            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Padrão");
+            // Adicionar a opção B
+            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Hidratação");
+            // Adicionar a opção C
+            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Nenhum");
+
+            g_editControlsFilters.push_back(hComboBox);
+        }
+        else if (col == 13) {
+            HWND hComboBox = CreateWindowEx(
+                0,                                 // Estilos estendidos
+                L"ComboBox",                       // Nome da classe do controle ComboBox
+                L"",                               // Texto inicial (vazio)
+                WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST | WS_VSCROLL, // Estilos: Filho, Visível, e lista suspensa que não pode ser editada (SELECT)
+                xPos, yPos, cellWidthFull, 150,
+                hWnd,                        // Janela pai
+                (HMENU)(controlID),                        // ID único do controle (para o WM_COMMAND)
+                (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
+                NULL
+            );
+
+            // Traga o ComboBox para a frente, acima de todos os outros controles irmãos (siblings)
+            SetWindowPos(hComboBox, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+
+            // Adicionar a opção A
+            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"");
+            // Adicionar a opção A
+            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Tesoura");
+            // Adicionar a opção B
+            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Máquina");
+            // Adicionar a opção C
+            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Higiênica");
+            // Adicionar a opção C
+            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Tosa da Raça");
+            // Adicionar a opção C
+            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Nenhum");
+
+            g_editControlsFilters.push_back(hComboBox);
+        }
+        else if (col == 15) {
+            // 1. Defina a largura desejada para a lista suspensa (ex: 300 pixels)
+            int desiredDroppedWidth = 170;
+
+            HWND hComboBox = CreateWindowEx(
+                0,                                 // Estilos estendidos
+                L"ComboBox",                       // Nome da classe do controle ComboBox
+                L"",                               // Texto inicial (vazio)
+                WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST | WS_VSCROLL, // Estilos: Filho, Visível, e lista suspensa que não pode ser editada (SELECT)
+                xPos, yPos, cellWidthFull, 150,
+                hWnd,                        // Janela pai
+                (HMENU)(controlID),                        // ID único do controle (para o WM_COMMAND)
+                (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
+                NULL
+            );
+
+            // independentemente da largura do controle principal.
+            SendMessageW(
+                hComboBox,
+                CB_SETDROPPEDWIDTH,
+                (WPARAM)desiredDroppedWidth, // Novo valor de largura
+                0
+            );
+
+            // Adicionar a opção A
+            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"");
+            // Adicionar a opção A
+            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Pulgas");
+            // Adicionar a opção B
+            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Carrapatos");
+            // Adicionar a opção B
+            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Pulgas e Carrapatos");
+
+            g_editControlsFilters.push_back(hComboBox);
+        }
+        else if (col == 16) {
+            // 1. Defina a largura desejada para a lista suspensa (ex: 300 pixels)
+            int desiredDroppedWidth = 250;
+
+            HWND hComboBox = CreateWindowEx(
+                0,                                 // Estilos estendidos
+                L"ComboBox",                       // Nome da classe do controle ComboBox
+                L"",                               // Texto inicial (vazio)
+                WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST | WS_VSCROLL, // Estilos: Filho, Visível, e lista suspensa que não pode ser editada (SELECT)
+                xPos, yPos, cellWidthFull, 150,
+                hWnd,                        // Janela pai
+                (HMENU)(controlID),                        // ID único do controle (para o WM_COMMAND)
+                (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
+                NULL
+            );
+
+            // independentemente da largura do controle principal.
+            SendMessageW(
+                hComboBox,
+                CB_SETDROPPEDWIDTH,
+                (WPARAM)desiredDroppedWidth, // Novo valor de largura
+                0
+            );
+
+            // Adicionar a opção A
+            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"");
+            // Adicionar a opção A
+            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Pele");
+            // Adicionar a opção B
+            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Olhos");
+            // Adicionar a opção A
+            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Secreção");
+            // Adicionar a opção B
+            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Ouvido");
+            // Adicionar a opção B
+            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Pele e Olhos");
+            // Adicionar a opção B
+            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Pele e Secreção");
+            // Adicionar a opção B
+            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Pele e Ouvido");
+            // Adicionar a opção B
+            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Olhos e Secreção");
+            // Adicionar a opção B
+            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Olhos e Ouvido");
+            // Adicionar a opção B
+            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Secreção e Ouvido");
+            // Adicionar a opção B
+            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Olhos, Secreção e Ouvido");
+            // Adicionar a opção B
+            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Pele, Secreção e Ouvido");
+            // Adicionar a opção B
+            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Pele, Olhos e Ouvido");
+            // Adicionar a opção B
+            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Pele, Olhos e Secreção");
+            // Adicionar a opção B
+            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Pele, Olhos, Secreção e Ouvido");
+
+            g_editControlsFilters.push_back(hComboBox);
+        }
+        else {
+            HWND hEdit = CreateWindowEx(
+                0, L"EDIT", L"",
+                WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL,
+                xPos, yPos, cellWidthFull, 25, hWnd, (HMENU)(controlID), NULL, NULL
+            );
+            g_editControlsFilters.push_back(hEdit);
+        }
+    }
+
+    // Configurar a linha do input
+    startYFull = startYFull + 2 * cellHeight + 7;  // Posição Y com scroll
+    startXFull = 22 - g_scrollX;  // Posição X com scroll
+    colNumber = 20;
+    colFinalNumber = 24;
+    int controlID;
+
+    for (int col = colNumber; col < colFinalNumber; col++) {
+        controlID = col + 100000;
+        yPos = startYFull + row * cellHeight + 7;
+        xPos = startXFull + (col - colNumber) * cellWidthFull + 10;
+
+        if (col == 20) {
+            HFONT hFont;
+            hFont = CreateFont(14, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE,
+                DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
+                ANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Arial");
+
+            HWND hEdit = CreateWindowEx(
+                0, L"EDIT", L"",
+                WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL,
+                xPos, yPos, cellWidthFull, 25, hWnd, (HMENU)(controlID), NULL, NULL
+            );
+
+            SendMessageW(hEdit, WM_SETFONT, (WPARAM)hFont, TRUE);
+
+            g_editControlsFilters.push_back(hEdit);
+
+            HWND hEdit2 = CreateWindowEx(
+                0, L"EDIT", L"",
+                WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL,
+                xPos + 75, yPos, cellWidthFull, 25, hWnd, (HMENU)(controlID + 100000), NULL, NULL
+            );
+
+            SendMessageW(hEdit2, WM_SETFONT, (WPARAM)hFont, TRUE);
+
+            g_editControlsFilters.push_back(hEdit2);
+        }
+        else if (col == 22) {
+            HFONT hFont;
+            hFont = CreateFont(14, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE,
+                DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
+                ANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Arial");
+
+            HWND hEdit = CreateWindowEx(
+                0, L"EDIT", L"",
+                WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL,
+                xPos, yPos, cellWidthFull, 25, hWnd, (HMENU)(controlID), NULL, NULL
+            );
+            
+            SendMessageW(hEdit, WM_SETFONT, (WPARAM)hFont, TRUE);
+
+            g_editControlsFilters.push_back(hEdit);
+
+            HWND hEdit2 = CreateWindowEx(
+                0, L"EDIT", L"",
+                WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL,
+                xPos + 75, yPos, cellWidthFull, 25, hWnd, (HMENU)(controlID + 100000), NULL, NULL
+            );
+
+            SendMessageW(hEdit2, WM_SETFONT, (WPARAM)hFont, TRUE);
+
+            g_editControlsFilters.push_back(hEdit2);
+        }
+        else {
+            HWND hEdit = CreateWindowEx(
+                0, L"EDIT", L"",
+                WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL,
+                xPos, yPos, cellWidthFull, 25, hWnd, (HMENU)(controlID), NULL, NULL
+            );
+            g_editControlsFilters.push_back(hEdit);
+        }
+    }
+
+    startXFull = 22 - g_scrollX;  // Posição X com scroll
+    startYFull = startYFull + 2 * cellHeight + 7;  // Posição Y com scroll
+    xPos = startXFull;
+    yPos = startYFull;
+    
+    //Criar botão para filtrar
+    HWND hButton = CreateWindowW(
+        L"BUTTON", L"Filtrar",
+        WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
+        xPos, yPos, 70, 30,
+        hWnd, (HMENU)(FILTRAR),
+        (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL
+    );
+    if (hButton) {
+        //SetWindowLongPtr(hButton, GWLP_USERDATA, controlID + 1);
+        g_editControlsFilters.push_back(hButton);
+    }
+}
+
+void criarHeaderLineFilter(HDC hdc, HWND hWnd, int startYFull, int startXFull, int colNumber, int colFinalNumber) {
+    // Obter dimensões da janela
+    RECT rect;
+    GetClientRect(hWnd, &rect);
+    int width = (rect.right - rect.left) - 44;
+    int height = rect.bottom - rect.top;
+
+    // Desenhar fundos alternados para as linhas
+    HBRUSH hBrushHeader = CreateSolidBrush(RGB(200, 200, 200));
+    HBRUSH hBrushWhite = CreateSolidBrush(RGB(255, 255, 255));
+    HBRUSH hBrushGray = CreateSolidBrush(RGB(240, 240, 240));
+
+    // Configurar a tabela
+    int cellHeight = 32;
+    int numColumnsFull = 10;
+    int cellWidthFull = width / (numColumnsFull > 0 ? numColumnsFull : 1); // +3 para os botões
+    startYFull = startYFull;  // Posição Y com scroll
+    startXFull = startXFull;  // Posição X com scroll
+
+    // DESENHAR APENAS UMA VEZ - REMOVER loops desnecessários
+    for (size_t row = 0; row < 1; row++) {
+        // Desenhar o texto nas células
+        SetBkMode(hdc, TRANSPARENT);
+
+        HBRUSH hCurrentBrush = (row % 2 == 0) ? hBrushGray : hBrushWhite;
+
+        if (row == 0) {
+            hCurrentBrush = hBrushHeader;
+            fonte(L"Header", RGB(0, 0, 0), hdc);
+        }
+        else {
+            fonte(L"Font", RGB(0, 0, 0), hdc);
+        }
+
+        // Desenhar o fundo da linha
+        RECT rowRect = {
+            startXFull,
+            startYFull + static_cast<int>(row) * cellHeight,
+            startXFull + width,
+            startYFull + (static_cast<int>(row) + 1) * cellHeight
+        };
+        FillRect(hdc, &rowRect, hCurrentBrush);
+
+        // Desenhar as células de dados
+        for (size_t col = colNumber; col < colFinalNumber; col++) {
+            int xPos;
+            int yPos;
+            yPos = startYFull + row * cellHeight + 7;
+            xPos = startXFull + (col - colNumber) * cellWidthFull + 10;
+
+            std::wstring displayText = g_tableDataFull[row][col];
+
+            // Traduzir cabeçalhos se necessário
+            if (row == 0) {
+                displayText = arrumarNomesColunas(displayText);
+            }
+
+            TextOut(hdc, xPos, yPos, displayText.c_str(), static_cast<int>(displayText.length()));
+        }
+    }
+}
+
+void createHeaderFilters(HDC hdc, HWND hWnd) {
     g_tableDataFull.clear();
 
     sqlite3* db;
@@ -145,78 +832,31 @@ void createInputsFilters(HDC hdc, HWND hWnd) {
     else {
         g_tableDataFull.push_back({ L"Erro", L"Não foi possível abrir o banco" });
     }
-
-    // Obter dimensões da janela
-    RECT rect;
-    GetClientRect(hWnd, &rect);
-    int width = (rect.right - rect.left) - 44;
-    int height = rect.bottom - rect.top;
-
-    // LIMPAR a área de desenho primeiro
-    HBRUSH hBgBrush = CreateSolidBrush(GetSysColor(COLOR_WINDOW));
-    FillRect(hdc, &rect, hBgBrush);
-    DeleteObject(hBgBrush);
-
-    // Desenhar fundos alternados para as linhas
-    HBRUSH hBrushHeader = CreateSolidBrush(RGB(150, 150, 150));
-    HBRUSH hBrushWhite = CreateSolidBrush(RGB(255, 255, 255));
-    HBRUSH hBrushGray = CreateSolidBrush(RGB(240, 240, 240));
-
-    // Configurar a tabela
+    
+    // Configurar a linha do header
     int cellHeight = 32;
-    int numColumns = g_tableDataFull.empty() ? 0 : g_tableDataFull[0].size();
-    int cellWidth = width / (numColumns > 0 ? numColumns + 3 : 1); // +3 para os botões
-    int startY = 80 - g_scrollY;  // Posição Y com scroll
-    int startX = 22 - g_scrollX;  // Posição X com scroll
+    int startYFull = 80 - g_scrollY;  // Posição Y com scroll
+    int startXFull = 22 - g_scrollX;  // Posição X com scroll
+    int colNumber = 0;
+	int colFinalNumber = colNumber + 10;
 
-    // DESENHAR APENAS UMA VEZ - REMOVER loops desnecessários
-    for (size_t row = 0; row < 1; row++) {
-        // Desenhar o texto nas células
-        SetBkMode(hdc, TRANSPARENT);
+    criarHeaderLineFilter(hdc, hWnd, startYFull, startXFull, colNumber, colFinalNumber);
 
-        HBRUSH hCurrentBrush = (row % 2 == 0) ? hBrushGray : hBrushWhite;
+    // Configurar a linha do header
+    startYFull = startYFull + 2 * cellHeight + 7;  // Posição Y com scroll
+    startXFull = 22 - g_scrollX;  // Posição X com scroll
+    colNumber = 10;
+    colFinalNumber = colNumber + 10;
 
-        if (row == 0) {
-            hCurrentBrush = hBrushHeader;
-            fonte(L"Header", RGB(255, 255, 255), hdc);
-        }
-        else {
-            fonte(L"Font", RGB(0, 0, 0), hdc);
-        }
+    criarHeaderLineFilter(hdc, hWnd, startYFull, startXFull, colNumber, colFinalNumber);
 
-        // Desenhar o fundo da linha
-        RECT rowRect = {
-            startX,
-            startY + static_cast<int>(row) * cellHeight,
-            startX + width,
-            startY + (static_cast<int>(row) + 1) * cellHeight
-        };
-        FillRect(hdc, &rowRect, hCurrentBrush);
+    // Configurar a linha do header
+    startYFull = startYFull + 2 * cellHeight + 7;  // Posição Y com scroll
+    startXFull = 22 - g_scrollX;  // Posição X com scroll
+    colNumber = 20;
+    colFinalNumber = g_tableDataFull[1].size();
 
-        // Desenhar as células de dados
-        for (size_t col = 0; col < g_tableDataFull[row].size(); col++) {
-            int xPos = startX + col * cellWidth + 10;
-            int yPos = startY + row * cellHeight + 7;
-
-            std::wstring displayText = g_tableDataFull[row][col];
-
-            // Traduzir cabeçalhos se necessário
-            if (row == 0) {
-                if (displayText == L"Nome_do_Pet") displayText = L"Nome do Pet";
-                else if (displayText == L"Nome_do_Tutor") displayText = L"Nome do Tutor";
-                else if (displayText == L"Raca") displayText = L"Raça";
-                else if (displayText == L"Appointment_Date") displayText = L"Data";
-                else if (displayText == L"Appointment_Hour") displayText = L"Hora";
-                else if (displayText == L"Date") displayText = L"Data Registro";
-                else if (displayText == L"Hour") displayText = L"Hora Registro";
-            }
-
-            TextOut(hdc, xPos, yPos, displayText.c_str(), static_cast<int>(displayText.length()));
-        }
-
-        // Desenhar cabeçalhos dos botões apenas na linha do cabeçalho
-        // REMOVER o código duplicado de desenho de botões que estava criando tabelas sobrepostas
-    }
+    criarHeaderLineFilter(hdc, hWnd, startYFull, startXFull, colNumber, colFinalNumber);
 }
 
 void updateWindow(LPCWSTR className) {
@@ -225,6 +865,7 @@ void updateWindow(LPCWSTR className) {
 
     if (hSelectWnd != NULL)
     {
+        selectDB();
         RecarregarDadosTabela(hSelectWnd);
     }
 }
@@ -235,10 +876,10 @@ void AtualizarPosicoesBotoes(HWND hWnd)
     RECT rect;
     GetClientRect(hWnd, &rect);
     int width = (rect.right - rect.left) - 44;
-    int numColumns = g_tableData.empty() ? 0 : g_tableData[0].size() + 3;
+    int numColumns = g_tableData.empty() ? 0 : 7 + 3;
     int cellWidth = width / (numColumns > 0 ? numColumns : 1);
     int startX = 22;
-    int startY = 80;
+    int startY = 350;
     int cellHeight = 32;
 
     // Desabilitar redesenho durante a atualização
@@ -313,6 +954,116 @@ bool deleteRecordById(const std::string& databasePath, int id, HWND hWnd) {
     return success;
 }
 
+void selectDB() {
+    // 1. LIMPAR DADOS ANTIGOS ANTES DE CADA CONSULTA
+    g_tableData.clear();
+
+    // Consultar o banco apenas se a tabela estiver vazia
+    sqlite3* db;
+    char* errMsg = 0;
+    int rc = sqlite3_open("pet.db", &db);
+    if (rc == SQLITE_OK) {
+        std::string sqlSelect;
+        if (orderColumn == "Appointment_Hour") {
+
+            // Expressão para converter 'H:MM' ou 'HH:MM' para o formato ordenável 'HH:MM'
+            std::string hourSorting =
+                // 1. Pega a hora (antes do ':'), converte para INT, e preenche com zero (ex: '4' -> '04')
+                "PRINTF('%02d', CAST(SUBSTR(Appointment_Hour, 1, INSTR(Appointment_Hour, ':') - 1) AS INTEGER))"
+                // 2. Concatena com os minutos (incluindo o ':')
+                " || SUBSTR(Appointment_Hour, INSTR(Appointment_Hour, ':'))";
+
+            sqlSelect = "SELECT * FROM Pets ORDER BY " + hourSorting + " " + orderAscDesc + ";";
+        }
+        else if (orderColumn == "Appointment_Date") {
+
+            // Define a string de ordenação complexa para a data DD/MM/YYYY
+            std::string dataSorting =
+                "SUBSTR(Appointment_Date, 7, 4) || SUBSTR(Appointment_Date, 4, 2) || SUBSTR(Appointment_Date, 1, 2)";
+            sqlSelect = "SELECT * FROM Pets ORDER BY " + dataSorting + " " + orderAscDesc + ";";
+
+        }
+        else {
+            //const char* sqlSelect = "SELECT ID, Nome_do_Pet, Nome_do_Tutor, Banho, Tosa, Appointment_Date, Appointment_Hour FROM Pets;";
+            sqlSelect = "SELECT * FROM Pets ORDER BY " + orderColumn + " COLLATE NOCASE " + orderAscDesc + ";";
+        }
+        rc = sqlite3_exec(db, sqlSelect.c_str(), sqlite_callback, &g_tableData, &errMsg);
+        if (rc != SQLITE_OK) {
+            if (errMsg) {
+                // Converte char* para wchar_t* corretamente
+                size_t len = strlen(errMsg) + 1;
+                std::wstring wErrMsg(len, L'\0');
+                mbstowcs_s(nullptr, &wErrMsg[0], len, errMsg, _TRUNCATE);
+                // Remove o caractere nulo extra do final
+                wErrMsg.resize(wcslen(wErrMsg.c_str()));
+                g_tableData.push_back({ L"Erro", wErrMsg });
+            }
+            else {
+                g_tableData.push_back({ L"Erro", L"Desconhecido" });
+            }
+            if (errMsg) sqlite3_free(errMsg);
+        }
+        sqlite3_close(db);
+        naoDesenhar.resize(g_tableData.size());
+    }
+    else {
+        g_tableData.push_back({ L"Erro", L"Não foi possível abrir o banco" });
+    }
+}
+
+void verificarFiltro(const std::vector<std::wstring>& dados, std::vector<int>& naoDesenharIntern){
+    // Colunas que não serão desenhadas na tabela
+    // DESENHAR APENAS UMA VEZ - REMOVER loops desnecessários
+
+    rowsNumber = 0;
+    std::wstring filtro;
+    std::wstring dadoTable;
+    for (size_t row = 0; row < g_tableData.size(); row++) {
+
+        naoDesenharIntern[row] = 0;
+        for (size_t col = 0; col < g_tableData[row].size(); col++) {
+            std::wstring displayText = g_tableData[row][col];
+
+            if (row != 0 && !dados[col].empty() && (col == 0 || col == 6 || col == 7 || col == 9 || col == 12 || col == 13 || col == 15 || col == 16)) {
+                filtro = dados[col];
+                dadoTable = g_tableData[row][col];
+                if (filtro != dadoTable) {
+                    naoDesenharIntern[row] = 1;
+                    break;
+                }
+            }
+            else if (row != 0 && (!dados[col].empty() || !dataAte.empty()) && col == 20) {
+                bool estaEntre = estaEntreDatas(dados[col], dataAte, g_tableData[row][col]);
+
+                if (!estaEntre) {
+                    naoDesenharIntern[row] = 1;
+                    break;
+                }
+            }
+            else if (row != 0 && (!dados[col].empty() || !dataRegistroAte.empty()) && col == 22) {
+                bool estaEntre = estaEntreDatas(dados[col], dataRegistroAte, g_tableData[row][col]);
+
+                if (!estaEntre) {
+                    naoDesenharIntern[row] = 1;
+                    break;
+                }
+            }
+            else if (row != 0 && !dados[col].empty() && g_tableData[row][col].find(dados[col]) == std::wstring::npos) {
+                naoDesenharIntern[row] = 1;
+                break;
+            }
+        }
+    }
+
+    for (size_t row = 0; row < g_tableData.size(); row++) {
+        if (naoDesenharIntern[row] != 1) {
+            rowsNumber++;
+        }
+    }
+
+    naoDesenhar = naoDesenharIntern;
+}
+
 void CriarBotoesTabela(HWND hWnd)
 {
     // Limpar botões existentes
@@ -333,49 +1084,51 @@ void CriarBotoesTabela(HWND hWnd)
     int cellHeight = 32;
 
     for (size_t row = 1; row < g_tableData.size(); row++) {
-        LONG_PTR recordId = _wtoi(g_tableData[row][0].c_str());
-        int yPos = startY + row * cellHeight + 2;
+        if (naoDesenhar[row] != 1) {
+            LONG_PTR recordId = _wtoi(g_tableData[row][0].c_str());
+            int yPos = startY + row * cellHeight + 2;
 
-        // Botão Consultar
-        int xPos = startX + 7 * cellWidth + 2;
-        HWND hButton = CreateWindowW(
-            L"BUTTON", L"Consultar",
-            WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
-            xPos, yPos, 70, 30,
-            hWnd, (HMENU)(CONSULTAR),
-            (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL
-        );
-        if (hButton) {
-            SetWindowLongPtr(hButton, GWLP_USERDATA, recordId);
-            g_buttons.push_back(hButton);
-        }
+            // Botão Consultar
+            int xPos = startX + 7 * cellWidth + 2;
+            HWND hButton = CreateWindowW(
+                L"BUTTON", L"Consultar",
+                WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
+                xPos, yPos, 70, 30,
+                hWnd, (HMENU)(CONSULTAR),
+                (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL
+            );
+            if (hButton) {
+                SetWindowLongPtr(hButton, GWLP_USERDATA, recordId);
+                g_buttons.push_back(hButton);
+            }
 
-        // Botão Editar
-        xPos = startX + 8 * cellWidth + 2;
-        hButton = CreateWindowW(
-            L"BUTTON", L"Editar",
-            WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
-            xPos, yPos, 70, 30,
-            hWnd, (HMENU)(EDITAR),
-            (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL
-        );
-        if (hButton) {
-            SetWindowLongPtr(hButton, GWLP_USERDATA, recordId);
-            g_buttons.push_back(hButton);
-        }
+            // Botão Editar
+            xPos = startX + 8 * cellWidth + 2;
+            hButton = CreateWindowW(
+                L"BUTTON", L"Editar",
+                WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
+                xPos, yPos, 70, 30,
+                hWnd, (HMENU)(EDITAR),
+                (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL
+            );
+            if (hButton) {
+                SetWindowLongPtr(hButton, GWLP_USERDATA, recordId);
+                g_buttons.push_back(hButton);
+            }
 
-        // Botão Deletar
-        xPos = startX + 9 * cellWidth + 2;
-        hButton = CreateWindowW(
-            L"BUTTON", L"Deletar",
-            WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
-            xPos, yPos, 70, 30,
-            hWnd, (HMENU)(DELETAR),
-            (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL
-        );
-        if (hButton) {
-            SetWindowLongPtr(hButton, GWLP_USERDATA, recordId);
-            g_buttons.push_back(hButton);
+            // Botão Deletar
+            xPos = startX + 9 * cellWidth + 2;
+            hButton = CreateWindowW(
+                L"BUTTON", L"Deletar",
+                WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
+                xPos, yPos, 70, 30,
+                hWnd, (HMENU)(DELETAR),
+                (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL
+            );
+            if (hButton) {
+                SetWindowLongPtr(hButton, GWLP_USERDATA, recordId);
+                g_buttons.push_back(hButton);
+            }
         }
     }
 }
@@ -388,7 +1141,9 @@ void ConfigurarScrollBars(HWND hWnd)
     g_clientHeight = rect.bottom - rect.top;
 
     int cellHeight = 32;
-    g_contentHeight = static_cast<int>(g_tableData.size()) * cellHeight + 130;
+    int filtersHeight = 6 * cellHeight + 6 * 7;
+
+    g_contentHeight = static_cast<int>(rowsNumber) * cellHeight + 160 + filtersHeight;
 
     SCROLLINFO si = {};
     si.cbSize = sizeof(SCROLLINFO);
@@ -404,31 +1159,13 @@ void ConfigurarScrollBars(HWND hWnd)
 // Função para recarregar dados do banco
 void RecarregarDadosTabela(HWND hWnd) {
     // Limpar dados antigos
-    g_tableData.clear();
+    selectDB();
 
-    sqlite3* db;
-    char* errMsg = 0;
-    int rc = sqlite3_open("pet.db", &db);
+    //Verificar filtros
+    verificarFiltro(dados, naoDesenhar);
 
-    if (rc == SQLITE_OK) {
-        const char* sqlSelect = "SELECT ID, Nome_do_Pet, Nome_do_Tutor, Banho, Tosa, Appointment_Date, Appointment_Hour FROM Pets;";
-        rc = sqlite3_exec(db, sqlSelect, sqlite_callback, &g_tableData, &errMsg);
-
-        if (rc != SQLITE_OK) {
-            if (errMsg) {
-                size_t len = strlen(errMsg) + 1;
-                std::wstring wErrMsg(len, L'\0');
-                mbstowcs_s(nullptr, &wErrMsg[0], len, errMsg, _TRUNCATE);
-                wErrMsg.resize(wcslen(wErrMsg.c_str()));
-                g_tableData.push_back({ L"Erro", wErrMsg });
-                sqlite3_free(errMsg);
-            }
-        }
-        sqlite3_close(db);
-    }
-    else {
-        g_tableData.push_back({ L"Erro", L"Não foi possível abrir o banco" });
-    }
+    // Criar botões após carregar os dados
+    CriarBotoesTabela(hWnd);
 
     // Recriar botões com os novos dados
     CriarBotoesTabela(hWnd);
@@ -1032,7 +1769,7 @@ BOOL CreateNewWindow(HWND hWndParent, HINSTANCE hInst, LPCWSTR className, LPCWST
             windowTittle,
             WS_OVERLAPPEDWINDOW | WS_VSCROLL | WS_HSCROLL,
             CW_USEDEFAULT, CW_USEDEFAULT,
-            1400, 400, // Tamanho inicial (pode ser ignorado ao maximizar)
+            CW_USEDEFAULT, CW_USEDEFAULT, // Tamanho inicial (pode ser ignorado ao maximizar)
             NULL,
             NULL,
             hInst,
@@ -1074,7 +1811,7 @@ BOOL CreateNewWindow(HWND hWndParent, HINSTANCE hInst, LPCWSTR className, LPCWST
             }
 
             // Maximizar a janela
-            ShowWindow(hNewWnd, SW_MAXIMIZE);
+            ShowWindow(hNewWnd, SW_SHOWMAXIMIZED);
             UpdateWindow(hNewWnd);
 
             return TRUE;

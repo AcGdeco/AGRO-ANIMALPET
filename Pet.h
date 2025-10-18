@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include "resource.h"
+#include "Select.h"
 
 extern int windowsNumber;
 
@@ -27,8 +28,14 @@ extern int g_contentWidth;
 extern std::vector<std::vector<std::wstring>> g_tableData;
 extern std::vector<std::vector<std::wstring>> g_tableDataFull;
 extern LONG_PTR idRecord;
-extern enum ButtonAction { CONSULTAR, EDITAR, DELETAR };
+extern enum ButtonAction { CONSULTAR, EDITAR, DELETAR, FILTRAR, ORDENAR };
 extern std::vector<HWND> g_buttons;
+extern std::vector<std::wstring> dados;
+extern int rowsNumber;
+extern std::wstring dataAte;
+extern std::wstring dataRegistroAte;
+extern std::string orderColumn;
+extern std::string orderAscDesc;
 
 std::wstring GetCurrentDate();
 std::wstring GetCurrentHour();
@@ -57,4 +64,27 @@ void CriarBotoesTabela(HWND hWnd);
 void ConfigurarScrollBars(HWND hWnd);
 void AtualizarPosicoesBotoes(HWND hWnd);
 void updateWindow(LPCWSTR className);
-void createInputsFilters(HDC hdc, HWND hWnd);
+void createHeaderFilters(HDC hdc, HWND hWnd);
+void criarInputsFilters(HWND hWnd);
+void AtualizarPosicoesInputs(HWND hWnd);
+void verificarFiltro(const std::vector<std::wstring>& dados, std::vector<int>& naoDesenharIntern);
+void selectDB();
+void createOrderBtn(HWND hWnd);
+void AtualizarPosicoesOrder(HWND hWnd);
+
+// Definição da estrutura
+struct Data {
+    int ano;
+    int mes;
+    int dia;
+};
+
+inline bool operator<=(const Data& a, const Data& b) {
+    if (a.ano != b.ano) {
+        return a.ano <= b.ano;
+    }
+    if (a.mes != b.mes) {
+        return a.mes <= b.mes;
+    }
+    return a.dia <= b.dia;
+}

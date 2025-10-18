@@ -81,5 +81,8 @@
     <Image Include="Pet.ico">
       <Filter>Arquivos de Recurso</Filter>
     </Image>
+    <Image Include="Setas.bmp">
+      <Filter>Arquivos de Recurso</Filter>
+    </Image>
   </ItemGroup>
 </Project>
