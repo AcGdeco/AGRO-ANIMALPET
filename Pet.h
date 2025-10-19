@@ -27,8 +27,10 @@ extern int g_contentHeight;
 extern int g_contentWidth;
 extern std::vector<std::vector<std::wstring>> g_tableData;
 extern std::vector<std::vector<std::wstring>> g_tableDataFull;
+extern std::vector<HWND> g_editControlsLimit;
+extern std::vector<HWND> g_editControlsOffsetLimit;
 extern LONG_PTR idRecord;
-extern enum ButtonAction { CONSULTAR, EDITAR, DELETAR, FILTRAR, ORDENAR };
+extern enum ButtonAction { CONSULTAR, EDITAR, DELETAR, FILTRAR, ORDENAR, LIMITAR, OFFSET };
 extern std::vector<HWND> g_buttons;
 extern std::vector<std::wstring> dados;
 extern int rowsNumber;
@@ -36,6 +38,14 @@ extern std::wstring dataAte;
 extern std::wstring dataRegistroAte;
 extern std::string orderColumn;
 extern std::string orderAscDesc;
+extern int limitTableRow;
+extern int offsetTableRow;
+extern int g_totalRowCount;
+extern int count_callback(void* data, int argc, char** argv, char** azColName);
+extern void getRowCount();
+extern void DestroyAllOffsetButtons();
+extern int numeroBtn;
+extern int idNumeroUltimo;
 
 std::wstring GetCurrentDate();
 std::wstring GetCurrentHour();
@@ -71,6 +81,15 @@ void verificarFiltro(const std::vector<std::wstring>& dados, std::vector<int>& n
 void selectDB();
 void createOrderBtn(HWND hWnd);
 void AtualizarPosicoesOrder(HWND hWnd);
+int pragma_callback(void* data, int argc, char** argv, char** azColName);
+void selectHeaderDB();
+void createHeaderTable(HWND hWnd, HDC hdc);
+void createInputLimit(HWND hWnd);
+void AtualizarPosicoesLimit(HWND hWnd);
+void handleLimitChange(HWND hComboBox);
+void createBtnPageLimit(HWND hWnd);
+void AtualizarPosicoesOffset(HWND hWnd);
+void mudarPagina(int id);
 
 // Definição da estrutura
 struct Data {

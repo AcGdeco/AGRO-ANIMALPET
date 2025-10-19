@@ -1,46 +1,19 @@
-﻿  Pet.cpp
-C:\Users\Andre\source\repos\Pet\Pet.h(1,1): warning C4828: O arquivo contém um caractere começando com o deslocamento 0xb8d que é inválido no conjunto de caracteres de origem atual (página de código 65001).
-  (compilando o arquivo fonte 'Pet.cpp')
-  
+﻿  Select.cpp
 C:\Users\Andre\source\repos\Pet\Select.h(1,1): warning C4828: O arquivo contém um caractere começando com o deslocamento 0x1b1 que é inválido no conjunto de caracteres de origem atual (página de código 65001).
-  (compilando o arquivo fonte 'Pet.cpp')
-  
-C:\Users\Andre\source\repos\Pet\Pet.h(31,13): warning C4091: 'extern ': ignorado à esquerda de 'ButtonAction' quando nenhuma variável é declarada
-  (compilando o arquivo fonte 'Pet.cpp')
+  (compilando o arquivo fonte 'Select.cpp')
   
 C:\Users\Andre\source\repos\Pet\MenuUniversal.h(1,1): warning C4828: O arquivo contém um caractere começando com o deslocamento 0x10f que é inválido no conjunto de caracteres de origem atual (página de código 65001).
-  (compilando o arquivo fonte 'Pet.cpp')
+  (compilando o arquivo fonte 'Select.cpp')
   
-C:\Users\Andre\source\repos\Pet\Add.h(1,1): warning C4828: O arquivo contém um caractere começando com o deslocamento 0xf4 que é inválido no conjunto de caracteres de origem atual (página de código 65001).
-  (compilando o arquivo fonte 'Pet.cpp')
+C:\Users\Andre\source\repos\Pet\Pet.h(1,1): warning C4828: O arquivo contém um caractere começando com o deslocamento 0xe8d que é inválido no conjunto de caracteres de origem atual (página de código 65001).
+  (compilando o arquivo fonte 'Select.cpp')
   
-C:\Users\Andre\source\repos\Pet\Consultar.h(1,1): warning C4828: O arquivo contém um caractere começando com o deslocamento 0xf7 que é inválido no conjunto de caracteres de origem atual (página de código 65001).
-  (compilando o arquivo fonte 'Pet.cpp')
+C:\Users\Andre\source\repos\Pet\Pet.h(33,13): warning C4091: 'extern ': ignorado à esquerda de 'ButtonAction' quando nenhuma variável é declarada
+  (compilando o arquivo fonte 'Select.cpp')
   
-C:\Users\Andre\source\repos\Pet\Pet.cpp(399,17): warning C4101: 'column': variável local não referenciada
-C:\Users\Andre\source\repos\Pet\Pet.cpp(454,17): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\Pet.cpp(475,54): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\Pet.cpp(500,17): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\Pet.cpp(527,17): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\Pet.cpp(561,17): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\Pet.cpp(596,17): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\Pet.cpp(648,54): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\Pet.cpp(675,54): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\Pet.cpp(685,59): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\Pet.cpp(701,54): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\Pet.cpp(711,59): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\Pet.cpp(722,54): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\Pet.cpp(794,50): warning C4267: '=': conversão de 'size_t' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\Pet.cpp(795,67): warning C4267: '=': conversão de 'size_t' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\Pet.cpp(857,45): warning C4267: '=': conversão de 'size_t' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\Pet.cpp(892,18): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\Pet.cpp(1080,20): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\Pet.cpp(1089,22): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\Pet.cpp(1732,16): warning C4244: 'return': conversão de 'LRESULT' para 'BOOL', possível perda de dados
-C:\Users\Andre\source\repos\Pet\Pet.cpp(1738,16): warning C4244: 'return': conversão de 'LRESULT' para 'BOOL', possível perda de dados
-C:\Users\Andre\source\repos\Pet\Pet.cpp(1744,16): warning C4244: 'return': conversão de 'LRESULT' para 'BOOL', possível perda de dados
-C:\Users\Andre\source\repos\Pet\Pet.cpp(1995,52): warning C4267: 'argumento': conversão de 'size_t' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\Pet.cpp(2000,45): warning C4267: 'argumento': conversão de 'size_t' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\Pet.cpp(1746,1): warning C4715: 'ProcessarMenu': nem todos os caminhos de controle retornam um valor
-C:\Users\Andre\source\repos\Pet\Pet.cpp(1845,1): warning C4715: 'CreateNewWindow': nem todos os caminhos de controle retornam um valor
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\format(42): warning STL4038: The contents of <format> are available only with C++20 or later.
+C:\Users\Andre\source\repos\Pet\Select.cpp(66,20): warning C4244: 'inicializando': conversão de 'LONG_PTR' para 'LONG', possível perda de dados
+C:\Users\Andre\source\repos\Pet\Select.cpp(211,44): warning C4244: 'argumento': conversão de 'LONG_PTR' para 'int', possível perda de dados
+C:\Users\Andre\source\repos\Pet\Select.cpp(342,25): warning C4244: 'argumento': conversão de 'LONG_PTR' para 'int', possível perda de dados
+C:\Users\Andre\source\repos\Pet\Select.cpp(431,42): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
   Pet.vcxproj -> C:\Users\Andre\source\repos\Pet\x64\Debug\Pet.exe

@@ -25,10 +25,16 @@ int g_contentHeight;   // Altura total do conteúdo
 int g_clientWidth;       // Largura da área cliente
 int g_clientHeight;      // Altura da área cliente
 int rowsNumber;
+int limitTableRow = 20;
+int offsetTableRow = 0;
+int numeroBtn;
+int idNumeroUltimo = 1;
 
 std::vector<HWND> g_editControls; // Array global para armazenar handles dos controles de edição
 std::vector<HWND> g_editControlsFilters;
 std::vector<HWND> g_editControlsOrder;
+std::vector<HWND> g_editControlsLimit;
+std::vector<HWND> g_editControlsOffsetLimit;
 std::vector<std::vector<std::wstring>> g_tableData;
 std::vector<std::vector<std::wstring>> g_tableDataFull;
 LONG_PTR idRecord;
@@ -40,6 +46,9 @@ std::wstring dataAte;
 std::wstring dataRegistroAte;
 
 std::vector<HWND> g_buttons;
+
+// Variável global ou de classe para armazenar o resultado da contagem
+int g_totalRowCount = 0;
 
 // Substitua o macro por constexpr conforme sugerido pelo VCR101
 constexpr int MAX_LOADSTRING = 100;
@@ -130,6 +139,400 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
     return RegisterClassExW(&wcex);
 }
 
+void mudarPagina(int id) {
+
+    // Variável temporária para a nova página selecionada
+    int newPageId = idNumeroUltimo;
+
+    // ----------------------------------------------------------------------
+    // 1. Lógica do Botão 'Página Anterior' (id == 0)
+    // ----------------------------------------------------------------------
+    if (id == 0) {
+        // Verifica se não estamos na primeira página (Página 1)
+        if (idNumeroUltimo > 1) {
+            newPageId = idNumeroUltimo - 1;
+        }
+    }
+    // ----------------------------------------------------------------------
+    // 2. Lógica do Botão 'Próxima Página' (id == numeroBtn + 1)
+    // ----------------------------------------------------------------------
+    else if (id == numeroBtn + 1) {
+        // Verifica se não estamos na última página
+        if (idNumeroUltimo < numeroBtn) {
+            newPageId = idNumeroUltimo + 1;
+        }
+    }
+    // ----------------------------------------------------------------------
+    // 3. Lógica dos Botões Numéricos (id é o número da página)
+    // ----------------------------------------------------------------------
+    else {
+        // O ID é o próprio número da página clicada.
+        // Apenas verifica se o ID está dentro do intervalo válido [1, numeroBtn]
+        if (id >= 1 && id <= numeroBtn) {
+            newPageId = id;
+        }
+        else {
+            // Se o ID for inválido (por segurança), não faz nada
+            return;
+        }
+    }
+
+    // ----------------------------------------------------------------------
+    // 4. Atualização e Cálculo Final (Feito uma única vez)
+    // ----------------------------------------------------------------------
+
+    // Se a página mudou, atualiza a variável e recalcula o offset
+    if (newPageId != idNumeroUltimo) {
+        idNumeroUltimo = newPageId;
+
+        // O offset é sempre o Tamanho da Página * (Página - 1)
+        offsetTableRow = limitTableRow * (idNumeroUltimo - 1);
+
+        // Agora você chamaria a função para recarregar os dados (selectDB) e redesenhar.
+        // RecarregarDadosEDesenhar(); 
+    }
+}
+
+// Callback para capturar o resultado de COUNT(*)
+int count_callback(void* data, int argc, char** argv, char** azColName) {
+    // A consulta COUNT(*) retorna apenas uma linha (argc=1)
+    if (argc > 0 && argv[0]) {
+        // Converte o valor retornado (que é uma string char*) para int
+        g_totalRowCount = std::stoi(argv[0]);
+    }
+    // Retorna 0 para indicar sucesso e continuar (embora só haja uma linha)
+    return 0;
+}
+
+void getRowCount() {
+    sqlite3* db;
+    char* errMsg = 0;
+    int rc = sqlite3_open("pet.db", &db);
+
+    const char* sqlCount = "SELECT COUNT(*) FROM Pets;";
+    errMsg = nullptr;
+
+    // Zera o contador antes da execução
+    g_totalRowCount = 0;
+
+    rc = sqlite3_exec(
+        db,
+        sqlCount,
+        count_callback,  // Nosso callback
+        nullptr,         // Não precisamos passar dados extras, o callback usa g_totalRowCount
+        &errMsg
+    );
+
+    if (rc != SQLITE_OK) {
+        if (errMsg) {
+            std::cerr << "Erro ao contar linhas: " << errMsg << std::endl;
+            sqlite3_free(errMsg);
+        }
+    }
+
+    // g_totalRowCount agora contém o número total de registros.
+}
+
+void AtualizarPosicoesOffset(HWND hWnd) {
+    RECT rect;
+    GetClientRect(hWnd, &rect);
+
+    int startYFull = 80 - g_scrollY;
+    int width = rect.right;
+    int yPos = startYFull + 240;
+
+    // --- PARÂMETROS DO BOTÃO ---
+    int buttonWidth = 23;
+    int buttonHeight = 23;
+    int gap = 5; // Use um gap menor para espaçamento entre botões. O valor '25' em seu código parece ser a folga + largura do botão, vamos redefinir.
+
+    // Se o seu 'gap' de 25 representa a distância do início de um botão para o início do próximo, use-o para o cálculo:
+    int step = 25; // Distância entre o início de um botão e o início do próximo.
+
+    int numButtons = (int)g_editControlsOffsetLimit.size();
+
+    // 1. Calcular a Largura Total Ocupada pelo Grupo
+    // A largura total do grupo (do início do 1º ao início do último + largura do último)
+    int totalGroupWidth = 0;
+    if (numButtons > 0) {
+        // Largura Total = (Número de Passos x Distância do Passo) + Largura do último botão
+        totalGroupWidth = (numButtons - 1) * step + buttonWidth;
+    }
+
+    // 2. Calcular a Posição X de Início (Canto esquerdo do primeiro botão)
+    int xStart = (width / 2) - (totalGroupWidth / 2);
+
+    // 3. Posicionar os Botões
+    for (int i = 0; i < numButtons; i++) {
+
+        // Posição X do botão atual: Posição de Início + (Índice * Distância)
+        int xPos = xStart + i * step;
+
+        // Reposiciona o botão
+        // Nota: Removi a duplicação de SetWindowPos (HIDE/SHOW) para simplificar,
+        // mas usei SWP_SHOWWINDOW para garantir que seja visível.
+        SetWindowPos(
+            g_editControlsOffsetLimit[i],
+            NULL,
+            xPos,
+            yPos,
+            buttonWidth,
+            buttonHeight,
+            SWP_NOZORDER | SWP_SHOWWINDOW | SWP_HIDEWINDOW
+        );
+
+        SetWindowPos(
+            g_editControlsOffsetLimit[i],
+            NULL,
+            xPos,
+            yPos,
+            buttonWidth,
+            buttonHeight,
+            SWP_NOZORDER | SWP_SHOWWINDOW | SWP_SHOWWINDOW
+        );
+    }
+}
+
+void DestroyAllOffsetButtons() {
+    // 1. Itera sobre todos os handles (HWND) no vetor
+    for (HWND hBtn : g_editControlsOffsetLimit) {
+
+        // Verifica se o handle é válido antes de tentar destruir
+        if (hBtn != NULL && IsWindow(hBtn)) {
+
+            // 2. Destroi o controle de janela
+            DestroyWindow(hBtn);
+        }
+        // Nota: Se você não está usando C++11 ou superior (range-based for loop),
+        // use um iterador tradicional:
+        /*
+        for (size_t i = 0; i < g_editControlsOffsetLimit.size(); ++i) {
+            DestroyWindow(g_editControlsOffsetLimit[i]);
+        }
+        */
+    }
+
+    // 3. Limpa o vetor
+    // Isso é essencial para garantir que o vetor esteja vazio e 
+    // pronto para armazenar novos handles na próxima criação.
+    g_editControlsOffsetLimit.clear();
+}
+
+void createBtnPageLimit(HWND hWnd) {
+    getRowCount();
+    DestroyAllOffsetButtons();
+
+    // Obter dimensões da janela
+    RECT rect;
+    GetClientRect(hWnd, &rect);
+
+    // Configurar a linha do header
+    int startYFull = 80 - g_scrollY;
+
+    // Variáveis de posicionamento (Usadas para a criação, o reposicionamento final ocorre em AtualizarPosicoesOffset)
+    int xPos_start;
+    int yPos;
+    int selectWidth = 50;
+    int width = rect.right;
+    yPos = startYFull + 240;
+    xPos_start = (width / 2 - selectWidth / 2) + 55; // Posição inicial
+
+    // 1. Calcular o número total de páginas (numeroBtn)
+    numeroBtn = static_cast<int>(std::ceil(
+        static_cast<double>(g_totalRowCount) / limitTableRow
+    ));
+
+    // Se não houver páginas para exibir (tabela vazia), encerra
+    if (numeroBtn < 1) {
+        AtualizarPosicoesOffset(hWnd);
+        return;
+    }
+
+    // 2. LÓGICA DE PAGINAÇÃO DINÂMICA (Máximo 10 Botões)
+    const int MAX_PAGES_DISPLAY = 10;
+
+    // Garantir que a página atual (idNumeroUltimo) esteja no intervalo válido
+    if (idNumeroUltimo < 1) idNumeroUltimo = 1;
+    if (idNumeroUltimo > numeroBtn) idNumeroUltimo = numeroBtn;
+
+    int start_page, end_page;
+
+    // A. Se o total de páginas for menor ou igual ao limite (10)
+    if (numeroBtn <= MAX_PAGES_DISPLAY) {
+        start_page = 1;
+        end_page = numeroBtn;
+    }
+    // B. Se o total de páginas for maior que 10
+    else {
+        // Tentativa de centralizar: 5 antes, 4 depois da página atual
+        start_page = idNumeroUltimo - 5;
+        end_page = idNumeroUltimo + 4;
+
+        // B1. Tratamento da borda inicial (garantir que não comece antes de 1)
+        if (start_page < 1) {
+            start_page = 1;
+            end_page = MAX_PAGES_DISPLAY;
+        }
+
+        // B2. Tratamento da borda final (garantir que não ultrapasse numeroBtn)
+        else if (end_page > numeroBtn) {
+            end_page = numeroBtn;
+            // Ajusta o início para mostrar os últimos 10 botões
+            start_page = numeroBtn - MAX_PAGES_DISPLAY + 1;
+        }
+    }
+
+    // 3. CRIAÇÃO DOS BOTÕES
+
+    // Índice para posicionamento sequencial (xPos_start + i * 55)
+    int i = 0;
+
+    // Botão 'Voltar' (<) - ID 0
+    HWND hBotao = CreateWindowEx(
+        0, L"BUTTON", L"<", WS_TABSTOP | WS_VISIBLE | WS_CHILD,
+        xPos_start + i * 55, yPos, 50, 50,
+        hWnd, (HMENU)OFFSET,
+        (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL
+    );
+    SetWindowLongPtr(hBotao, GWLP_USERDATA, 0); // ID 0 para 'Voltar'
+    g_editControlsOffsetLimit.push_back(hBotao);
+    i++; // Próxima posição sequencial
+
+    // Botões dos números das páginas (start_page até end_page)
+    for (int page_num = start_page; page_num <= end_page; page_num++) {
+        std::wstring wText = std::to_wstring(page_num);
+
+        hBotao = CreateWindowEx(
+            0, L"BUTTON", wText.c_str(), WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_OWNERDRAW,
+            xPos_start + i * 55, yPos, 50, 50,
+            hWnd, (HMENU)OFFSET,
+            (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL
+        );
+
+        // USERDATA é o número da página real
+        SetWindowLongPtr(hBotao, GWLP_USERDATA, page_num);
+        g_editControlsOffsetLimit.push_back(hBotao);
+        i++; // Próxima posição sequencial
+    }
+
+    // Botão 'Avançar' (>) - ID numeroBtn + 1
+    int forward_id = numeroBtn + 1;
+
+    hBotao = CreateWindowEx(
+        0, L"BUTTON", L">", WS_TABSTOP | WS_VISIBLE | WS_CHILD,
+        xPos_start + i * 55, yPos, 50, 50,
+        hWnd, (HMENU)OFFSET,
+        (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL
+    );
+    SetWindowLongPtr(hBotao, GWLP_USERDATA, forward_id); // ID numeroBtn + 1 para 'Avançar'
+    g_editControlsOffsetLimit.push_back(hBotao);
+
+    // Reposicionar e Centralizar o Bloco com o novo tamanho (máximo 12 botões)
+    AtualizarPosicoesOffset(hWnd);
+}
+
+void handleLimitChange(HWND hComboBox) {
+    // 1. Obter o Índice Selecionado
+    int selected_index = (int)SendMessageW(hComboBox, CB_GETCURSEL, 0, 0);
+
+    if (selected_index != CB_ERR) {
+        // 2. Obter o Valor do Texto (Ex: "30")
+        int text_len = (int)SendMessageW(hComboBox, CB_GETLBTEXTLEN, (WPARAM)selected_index, 0);
+        std::wstring selected_text(text_len, L'\0');
+        SendMessageW(hComboBox, CB_GETLBTEXT, (WPARAM)selected_index, (LPARAM)selected_text.data());
+        selected_text.resize(wcslen(selected_text.c_str())); // Limpa possíveis caracteres nulos extras
+
+        // 3. Converte a string para número (integer)
+        limitTableRow = _wtoi(selected_text.c_str());
+
+        offsetTableRow = 0;
+        idNumeroUltimo = 1;
+    }
+}
+
+void AtualizarPosicoesLimit(HWND hWnd) {
+    // Obter dimensões da janela
+    RECT rect;
+    GetClientRect(hWnd, &rect);
+
+    // Configurar a linha do header
+    int startYFull = 80 - g_scrollY;  // Posição Y com scroll
+
+    int xPos;
+    int yPos;
+
+    int selectWidth = 50;
+    int width = rect.right;
+    yPos = startYFull + 214;
+    xPos = (width) / 2 - selectWidth / 2;
+
+    SetWindowPos(g_editControlsLimit[0], NULL, xPos, yPos, 50, 50,
+        SWP_NOSIZE | SWP_NOZORDER | SWP_HIDEWINDOW);
+
+    SetWindowPos(g_editControlsLimit[0], NULL, xPos, yPos, 50, 50,
+        SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
+}
+
+void createInputLimit(HWND hWnd) {
+    // Obter dimensões da janela
+    RECT rect;
+    GetClientRect(hWnd, &rect);
+
+    // Configurar a linha do header
+    int startYFull = 80 - g_scrollY;  // Posição Y com scroll
+
+    int xPos;
+    int yPos;
+
+    int selectWidth = 50;
+    int width = rect.right;
+    yPos = startYFull + 240;
+    xPos = (width) / 2 - selectWidth / 2;
+
+    // 1. Defina a largura desejada para a lista suspensa (ex: 300 pixels)
+    int desiredDroppedWidth = 170;
+
+    HWND hComboBox = CreateWindowEx(
+        0,                                 // Estilos estendidos
+        L"ComboBox",                       // Nome da classe do controle ComboBox
+        L"",                               // Texto inicial (vazio)
+        WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST | WS_VSCROLL, // Estilos: Filho, Visível, e lista suspensa que não pode ser editada (SELECT)
+        xPos, yPos, selectWidth, 150,
+        hWnd,                        // Janela pai
+        (HMENU)(LIMITAR),                        // ID único do controle (para o WM_COMMAND)
+        (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
+        NULL
+    );
+
+    // independentemente da largura do controle principal.
+    SendMessageW(
+        hComboBox,
+        CB_SETDROPPEDWIDTH,
+        (WPARAM)desiredDroppedWidth, // Novo valor de largura
+        0
+    );
+
+    // Adicionar a opção A
+    SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"10");
+    // Adicionar a opção B
+    SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"20");
+    // Adicionar a opção B
+    SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"30");
+    // Adicionar a opção B
+    SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"40");
+    // Adicionar a opção B
+    SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"50");
+    // Adicionar a opção B
+    SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"75");
+    // Adicionar a opção B
+    SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"100");
+
+    //Selecionar uma opção
+    SendMessageW(hComboBox, CB_SETCURSEL, 1, 0);
+
+    g_editControlsLimit.push_back(hComboBox);
+}
+
 void AtualizarPosicoesOrder(HWND hWnd) {
     // Obter dimensões da janela
     RECT rect;
@@ -140,7 +543,7 @@ void AtualizarPosicoesOrder(HWND hWnd) {
     // Configurar a tabela
     int columnNumber = 7;
     int cellHeight = 32;
-    int numColumns = g_tableData.empty() ? 0 : 7;
+    int numColumns = 7;
     int cellWidth = width / (numColumns > 0 ? numColumns + 3 : 1); // +3 para os botões
     int startY = 350 - g_scrollY;  // Posição Y com scroll
     int startX = 22 - g_scrollX;  // Posição X com scroll
@@ -167,7 +570,7 @@ void createOrderBtn(HWND hWnd){
     // Configurar a tabela
     int columnNumber = 7;
     int cellHeight = 32;
-    int numColumns = g_tableData.empty() ? 0 : 7;
+    int numColumns = 7;
     int cellWidth = width / (numColumns > 0 ? numColumns + 3 : 1); // +3 para os botões
     int startY = 350 - g_scrollY;  // Posição Y com scroll
     int startX = 22 - g_scrollX;  // Posição X com scroll
@@ -806,32 +1209,126 @@ void criarHeaderLineFilter(HDC hdc, HWND hWnd, int startYFull, int startXFull, i
     }
 }
 
-void createHeaderFilters(HDC hdc, HWND hWnd) {
+// Callback para processar o resultado do PRAGMA table_info()
+int pragma_callback(void* data, int argc, char** argv, char** azColName) {
+    // 'data' é o ponteiro para o vetor de destino, neste caso, g_tableDataFull.
+    auto* tableData = static_cast<std::vector<std::vector<std::wstring>>*>(data);
+
+    // O PRAGMA table_info() retorna 6 colunas por linha (cada linha é uma coluna real da tabela 'Pets').
+    // Colunas do PRAGMA: cid, name, type, notnull, dflt_value, pk
+
+    // Se o vetor ainda estiver vazio (o que é esperado ao iniciar),
+    // criamos a linha 0 (onde guardaremos os nomes das colunas da tabela 'Pets').
+    if (tableData->empty()) {
+        tableData->emplace_back(); // Adiciona uma nova linha vazia: tableData[0]
+    }
+
+    // A coluna "name" do PRAGMA (o nome da coluna real da tabela 'Pets') está no índice 1 (coluna azColName[1] ou argv[1]).
+    if (argc >= 2 && argv[1]) {
+        // Converte o nome da coluna (char*) para wstring
+        size_t len = strlen(argv[1]) + 1;
+        std::wstring wName(len, L'\0');
+        mbstowcs_s(nullptr, &wName[0], len, argv[1], _TRUNCATE);
+        wName.resize(wcslen(wName.c_str()));
+
+        // Adiciona o nome da coluna à primeira linha (índice 0)
+        (*tableData)[0].push_back(wName);
+    }
+
+    // Retorna 0 para continuar processando a próxima linha do PRAGMA
+    return 0;
+}
+
+void createHeaderTable(HWND hWnd, HDC hdc) {
+    selectHeaderDB();
+
+    // Obter dimensões da janela
+    RECT rect;
+    GetClientRect(hWnd, &rect);
+    int width = (rect.right - rect.left) - 44;
+    int height = rect.bottom - rect.top;
+
+    // Configurar a tabela
+    int columnNumber = 7;
+    int cellHeight = 32;
+    int numColumns = g_tableDataFull.empty() ? 0 : 7;
+    int cellWidth = width / (numColumns > 0 ? numColumns + 3 : 1); // +3 para os botões
+    int startY = 350 - g_scrollY;  // Posição Y com scroll
+    int startX = 22 - g_scrollX;  // Posição X com scroll
+    
+    HBRUSH hCurrentBrush;
+
+    HBRUSH hBrushHeader = CreateSolidBrush(RGB(150, 150, 150));
+
+    hCurrentBrush = hBrushHeader;
+    fonte(L"Header", RGB(255, 255, 255), hdc);
+
+    // Desenhar o fundo da linha
+    RECT rowRect = {
+        startX,
+        startY + static_cast<int>(0) * cellHeight,
+        startX + width,
+        startY + (static_cast<int>(0) + 1) * cellHeight
+    };
+    FillRect(hdc, &rowRect, hCurrentBrush);
+
+    int counter = 0;
+    for (size_t col = 0; col < g_tableDataFull[0].size(); col++) {
+        std::wstring displayText = g_tableDataFull[0][col];
+        int xPos = startX + counter * cellWidth + 10;
+        int yPos = startY + 0 * cellHeight + 7;
+
+        if (col == 0 || col == 1 || col == 3 || col == 12 || col == 13 || col == 20 || col == 21) {
+            // Traduzir cabeçalhos se necessário
+            if (displayText == L"Nome_do_Pet") displayText = L"Nome do Pet";
+            else if (displayText == L"Nome_do_Tutor") displayText = L"Nome do Tutor";
+            else if (displayText == L"Raca") displayText = L"Raça";
+            else if (displayText == L"Appointment_Date") displayText = L"Data";
+            else if (displayText == L"Appointment_Hour") displayText = L"Hora";
+            else if (displayText == L"Date") displayText = L"Data Registro";
+            else if (displayText == L"Hour") displayText = L"Hora Registro";
+
+            int qtyCaracters = displayText.length();
+            if (width <= 1600 && displayText.length() > 15) {
+                qtyCaracters = 15;
+
+            }
+            TextOut(hdc, xPos, yPos, displayText.c_str(), static_cast<int>(qtyCaracters));
+            counter++;
+        }
+    }
+}
+
+void selectHeaderDB() {
     g_tableDataFull.clear();
 
     sqlite3* db;
     char* errMsg = 0;
     int rc = sqlite3_open("pet.db", &db);
 
-    if (rc == SQLITE_OK) {
-        const char* sqlSelect = "SELECT * FROM Pets LIMIT 1;";
-        rc = sqlite3_exec(db, sqlSelect, sqlite_callback, &g_tableDataFull, &errMsg);
+    errMsg = 0;
+    const char* sqlPragma = "PRAGMA table_info(Pets);";
 
-        if (rc != SQLITE_OK) {
-            if (errMsg) {
-                size_t len = strlen(errMsg) + 1;
-                std::wstring wErrMsg(len, L'\0');
-                mbstowcs_s(nullptr, &wErrMsg[0], len, errMsg, _TRUNCATE);
-                wErrMsg.resize(wcslen(wErrMsg.c_str()));
-                g_tableDataFull.push_back({ L"Erro", wErrMsg });
-                sqlite3_free(errMsg);
-            }
+    // 2. Executar o PRAGMA usando o callback que criamos
+    rc = sqlite3_exec(
+        db,
+        sqlPragma,
+        pragma_callback, // Nosso callback personalizado
+        &g_tableDataFull, // Passamos o vetor global para o callback
+        &errMsg
+    );
+
+    if (rc != SQLITE_OK) {
+        // Tratar erro (opcional)
+        if (errMsg) {
+            fprintf(stderr, "SQL error (PRAGMA): %s\n", errMsg);
+            sqlite3_free(errMsg);
         }
-        sqlite3_close(db);
     }
-    else {
-        g_tableDataFull.push_back({ L"Erro", L"Não foi possível abrir o banco" });
-    }
+}
+
+void createHeaderFilters(HDC hdc, HWND hWnd) {
+    selectHeaderDB();
     
     // Configurar a linha do header
     int cellHeight = 32;
@@ -854,7 +1351,7 @@ void createHeaderFilters(HDC hdc, HWND hWnd) {
     startYFull = startYFull + 2 * cellHeight + 7;  // Posição Y com scroll
     startXFull = 22 - g_scrollX;  // Posição X com scroll
     colNumber = 20;
-    colFinalNumber = g_tableDataFull[1].size();
+    colFinalNumber = 24;
 
     criarHeaderLineFilter(hdc, hWnd, startYFull, startXFull, colNumber, colFinalNumber);
 }
@@ -973,20 +1470,24 @@ void selectDB() {
                 // 2. Concatena com os minutos (incluindo o ':')
                 " || SUBSTR(Appointment_Hour, INSTR(Appointment_Hour, ':'))";
 
-            sqlSelect = "SELECT * FROM Pets ORDER BY " + hourSorting + " " + orderAscDesc + ";";
+            sqlSelect = "SELECT * FROM Pets ORDER BY " + hourSorting + " " + orderAscDesc;
         }
         else if (orderColumn == "Appointment_Date") {
 
             // Define a string de ordenação complexa para a data DD/MM/YYYY
             std::string dataSorting =
                 "SUBSTR(Appointment_Date, 7, 4) || SUBSTR(Appointment_Date, 4, 2) || SUBSTR(Appointment_Date, 1, 2)";
-            sqlSelect = "SELECT * FROM Pets ORDER BY " + dataSorting + " " + orderAscDesc + ";";
+            sqlSelect = "SELECT * FROM Pets ORDER BY " + dataSorting + " " + orderAscDesc;
 
         }
         else {
             //const char* sqlSelect = "SELECT ID, Nome_do_Pet, Nome_do_Tutor, Banho, Tosa, Appointment_Date, Appointment_Hour FROM Pets;";
-            sqlSelect = "SELECT * FROM Pets ORDER BY " + orderColumn + " COLLATE NOCASE " + orderAscDesc + ";";
+            sqlSelect = "SELECT * FROM Pets ORDER BY " + orderColumn + " COLLATE NOCASE " + orderAscDesc;
         }
+
+        std::string limitClause = " LIMIT " + std::to_string(limitTableRow) + " OFFSET " + std::to_string(offsetTableRow);
+        sqlSelect = sqlSelect + limitClause + ";";
+
         rc = sqlite3_exec(db, sqlSelect.c_str(), sqlite_callback, &g_tableData, &errMsg);
         if (rc != SQLITE_OK) {
             if (errMsg) {

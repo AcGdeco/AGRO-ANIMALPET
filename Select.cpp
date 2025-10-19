@@ -81,7 +81,7 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
             //const char* sqlDrop = "DROP TABLE IF EXISTS Pets;";
             //rc = sqlite3_exec(db, sqlDrop, 0, 0, &errMsg);
             //if (rc != SQLITE_OK) {
-               // MessageBox(hWnd, L"Erro ao dropar tabela!", L"Erro", MB_OK | MB_ICONERROR);
+                //MessageBox(hWnd, L"Erro ao dropar tabela!", L"Erro", MB_OK | MB_ICONERROR);
                 //sqlite3_free(errMsg);
             //}
             const char* sqlCreate = "CREATE TABLE IF NOT EXISTS Pets (ID INTEGER PRIMARY KEY AUTOINCREMENT, Nome_do_Pet TEXT, Raca TEXT, Nome_do_Tutor TEXT, CEP TEXT, Cor TEXT, Idade TEXT, Peso TEXT, Sexo TEXT, Castrado TEXT, Endereco TEXT, Ponto_de_referencia TEXT, Banho TEXT, Tosa TEXT, Obs_Tosa TEXT, Parasitas TEXT, Lesoes TEXT, Obs_Lesoes TEXT, Telefone TEXT, CPF TEXT, Appointment_Date TEXT, Appointment_Hour TEXT, Date TEXT, Hour TEXT);";
@@ -106,7 +106,7 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
                 //std::wstring currentDate = GetCurrentDate();
                 //std::wstring currentHour = GetCurrentHour();
                 //for (int i = 1; i <= 100; i++) {
-                    //std::wstring sqlInsertW = L"INSERT INTO Pets (Nome_do_Pet, Raca, Nome_do_Tutor, CEP, Cor, Idade, Peso, Sexo, Castrado, Endereco, Ponto_de_referencia, Banho, Tosa, Obs_Tosa, Parasitas, Lesoes, Obs_Lesoes, Telefone, CPF, Appointment_Date, Appointment_Hour, Date, Hour) VALUES ('Fido', 'Bulldog', 'Laís', '36309016', 'Preto', 5, 25, 'Masculino', 'Sim', 'Rua das flores - Guarda Mor - São João del Rei', 'Perto da pizzaria Agostinho', 'Padrão', 'Tesoura', 'ir qpiofj adfjs kçjf dkfjeif çsdaf jkasdjf iejf sdçf aksdfjis fdfj çaklsfjaksdfj kdsjfçaejf idsjfkasdf jaies', 'Carrapatos', 'Pele', 'asdf façldj fçkalsdj fdaskljf dsçkf jçklasdf jkaldsfj çkldsa fjaçklds jfakdls fjkalsdjf klasdjf çasdfj çasfj çadsklfjklf ', '32998360862', '09813426632', '04/07/2025', '15:00', '" + currentDate + L"', '" + currentHour + L"');";
+                   //std::wstring sqlInsertW = L"INSERT INTO Pets (Nome_do_Pet, Raca, Nome_do_Tutor, CEP, Cor, Idade, Peso, Sexo, Castrado, Endereco, Ponto_de_referencia, Banho, Tosa, Obs_Tosa, Parasitas, Lesoes, Obs_Lesoes, Telefone, CPF, Appointment_Date, Appointment_Hour, Date, Hour) VALUES ('Fido', 'Bulldog', 'Laís', '36309016', 'Preto', 5, 25, 'Masculino', 'Sim', 'Rua das flores - Guarda Mor - São João del Rei', 'Perto da pizzaria Agostinho', 'Padrão', 'Tesoura', 'ir qpiofj adfjs kçjf dkfjeif çsdaf jkasdjf iejf sdçf aksdfjis fdfj çaklsfjaksdfj kdsjfçaejf idsjfkasdf jaies', 'Carrapatos', 'Pele', 'asdf façldj fçkalsdj fdaskljf dsçkf jçklasdf jkaldsfj çkldsa fjaçklds jfakdls fjkalsdjf klasdjf çasdfj çasfj çadsklfjklf ', '32998360862', '09813426632', '04/07/2025', '15:00', '" + currentDate + L"', '" + currentHour + L"');";
                     //int required = WideCharToMultiByte(CP_UTF8, 0, sqlInsertW.c_str(), -1, nullptr, 0, nullptr, nullptr);
                     //if (required > 0) {
                         //std::string sqlInsertUtf8(required, '\0');
@@ -142,6 +142,9 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
             // Criar botões de ordenamento das colunas da tabela
             createOrderBtn(hWnd);
 
+            // Criar limite das páginas
+            createBtnPageLimit(hWnd);
+
             //Criar inputs dos filtros
             criarInputsFilters(hWnd);
 
@@ -151,6 +154,9 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 
             // Criar botões após carregar os dados
             CriarBotoesTabela(hWnd);
+
+            // Criar limite de linhas da tabela
+            createInputLimit(hWnd);
 
             // Configurar scroll bars após criar tudo
             ConfigurarScrollBars(hWnd);
@@ -307,6 +313,37 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
             RecarregarDadosTabela(hWnd);
             
         }
+        // Verifica se a mensagem veio do seu ComboBox LIMITAR
+        else if (wmId == LIMITAR) {
+            // HIWORD(wParam) é o código de notificação específico do controle
+            int notificationCode = HIWORD(wParam);
+
+            // 1. VERIFICA A MUDANÇA DE SELEÇÃO
+            if (notificationCode == CBN_SELCHANGE) {
+
+                // A SELEÇÃO MUDOU! É AQUI QUE VOCÊ CHAMA SUA FUNÇÃO.
+
+                // Obtém o Handle do ComboBox (opcional, mas bom para clareza)
+                HWND hComboBox = (HWND)lParam;
+
+                // CHAMAR FUNÇÃO DE AÇÃO
+                handleLimitChange(hComboBox);
+
+                createBtnPageLimit(hWnd);
+
+                RecarregarDadosTabela(hWnd);
+
+                // Certifique-se de retornar 0 após tratar a mensagem
+                return 0;
+            }
+        }
+        else if (wmId == OFFSET) {
+
+            mudarPagina(id);
+            createBtnPageLimit(hWnd);
+            RecarregarDadosTabela(hWnd);
+
+        }
         break;
     }
     case WM_PAINT:
@@ -349,72 +386,62 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
         // Desenhar filtros
         createHeaderFilters(hdc, hWnd);
 
-        int linha = 0;
+        //Header Table
+        createHeaderTable(hWnd, hdc);
+
+        int linha = 1;
         int counter = 0;
         // DESENHAR APENAS UMA VEZ - REMOVER loops desnecessários
-        for (size_t row = 0; row < g_tableData.size(); row++) {
-            if (naoDesenhar[row] != 1) {
-                HBRUSH hCurrentBrush = (linha % 2 == 0) ? hBrushGray : hBrushWhite;
+        for (size_t row = 1; row < g_tableData.size(); row++) {
+            if (row != 0) {
+                if (naoDesenhar[row] != 1) {
+                    HBRUSH hCurrentBrush = (linha % 2 == 0) ? hBrushGray : hBrushWhite;
 
-                if (linha == 0) {
-                    hCurrentBrush = hBrushHeader;
-                    fonte(L"Header", RGB(255, 255, 255), hdc);
-                }
-                else {
-                    fonte(L"Font", RGB(0, 0, 0), hdc);
-                }
-
-                // Desenhar o fundo da linha
-                RECT rowRect = {
-                    startX,
-                    startY + static_cast<int>(linha) * cellHeight,
-                    startX + width,
-                    startY + (static_cast<int>(linha) + 1) * cellHeight
-                };
-                FillRect(hdc, &rowRect, hCurrentBrush);
-            }
-            
-            counter = 0;
-            // Desenhar as células de dados
-            for (size_t col = 0; col < g_tableData[row].size(); col++) {
-                std::wstring displayText = g_tableData[row][col];
-
-                if (naoDesenhar[row] == 1) {
-                    break;
-                }
-
-                if (col == 0 || col == 1 || col == 3 || col == 12 || col == 13 || col == 20 || col == 21) {
-                    int xPos = startX + counter * cellWidth + 10;
-                    int yPos = startY + linha * cellHeight + 7;
-
-                    // Traduzir cabeçalhos se necessário
                     if (linha == 0) {
-                        if (displayText == L"Nome_do_Pet") displayText = L"Nome do Pet";
-                        else if (displayText == L"Nome_do_Tutor") displayText = L"Nome do Tutor";
-                        else if (displayText == L"Raca") displayText = L"Raça";
-                        else if (displayText == L"Appointment_Date") displayText = L"Data";
-                        else if (displayText == L"Appointment_Hour") displayText = L"Hora";
-                        else if (displayText == L"Date") displayText = L"Data Registro";
-                        else if (displayText == L"Hour") displayText = L"Hora Registro";
+                        hCurrentBrush = hBrushHeader;
+                        fonte(L"Header", RGB(255, 255, 255), hdc);
+                    }
+                    else {
+                        fonte(L"Font", RGB(0, 0, 0), hdc);
                     }
 
-                    int qtyCaracters = displayText.length();
-                    if (width <= 1600 && displayText.length() > 15) {
-                        qtyCaracters = 15;
-                        
+                    // Desenhar o fundo da linha
+                    RECT rowRect = {
+                        startX,
+                        startY + static_cast<int>(linha) * cellHeight,
+                        startX + width,
+                        startY + (static_cast<int>(linha) + 1) * cellHeight
+                    };
+                    FillRect(hdc, &rowRect, hCurrentBrush);
+                }
+
+                counter = 0;
+                // Desenhar as células de dados
+                for (size_t col = 0; col < g_tableData[row].size(); col++) {
+                    std::wstring displayText = g_tableData[row][col];
+
+                    if (naoDesenhar[row] == 1) {
+                        break;
                     }
-                    TextOut(hdc, xPos, yPos, displayText.c_str(), static_cast<int>(qtyCaracters));
-                    counter++;
-                    
+
+                    if (col == 0 || col == 1 || col == 3 || col == 12 || col == 13 || col == 20 || col == 21) {
+                        int xPos = startX + counter * cellWidth + 10;
+                        int yPos = startY + linha * cellHeight + 7;
+
+                        int qtyCaracters = displayText.length();
+                        if (width <= 1600 && displayText.length() > 15) {
+                            qtyCaracters = 15;
+
+                        }
+                        TextOut(hdc, xPos, yPos, displayText.c_str(), static_cast<int>(qtyCaracters));
+                        counter++;
+                    }
+                }
+
+                if (counter != 0) {
+                    linha++;
                 }
             }
-
-            if (counter != 0) {
-                linha++;
-            }
-
-            // Desenhar cabeçalhos dos botões apenas na linha do cabeçalho
-            // REMOVER o código duplicado de desenho de botões que estava criando tabelas sobrepostas
         }
 
         // DESENHAR CABEÇALHOS DOS BOTÕES APENAS UMA VEZ - fora do loop principal
@@ -465,8 +492,14 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
         g_clientHeight = HIWORD(lParam);
         ConfigurarScrollBars(hWnd);
 
+        // Atualizar offset botões
+        AtualizarPosicoesOffset(hWnd);
+
         // Atualizar order botões
         AtualizarPosicoesOrder(hWnd);
+
+		// Atualizar limite de linhas
+        AtualizarPosicoesLimit(hWnd);
 
         // Apenas atualizar botões, NÃO chamar InvalidateRect aqui
         AtualizarPosicoesBotoes(hWnd);
@@ -503,11 +536,17 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
         if (si.nPos != oldPos) {
             g_scrollY = si.nPos;
 
+            // Atualizar offset botões
+            AtualizarPosicoesOffset(hWnd);
+
             // Atualizar order botões
             AtualizarPosicoesOrder(hWnd);
 
             // Apenas atualizar botões, NÃO chamar InvalidateRect
             AtualizarPosicoesBotoes(hWnd);
+
+            // Atualizar limite de linhas
+            AtualizarPosicoesLimit(hWnd);
 
 			// Atualizar posições dos inputs dos filtros
             AtualizarPosicoesInputs(hWnd);
@@ -535,11 +574,17 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
         if (si.nPos != oldPos) {
             g_scrollY = si.nPos;
 
+            // Atualizar offset botões
+            AtualizarPosicoesOffset(hWnd);
+
             // Atualizar order botões
             AtualizarPosicoesOrder(hWnd);
 
             // Apenas atualizar botões, NÃO chamar InvalidateRect
             AtualizarPosicoesBotoes(hWnd);
+
+            // Atualizar limite de linhas
+            AtualizarPosicoesLimit(hWnd);
 
             // Atualizar posições dos inputs dos filtros
             AtualizarPosicoesInputs(hWnd);
@@ -551,6 +596,56 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
         // Retornar TRUE para evitar que o sistema apague o fundo
         // Isso reduz o flicker durante o redesenho
         return 1;
+    }
+    case WM_DRAWITEM:
+    {
+        LPDRAWITEMSTRUCT pDraw = (LPDRAWITEMSTRUCT)lParam;
+        HWND hBotao = pDraw->hwndItem;
+
+        // Obter o idBotao do GWLP_USERDATA
+        LONG_PTR idBotao = GetWindowLongPtr(hBotao, GWLP_USERDATA);
+
+        if (pDraw->CtlID == OFFSET) {
+            RECT rcButton = pDraw->rcItem;
+
+            // 1. PRIMEIRO desenhar a borda
+            UINT uState = DFCS_BUTTONPUSH;
+            if (pDraw->itemState & ODS_SELECTED) {
+                uState |= DFCS_PUSHED;
+            }
+            DrawFrameControl(pDraw->hDC, &rcButton, DFC_BUTTON, uState);
+
+            // 2. REDUZIR a área interna para não sobrepor a borda
+            InflateRect(&rcButton, -2, -2);  // Reduz para dentro
+
+            if (idBotao == idNumeroUltimo) {
+                // Botão especial (vermelho)
+                HBRUSH hBrush = CreateSolidBrush(RGB(150, 150, 150));
+                FillRect(pDraw->hDC, &rcButton, hBrush);
+                DeleteObject(hBrush);
+
+                SetTextColor(pDraw->hDC, RGB(255, 255, 255));
+            }
+            else {
+                // Botão normal
+                COLORREF bgColor = GetSysColor(COLOR_BTNFACE);
+                HBRUSH hBrush = CreateSolidBrush(bgColor);
+                FillRect(pDraw->hDC, &rcButton, hBrush);
+                DeleteObject(hBrush);
+
+                SetTextColor(pDraw->hDC, GetSysColor(COLOR_BTNTEXT));
+            }
+
+            // 3. AGORA desenhar o texto
+            SetBkMode(pDraw->hDC, TRANSPARENT);
+
+            WCHAR buffer[32];
+            swprintf(buffer, 32, L"%ld", (long)idBotao);
+
+            DrawText(pDraw->hDC, buffer, -1, &rcButton,
+                DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+        }
+        return TRUE;
     }
     default:
         return DefWindowProc(hWnd, message, wParam, lParam);
