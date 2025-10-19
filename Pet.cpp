@@ -26,7 +26,7 @@ int g_clientWidth;       // Largura da área cliente
 int g_clientHeight;      // Altura da área cliente
 int rowsNumber;
 int limitTableRow = 20;
-int offsetTableRow = 0;
+int offsetTableRow = 1;
 int numeroBtn;
 int idNumeroUltimo = 1;
 
@@ -37,18 +37,17 @@ std::vector<HWND> g_editControlsLimit;
 std::vector<HWND> g_editControlsOffsetLimit;
 std::vector<std::vector<std::wstring>> g_tableData;
 std::vector<std::vector<std::wstring>> g_tableDataFull;
+std::vector<std::vector<std::wstring>> g_tableDataRowsNumber;
 LONG_PTR idRecord;
 std::string orderColumn = "ID";
 std::string orderAscDesc = "DESC";
+std::vector<int> naoDesenharInternRowsNumber;
 
 std::vector<std::wstring> dados(24);
 std::wstring dataAte;
 std::wstring dataRegistroAte;
 
 std::vector<HWND> g_buttons;
-
-// Variável global ou de classe para armazenar o resultado da contagem
-int g_totalRowCount = 0;
 
 // Substitua o macro por constexpr conforme sugerido pelo VCR101
 constexpr int MAX_LOADSTRING = 100;
@@ -186,51 +185,11 @@ void mudarPagina(int id) {
         idNumeroUltimo = newPageId;
 
         // O offset é sempre o Tamanho da Página * (Página - 1)
-        offsetTableRow = limitTableRow * (idNumeroUltimo - 1);
+        offsetTableRow = limitTableRow * (idNumeroUltimo - 1) + 1;
 
         // Agora você chamaria a função para recarregar os dados (selectDB) e redesenhar.
         // RecarregarDadosEDesenhar(); 
     }
-}
-
-// Callback para capturar o resultado de COUNT(*)
-int count_callback(void* data, int argc, char** argv, char** azColName) {
-    // A consulta COUNT(*) retorna apenas uma linha (argc=1)
-    if (argc > 0 && argv[0]) {
-        // Converte o valor retornado (que é uma string char*) para int
-        g_totalRowCount = std::stoi(argv[0]);
-    }
-    // Retorna 0 para indicar sucesso e continuar (embora só haja uma linha)
-    return 0;
-}
-
-void getRowCount() {
-    sqlite3* db;
-    char* errMsg = 0;
-    int rc = sqlite3_open("pet.db", &db);
-
-    const char* sqlCount = "SELECT COUNT(*) FROM Pets;";
-    errMsg = nullptr;
-
-    // Zera o contador antes da execução
-    g_totalRowCount = 0;
-
-    rc = sqlite3_exec(
-        db,
-        sqlCount,
-        count_callback,  // Nosso callback
-        nullptr,         // Não precisamos passar dados extras, o callback usa g_totalRowCount
-        &errMsg
-    );
-
-    if (rc != SQLITE_OK) {
-        if (errMsg) {
-            std::cerr << "Erro ao contar linhas: " << errMsg << std::endl;
-            sqlite3_free(errMsg);
-        }
-    }
-
-    // g_totalRowCount agora contém o número total de registros.
 }
 
 void AtualizarPosicoesOffset(HWND hWnd) {
@@ -319,7 +278,6 @@ void DestroyAllOffsetButtons() {
 }
 
 void createBtnPageLimit(HWND hWnd) {
-    getRowCount();
     DestroyAllOffsetButtons();
 
     // Obter dimensões da janela
@@ -339,7 +297,7 @@ void createBtnPageLimit(HWND hWnd) {
 
     // 1. Calcular o número total de páginas (numeroBtn)
     numeroBtn = static_cast<int>(std::ceil(
-        static_cast<double>(g_totalRowCount) / limitTableRow
+        static_cast<double>(rowsNumber) / limitTableRow
     ));
 
     // Se não houver páginas para exibir (tabela vazia), encerra
@@ -445,7 +403,7 @@ void handleLimitChange(HWND hComboBox) {
         // 3. Converte a string para número (integer)
         limitTableRow = _wtoi(selected_text.c_str());
 
-        offsetTableRow = 0;
+        offsetTableRow = 1;
         idNumeroUltimo = 1;
     }
 }
@@ -1461,6 +1419,7 @@ void selectDB() {
     int rc = sqlite3_open("pet.db", &db);
     if (rc == SQLITE_OK) {
         std::string sqlSelect;
+        std::string sqlSelectCount;
         if (orderColumn == "Appointment_Hour") {
 
             // Expressão para converter 'H:MM' ou 'HH:MM' para o formato ordenável 'HH:MM'
@@ -1485,8 +1444,8 @@ void selectDB() {
             sqlSelect = "SELECT * FROM Pets ORDER BY " + orderColumn + " COLLATE NOCASE " + orderAscDesc;
         }
 
-        std::string limitClause = " LIMIT " + std::to_string(limitTableRow) + " OFFSET " + std::to_string(offsetTableRow);
-        sqlSelect = sqlSelect + limitClause + ";";
+        //std::string limitClause = " LIMIT " + std::to_string(limitTableRow) + " OFFSET " + std::to_string(offsetTableRow);
+        //sqlSelect = sqlSelect + limitClause + ";";
 
         rc = sqlite3_exec(db, sqlSelect.c_str(), sqlite_callback, &g_tableData, &errMsg);
         if (rc != SQLITE_OK) {
@@ -1513,10 +1472,13 @@ void selectDB() {
 }
 
 void verificarFiltro(const std::vector<std::wstring>& dados, std::vector<int>& naoDesenharIntern){
-    // Colunas que não serão desenhadas na tabela
-    // DESENHAR APENAS UMA VEZ - REMOVER loops desnecessários
+    // 1. LIMPAR DADOS ANTIGOS ANTES DE CADA CONSULTA
+    g_tableDataRowsNumber.clear();
+    g_tableDataRowsNumber.resize(g_tableData.size());
+    for (size_t row = 0; row < g_tableData.size(); ++row) {
+        g_tableDataRowsNumber[row].resize(g_tableData[row].size());
+    }
 
-    rowsNumber = 0;
     std::wstring filtro;
     std::wstring dadoTable;
     for (size_t row = 0; row < g_tableData.size(); row++) {
@@ -1556,11 +1518,53 @@ void verificarFiltro(const std::vector<std::wstring>& dados, std::vector<int>& n
         }
     }
 
+    // 1. Limpeza e Inicialização de Contadores
+    rowsNumber = 0;
+    int rowCount = 0;
+
+    // CRUCIAL: Limpar o vetor de destino para garantir que ele comece vazio
+    // e usar push_back() em vez de atribuição indexada para evitar erros de índice.
+    g_tableDataRowsNumber.clear();
+
+    // 2. Pré-alocação (Opcional, mas melhora o desempenho)
+    // Se g_tableDataRowsNumber já for do tipo std::vector<std::vector<std::wstring>>
+    g_tableDataRowsNumber.reserve(g_tableData.size());
+
+    // 3. Iteração, Filtro e Construção do Novo Vetor
     for (size_t row = 0; row < g_tableData.size(); row++) {
+
+        // A. Lógica do Filtro: Se a linha for válida (flag != 1)
         if (naoDesenharIntern[row] != 1) {
+
+            // B. Cria e preenche uma nova linha com todas as colunas da linha original
+            std::vector<std::wstring> newRow;
+
+            // Copia todas as colunas (você não está filtrando colunas, apenas linhas)
+            for (size_t col = 0; col < g_tableData[row].size(); col++) {
+                newRow.push_back(g_tableData[row][col]);
+            }
+
+            // C. Adiciona a linha válida (newRow) ao vetor de destino
+            g_tableDataRowsNumber.push_back(newRow);
+
+            // D. Atualiza o contador de linhas válidas
+            // rowCount e rowsNumber agora têm o mesmo valor (número de linhas)
+            rowCount++;
             rowsNumber++;
         }
+        // Linhas com naoDesenharIntern[row] == 1 são automaticamente "removidas"
+        // por não serem adicionadas ao g_tableDataRowsNumber.
     }
+
+    // 4. ATRIBUIÇÃO E REDIMENSIONAMENTO (Não é mais necessário redimensionar, 
+    // pois g_tableDataRowsNumber foi construído com o tamanho exato)
+
+    g_tableData.clear();
+    // Move o conteúdo filtrado para g_tableData.
+    // std::move é mais eficiente que a simples atribuição (=) pois evita cópia.
+    g_tableData = std::move(g_tableDataRowsNumber);
+
+    // O vetor g_tableData agora tem um tamanho (size()) igual ao rowsNumber final.
 
     naoDesenhar = naoDesenharIntern;
 }
@@ -1584,52 +1588,68 @@ void CriarBotoesTabela(HWND hWnd)
     int startY = 80;
     int cellHeight = 32;
 
-    for (size_t row = 1; row < g_tableData.size(); row++) {
-        if (naoDesenhar[row] != 1) {
-            LONG_PTR recordId = _wtoi(g_tableData[row][0].c_str());
-            int yPos = startY + row * cellHeight + 2;
+    int limit;
+    limit = offsetTableRow + limitTableRow;
 
-            // Botão Consultar
-            int xPos = startX + 7 * cellWidth + 2;
-            HWND hButton = CreateWindowW(
-                L"BUTTON", L"Consultar",
-                WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
-                xPos, yPos, 70, 30,
-                hWnd, (HMENU)(CONSULTAR),
-                (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL
-            );
-            if (hButton) {
-                SetWindowLongPtr(hButton, GWLP_USERDATA, recordId);
-                g_buttons.push_back(hButton);
-            }
+    if (limit < rowsNumber) {
+        limit = offsetTableRow + limitTableRow;
+    }
+    else {
+        limit = rowsNumber;
+    }
 
-            // Botão Editar
-            xPos = startX + 8 * cellWidth + 2;
-            hButton = CreateWindowW(
-                L"BUTTON", L"Editar",
-                WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
-                xPos, yPos, 70, 30,
-                hWnd, (HMENU)(EDITAR),
-                (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL
-            );
-            if (hButton) {
-                SetWindowLongPtr(hButton, GWLP_USERDATA, recordId);
-                g_buttons.push_back(hButton);
-            }
+    int inicio;
+    if (offsetTableRow == 0) {
+        inicio = 1;
+    }
+    else {
+        inicio = offsetTableRow;
+    }
 
-            // Botão Deletar
-            xPos = startX + 9 * cellWidth + 2;
-            hButton = CreateWindowW(
-                L"BUTTON", L"Deletar",
-                WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
-                xPos, yPos, 70, 30,
-                hWnd, (HMENU)(DELETAR),
-                (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL
-            );
-            if (hButton) {
-                SetWindowLongPtr(hButton, GWLP_USERDATA, recordId);
-                g_buttons.push_back(hButton);
-            }
+    for (size_t row = inicio; row < limit; row++) {
+        LONG_PTR recordId = _wtoi(g_tableData[row][0].c_str());
+        int yPos = startY + row * cellHeight + 2;
+
+        // Botão Consultar
+        int xPos = startX + 7 * cellWidth + 2;
+        HWND hButton = CreateWindowW(
+            L"BUTTON", L"Consultar",
+            WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
+            xPos, yPos, 70, 30,
+            hWnd, (HMENU)(CONSULTAR),
+            (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL
+        );
+        if (hButton) {
+            SetWindowLongPtr(hButton, GWLP_USERDATA, recordId);
+            g_buttons.push_back(hButton);
+        }
+
+        // Botão Editar
+        xPos = startX + 8 * cellWidth + 2;
+        hButton = CreateWindowW(
+            L"BUTTON", L"Editar",
+            WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
+            xPos, yPos, 70, 30,
+            hWnd, (HMENU)(EDITAR),
+            (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL
+        );
+        if (hButton) {
+            SetWindowLongPtr(hButton, GWLP_USERDATA, recordId);
+            g_buttons.push_back(hButton);
+        }
+
+        // Botão Deletar
+        xPos = startX + 9 * cellWidth + 2;
+        hButton = CreateWindowW(
+            L"BUTTON", L"Deletar",
+            WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
+            xPos, yPos, 70, 30,
+            hWnd, (HMENU)(DELETAR),
+            (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL
+        );
+        if (hButton) {
+            SetWindowLongPtr(hButton, GWLP_USERDATA, recordId);
+            g_buttons.push_back(hButton);
         }
     }
 }
@@ -1644,7 +1664,17 @@ void ConfigurarScrollBars(HWND hWnd)
     int cellHeight = 32;
     int filtersHeight = 6 * cellHeight + 6 * 7;
 
-    g_contentHeight = static_cast<int>(rowsNumber) * cellHeight + 160 + filtersHeight;
+    //offsetTableRow = limitTableRow
+    int limit;
+    int numeroDeLinhas =  limitTableRow;
+    
+    limit = offsetTableRow + limitTableRow;
+
+    if (limit > rowsNumber) {
+        numeroDeLinhas = rowsNumber - offsetTableRow;
+    }
+
+    g_contentHeight = static_cast<int>(numeroDeLinhas) * cellHeight + 160 + filtersHeight;
 
     SCROLLINFO si = {};
     si.cbSize = sizeof(SCROLLINFO);
@@ -1668,14 +1698,14 @@ void RecarregarDadosTabela(HWND hWnd) {
     // Criar botões após carregar os dados
     CriarBotoesTabela(hWnd);
 
-    // Recriar botões com os novos dados
-    CriarBotoesTabela(hWnd);
-
     // Reconfigurar scroll bars
     ConfigurarScrollBars(hWnd);
 
     //Atualizar posição dos botões
     AtualizarPosicoesBotoes(hWnd);
+
+    // Criar botões de paginação
+    createBtnPageLimit(hWnd);
 
     // Forçar redesenho da janela
     InvalidateRect(hWnd, NULL, TRUE);

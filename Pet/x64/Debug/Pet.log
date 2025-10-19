@@ -1,19 +1,46 @@
-﻿  Select.cpp
+﻿  Pet.cpp
+C:\Users\Andre\source\repos\Pet\Pet.h(1,1): warning C4828: O arquivo contém um caractere começando com o deslocamento 0xea5 que é inválido no conjunto de caracteres de origem atual (página de código 65001).
+  (compilando o arquivo fonte 'Pet.cpp')
+  
 C:\Users\Andre\source\repos\Pet\Select.h(1,1): warning C4828: O arquivo contém um caractere começando com o deslocamento 0x1b1 que é inválido no conjunto de caracteres de origem atual (página de código 65001).
-  (compilando o arquivo fonte 'Select.cpp')
+  (compilando o arquivo fonte 'Pet.cpp')
+  
+C:\Users\Andre\source\repos\Pet\Pet.h(34,13): warning C4091: 'extern ': ignorado à esquerda de 'ButtonAction' quando nenhuma variável é declarada
+  (compilando o arquivo fonte 'Pet.cpp')
   
 C:\Users\Andre\source\repos\Pet\MenuUniversal.h(1,1): warning C4828: O arquivo contém um caractere começando com o deslocamento 0x10f que é inválido no conjunto de caracteres de origem atual (página de código 65001).
-  (compilando o arquivo fonte 'Select.cpp')
+  (compilando o arquivo fonte 'Pet.cpp')
   
-C:\Users\Andre\source\repos\Pet\Pet.h(1,1): warning C4828: O arquivo contém um caractere começando com o deslocamento 0xe8d que é inválido no conjunto de caracteres de origem atual (página de código 65001).
-  (compilando o arquivo fonte 'Select.cpp')
+C:\Users\Andre\source\repos\Pet\Add.h(1,1): warning C4828: O arquivo contém um caractere começando com o deslocamento 0xf4 que é inválido no conjunto de caracteres de origem atual (página de código 65001).
+  (compilando o arquivo fonte 'Pet.cpp')
   
-C:\Users\Andre\source\repos\Pet\Pet.h(33,13): warning C4091: 'extern ': ignorado à esquerda de 'ButtonAction' quando nenhuma variável é declarada
-  (compilando o arquivo fonte 'Select.cpp')
+C:\Users\Andre\source\repos\Pet\Consultar.h(1,1): warning C4828: O arquivo contém um caractere começando com o deslocamento 0xf7 que é inválido no conjunto de caracteres de origem atual (página de código 65001).
+  (compilando o arquivo fonte 'Pet.cpp')
   
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\format(42): warning STL4038: The contents of <format> are available only with C++20 or later.
-C:\Users\Andre\source\repos\Pet\Select.cpp(66,20): warning C4244: 'inicializando': conversão de 'LONG_PTR' para 'LONG', possível perda de dados
-C:\Users\Andre\source\repos\Pet\Select.cpp(211,44): warning C4244: 'argumento': conversão de 'LONG_PTR' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\Select.cpp(342,25): warning C4244: 'argumento': conversão de 'LONG_PTR' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\Select.cpp(431,42): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
+C:\Users\Andre\source\repos\Pet\Pet.cpp(760,17): warning C4101: 'column': variável local não referenciada
+C:\Users\Andre\source\repos\Pet\Pet.cpp(815,17): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
+C:\Users\Andre\source\repos\Pet\Pet.cpp(836,54): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
+C:\Users\Andre\source\repos\Pet\Pet.cpp(861,17): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
+C:\Users\Andre\source\repos\Pet\Pet.cpp(888,17): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
+C:\Users\Andre\source\repos\Pet\Pet.cpp(922,17): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
+C:\Users\Andre\source\repos\Pet\Pet.cpp(957,17): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
+C:\Users\Andre\source\repos\Pet\Pet.cpp(1009,54): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
+C:\Users\Andre\source\repos\Pet\Pet.cpp(1036,54): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
+C:\Users\Andre\source\repos\Pet\Pet.cpp(1046,59): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
+C:\Users\Andre\source\repos\Pet\Pet.cpp(1062,54): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
+C:\Users\Andre\source\repos\Pet\Pet.cpp(1072,59): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
+C:\Users\Andre\source\repos\Pet\Pet.cpp(1083,54): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
+C:\Users\Andre\source\repos\Pet\Pet.cpp(1155,50): warning C4267: '=': conversão de 'size_t' para 'int', possível perda de dados
+C:\Users\Andre\source\repos\Pet\Pet.cpp(1156,67): warning C4267: '=': conversão de 'size_t' para 'int', possível perda de dados
+C:\Users\Andre\source\repos\Pet\Pet.cpp(1249,30): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
+C:\Users\Andre\source\repos\Pet\Pet.cpp(1347,18): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
+C:\Users\Andre\source\repos\Pet\Pet.cpp(1585,20): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
+C:\Users\Andre\source\repos\Pet\Pet.cpp(1611,18): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
+C:\Users\Andre\source\repos\Pet\Pet.cpp(2263,16): warning C4244: 'return': conversão de 'LRESULT' para 'BOOL', possível perda de dados
+C:\Users\Andre\source\repos\Pet\Pet.cpp(2269,16): warning C4244: 'return': conversão de 'LRESULT' para 'BOOL', possível perda de dados
+C:\Users\Andre\source\repos\Pet\Pet.cpp(2275,16): warning C4244: 'return': conversão de 'LRESULT' para 'BOOL', possível perda de dados
+C:\Users\Andre\source\repos\Pet\Pet.cpp(2526,52): warning C4267: 'argumento': conversão de 'size_t' para 'int', possível perda de dados
+C:\Users\Andre\source\repos\Pet\Pet.cpp(2531,45): warning C4267: 'argumento': conversão de 'size_t' para 'int', possível perda de dados
+C:\Users\Andre\source\repos\Pet\Pet.cpp(2277,1): warning C4715: 'ProcessarMenu': nem todos os caminhos de controle retornam um valor
+C:\Users\Andre\source\repos\Pet\Pet.cpp(2376,1): warning C4715: 'CreateNewWindow': nem todos os caminhos de controle retornam um valor
   Pet.vcxproj -> C:\Users\Andre\source\repos\Pet\x64\Debug\Pet.exe

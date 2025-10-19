@@ -142,9 +142,6 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
             // Criar botões de ordenamento das colunas da tabela
             createOrderBtn(hWnd);
 
-            // Criar limite das páginas
-            createBtnPageLimit(hWnd);
-
             //Criar inputs dos filtros
             criarInputsFilters(hWnd);
 
@@ -160,6 +157,9 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 
             // Configurar scroll bars após criar tudo
             ConfigurarScrollBars(hWnd);
+
+            // Criar limite das páginas
+            createBtnPageLimit(hWnd);
             
         }
         return 0;
@@ -262,6 +262,9 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
             GetWindowText(input, buffer, 256);
             dataRegistroAte = std::wstring(buffer);
 
+            idNumeroUltimo = 1;
+            offsetTableRow = 0;
+
             RecarregarDadosTabela(hWnd);
         }
         else if (wmId == ORDENAR) // Botões "Ordenar"
@@ -329,8 +332,6 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
                 // CHAMAR FUNÇÃO DE AÇÃO
                 handleLimitChange(hComboBox);
 
-                createBtnPageLimit(hWnd);
-
                 RecarregarDadosTabela(hWnd);
 
                 // Certifique-se de retornar 0 após tratar a mensagem
@@ -340,8 +341,8 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
         else if (wmId == OFFSET) {
 
             mudarPagina(id);
-            createBtnPageLimit(hWnd);
             RecarregarDadosTabela(hWnd);
+
 
         }
         break;
@@ -391,38 +392,43 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 
         int linha = 1;
         int counter = 0;
+
+        //offsetTableRow = limitTableRow
+        int limit;
+        limit = offsetTableRow + limitTableRow;
+
+        if (limit < rowsNumber) {
+            limit = offsetTableRow + limitTableRow;
+        } else {
+            limit = rowsNumber;
+        }
+         
         // DESENHAR APENAS UMA VEZ - REMOVER loops desnecessários
-        for (size_t row = 1; row < g_tableData.size(); row++) {
+        for (size_t row = offsetTableRow; row < limit; row++) {
             if (row != 0) {
-                if (naoDesenhar[row] != 1) {
-                    HBRUSH hCurrentBrush = (linha % 2 == 0) ? hBrushGray : hBrushWhite;
+                HBRUSH hCurrentBrush = (linha % 2 == 0) ? hBrushGray : hBrushWhite;
 
-                    if (linha == 0) {
-                        hCurrentBrush = hBrushHeader;
-                        fonte(L"Header", RGB(255, 255, 255), hdc);
-                    }
-                    else {
-                        fonte(L"Font", RGB(0, 0, 0), hdc);
-                    }
-
-                    // Desenhar o fundo da linha
-                    RECT rowRect = {
-                        startX,
-                        startY + static_cast<int>(linha) * cellHeight,
-                        startX + width,
-                        startY + (static_cast<int>(linha) + 1) * cellHeight
-                    };
-                    FillRect(hdc, &rowRect, hCurrentBrush);
+                if (linha == 0) {
+                    hCurrentBrush = hBrushHeader;
+                    fonte(L"Header", RGB(255, 255, 255), hdc);
                 }
+                else {
+                    fonte(L"Font", RGB(0, 0, 0), hdc);
+                }
+
+                // Desenhar o fundo da linha
+                RECT rowRect = {
+                    startX,
+                    startY + static_cast<int>(linha) * cellHeight,
+                    startX + width,
+                    startY + (static_cast<int>(linha) + 1) * cellHeight
+                };
+                FillRect(hdc, &rowRect, hCurrentBrush);
 
                 counter = 0;
                 // Desenhar as células de dados
                 for (size_t col = 0; col < g_tableData[row].size(); col++) {
                     std::wstring displayText = g_tableData[row][col];
-
-                    if (naoDesenhar[row] == 1) {
-                        break;
-                    }
 
                     if (col == 0 || col == 1 || col == 3 || col == 12 || col == 13 || col == 20 || col == 21) {
                         int xPos = startX + counter * cellWidth + 10;
@@ -536,19 +542,26 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
         if (si.nPos != oldPos) {
             g_scrollY = si.nPos;
 
+            naoDesenhar.resize(g_tableData.size());
+            //Verificar filtros
+            verificarFiltro(dados, naoDesenhar);
+
+            g_clientHeight = HIWORD(lParam);
+            ConfigurarScrollBars(hWnd);
+
             // Atualizar offset botões
             AtualizarPosicoesOffset(hWnd);
 
             // Atualizar order botões
             AtualizarPosicoesOrder(hWnd);
 
-            // Apenas atualizar botões, NÃO chamar InvalidateRect
-            AtualizarPosicoesBotoes(hWnd);
-
             // Atualizar limite de linhas
             AtualizarPosicoesLimit(hWnd);
 
-			// Atualizar posições dos inputs dos filtros
+            // Apenas atualizar botões, NÃO chamar InvalidateRect aqui
+            AtualizarPosicoesBotoes(hWnd);
+
+            // Atualizar posições dos inputs dos filtros
             AtualizarPosicoesInputs(hWnd);
         }
         break;
@@ -574,17 +587,24 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
         if (si.nPos != oldPos) {
             g_scrollY = si.nPos;
 
+            naoDesenhar.resize(g_tableData.size());
+            //Verificar filtros
+            verificarFiltro(dados, naoDesenhar);
+
+            g_clientHeight = HIWORD(lParam);
+            ConfigurarScrollBars(hWnd);
+
             // Atualizar offset botões
             AtualizarPosicoesOffset(hWnd);
 
             // Atualizar order botões
             AtualizarPosicoesOrder(hWnd);
 
-            // Apenas atualizar botões, NÃO chamar InvalidateRect
-            AtualizarPosicoesBotoes(hWnd);
-
             // Atualizar limite de linhas
             AtualizarPosicoesLimit(hWnd);
+
+            // Apenas atualizar botões, NÃO chamar InvalidateRect aqui
+            AtualizarPosicoesBotoes(hWnd);
 
             // Atualizar posições dos inputs dos filtros
             AtualizarPosicoesInputs(hWnd);
