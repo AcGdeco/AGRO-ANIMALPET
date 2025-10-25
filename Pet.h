@@ -48,6 +48,8 @@ extern int idNumeroUltimo;
 extern std::vector<HWND> g_editControlsOrder;
 extern bool g_isRedrawing;
 extern int rowsNumberSemCabecalho;
+extern LONG_PTR idBtnGlobal;
+extern std::wstring btnClicado;
 
 std::wstring GetCurrentDate();
 std::wstring GetCurrentHour();
@@ -98,6 +100,8 @@ void invalidateDrawing(HWND hWnd);
 void DestroyAllControls();
 void DestroyControlsFromVector(std::vector<HWND>& controls);
 void SetFilterValues(const std::vector<std::wstring>& dados);
+void ordenarDefinicoesValores(HWND hWnd);
+void ordenarMudarIcone(HWND hWnd);
 
 // Definição da estrutura
 struct Data {

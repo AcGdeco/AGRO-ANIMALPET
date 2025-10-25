@@ -33,6 +33,8 @@ int offsetTableRow = 1;
 int numeroBtn;
 int idNumeroUltimo = 1;
 int rowsNumberSemCabecalho = 0;
+LONG_PTR idBtnGlobal = 0;
+std::wstring btnClicado;
 
 bool g_isRedrawing = false;
 
@@ -623,6 +625,97 @@ void AtualizarPosicoesOrder(HWND hWnd) {
         
         SetWindowPos(g_editControlsOrder[col], NULL, xPos - 10, yPos, 0, 0,
             SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
+    }
+}
+
+void ordenarMudarIcone(HWND hWnd) {
+    // Encontra o HWND do botão (se você não o salvou globalmente)
+    HWND hButtonOrdenar = GetDlgItem(hWnd, ORDENAR);
+
+    while (hButtonOrdenar) {
+        // Verificar se é um botão de ordenar
+        if (GetDlgCtrlID(hButtonOrdenar) >= ORDENAR &&
+            GetDlgCtrlID(hButtonOrdenar) <= ORDENAR + 7) {
+
+            // Verificar se é o botão da coluna desejada
+            LONG_PTR coluna = GetWindowLongPtr(hButtonOrdenar, GWLP_USERDATA);
+            if (coluna == 0 && orderAscDesc == "ASC") {
+                // Encontrou o botão certo - mudar ícone
+                // Mudar para o novo ícone
+                MudarIconeDoBotao(hButtonOrdenar, IDB_SETAS_BAIXO);
+            }
+            else if (coluna == 0 && orderAscDesc == "DESC") {
+                MudarIconeDoBotao(hButtonOrdenar, IDB_SETAS_CIMA);
+            }
+            else {
+                MudarIconeDoBotao(hButtonOrdenar, IDB_SETAS);
+            }
+        }
+        hButtonOrdenar = GetWindow(hButtonOrdenar, GW_HWNDNEXT);
+    }
+
+    for (size_t i = 0; i < g_editControlsOrder.size(); i++) {
+        if (i == idBtnGlobal && orderAscDesc == "ASC") {
+            HWND hButton = g_editControlsOrder[i];
+            MudarIconeDoBotao(hButton, IDB_SETAS_CIMA);
+        }
+        else if (i == idBtnGlobal && orderAscDesc == "DESC") {
+            HWND hButton = g_editControlsOrder[i];
+            MudarIconeDoBotao(hButton, IDB_SETAS_BAIXO);
+        }
+        else {
+            HWND hButton = g_editControlsOrder[i];
+            MudarIconeDoBotao(hButton, IDB_SETAS);
+        }
+    }
+}
+
+void ordenarDefinicoesValores(HWND hWnd) {
+    if (btnClicado == L"ORDENAR") {
+        std::string oldOrderColumn = orderColumn;
+
+        switch (idBtnGlobal)
+        {
+        case 0:
+            orderColumn = "ID";
+            break;
+        case 1:
+            orderColumn = "Nome_do_Pet";
+            break;
+        case 2:
+            orderColumn = "Nome_do_Tutor";
+            break;
+        case 3:
+            orderColumn = "Banho";
+            break;
+        case 4:
+            orderColumn = "Tosa";
+            break;
+        case 5:
+            orderColumn = "Appointment_Date";
+            break;
+        case 6:
+            orderColumn = "Appointment_Hour";
+            break;
+        default:
+            break;
+        }
+
+        if (orderAscDesc == "DESC" && orderColumn == oldOrderColumn) {
+            orderAscDesc = "ASC";
+        }
+        else if (orderAscDesc == "ASC" && orderColumn == oldOrderColumn) {
+            orderAscDesc = "DESC";
+        }
+        else if (orderColumn != oldOrderColumn) {
+            if (idBtnGlobal == 0) {
+                orderAscDesc = "DESC";
+            }
+            else {
+                orderAscDesc = "ASC";
+            }
+        }
+        btnClicado = L"";
     }
 }
 
@@ -1941,6 +2034,9 @@ void DestroyControlsFromVector(std::vector<HWND>& controls) {
 
 // Função para recarregar dados do banco
 void RecarregarDadosTabela(HWND hWnd) {
+    // Assim, o Windows não redesenha a janela a cada SetWindowPos, apenas uma vez no final — mais rápido e visualmente limpo.
+    SendMessage(hWnd, WM_SETREDRAW, FALSE, 0);
+
     // Destruir na ordem inversa da criação (mais seguro)
     DestroyControlsFromVector(g_buttons);
     DestroyControlsFromVector(g_editControlsOffsetLimit);
@@ -1954,6 +2050,9 @@ void RecarregarDadosTabela(HWND hWnd) {
     g_editControlsLimit.clear();
     g_editControlsOrder.clear();
     g_editControlsFilters.clear();
+
+    // Definir valores para ordenação e imagem
+    ordenarDefinicoesValores(hWnd);
 
     // Limpar dados antigos
     selectDB();
@@ -1991,12 +2090,18 @@ void RecarregarDadosTabela(HWND hWnd) {
 
     // Atualizar limite de linhas
     AtualizarPosicoesLimit(hWnd);
-
+    
     // Atualizar botões order
     AtualizarPosicoesOrder(hWnd);
 
+    // Mudar ícone do botão de ordenamento
+    ordenarMudarIcone(hWnd);
+
     // Reconfigurar scroll bars NÃO PODE TIRAR ISSO DAQUI, NESSA ORDEM SE NÃO O INPUT QUE ESCOLHE O Nº DE LINHAS DA TABELA VAI BUGAR
     ConfigurarScrollBars(hWnd);
+
+    // Assim, o Windows não redesenha a janela a cada SetWindowPos, apenas uma vez no final — mais rápido e visualmente limpo.
+    SendMessage(hWnd, WM_SETREDRAW, TRUE, 0);
 
     // Forçar redesenho da janela
     invalidateDrawing(hWnd);

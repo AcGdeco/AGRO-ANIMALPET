@@ -462,8 +462,10 @@ LRESULT CALLBACK WndProcEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
 
         if (si.nPos != oldPos) {
             g_scrollY = si.nPos;
+            SendMessage(hWnd, WM_SETREDRAW, FALSE, 0);
             // Atualizar posições dos controles ANTES do redraw
             AtualizarPosicoesControlesAgendamento(hWnd);
+            SendMessage(hWnd, WM_SETREDRAW, TRUE, 0);
             invalidateDrawing(hWnd);
             UpdateWindow(hWnd);
         }
@@ -495,8 +497,10 @@ LRESULT CALLBACK WndProcEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
 
         if (si.nPos != oldPos) {
             g_scrollX = si.nPos;
+            SendMessage(hWnd, WM_SETREDRAW, FALSE, 0);
             // Atualizar posições dos controles ANTES do redraw
             AtualizarPosicoesControlesAgendamento(hWnd);
+            SendMessage(hWnd, WM_SETREDRAW, TRUE, 0);
             invalidateDrawing(hWnd);
             UpdateWindow(hWnd);
         }
@@ -510,10 +514,11 @@ LRESULT CALLBACK WndProcEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
         g_clientWidth = newWidth;
         g_clientHeight = newHeight;
 
+        SendMessage(hWnd, WM_SETREDRAW, FALSE, 0);
         ConfigurarScrollBarsAgendamento(hWnd);
         // Atualizar posições dos controles após redimensionamento
         AtualizarPosicoesControlesAgendamento(hWnd);
-
+        SendMessage(hWnd, WM_SETREDRAW, TRUE, 0);
         invalidateDrawing(hWnd);
         break;
     }
@@ -538,8 +543,10 @@ LRESULT CALLBACK WndProcEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
 
         if (si.nPos != oldPos) {
             g_scrollY = si.nPos;
+            SendMessage(hWnd, WM_SETREDRAW, FALSE, 0);
             // Atualizar posições dos controles ANTES do redraw
             AtualizarPosicoesControlesAgendamento(hWnd);
+            SendMessage(hWnd, WM_SETREDRAW, TRUE, 0);
             invalidateDrawing(hWnd);
             UpdateWindow(hWnd);
         }

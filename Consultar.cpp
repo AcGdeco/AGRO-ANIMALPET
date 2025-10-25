@@ -207,7 +207,9 @@ LRESULT CALLBACK WndProcRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
 
         g_clientWidth = newWidth;
         g_clientHeight = newHeight;
+        SendMessage(hWnd, WM_SETREDRAW, FALSE, 0);
         ConfigurarScrollBarsConsulta(hWnd);
+        SendMessage(hWnd, WM_SETREDRAW, TRUE, 0);
         invalidateDrawing(hWnd);
         break;
     }

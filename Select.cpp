@@ -85,12 +85,12 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
         }
         else {
             // Código de criação de tabela e inserção (mantido como está)
-            const char* sqlDrop = "DROP TABLE IF EXISTS Pets;";
-            rc = sqlite3_exec(db, sqlDrop, 0, 0, &errMsg);
-            if (rc != SQLITE_OK) {
-                MessageBox(hWnd, L"Erro ao dropar tabela!", L"Erro", MB_OK | MB_ICONERROR);
-                sqlite3_free(errMsg);
-            }
+            //const char* sqlDrop = "DROP TABLE IF EXISTS Pets;";
+            //rc = sqlite3_exec(db, sqlDrop, 0, 0, &errMsg);
+            //if (rc != SQLITE_OK) {
+                //MessageBox(hWnd, L"Erro ao dropar tabela!", L"Erro", MB_OK | MB_ICONERROR);
+                //sqlite3_free(errMsg);
+            //}
             const char* sqlCreate = "CREATE TABLE IF NOT EXISTS Pets (ID INTEGER PRIMARY KEY AUTOINCREMENT, Nome_do_Pet TEXT, Raca TEXT, Nome_do_Tutor TEXT, CEP TEXT, Cor TEXT, Idade TEXT, Peso TEXT, Sexo TEXT, Castrado TEXT, Endereco TEXT, Ponto_de_referencia TEXT, Banho TEXT, Tosa TEXT, Obs_Tosa TEXT, Parasitas TEXT, Lesoes TEXT, Obs_Lesoes TEXT, Telefone TEXT, CPF TEXT, Appointment_Date TEXT, Appointment_Hour TEXT, Date TEXT, Hour TEXT);";
             rc = sqlite3_exec(db, sqlCreate, 0, 0, &errMsg);
             if (rc != SQLITE_OK) {
@@ -108,21 +108,21 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
                 MessageBox(hWnd, fullMsg, L"Erro", MB_OK | MB_ICONERROR);
                 sqlite3_free(errMsg);
             }
-            else {
+            //else {
                 // Inserções (código original mantido)
-                std::wstring currentDate = GetCurrentDate();
-                std::wstring currentHour = GetCurrentHour();
-                for (int i = 1; i <= 100; i++) {
-                   std::wstring sqlInsertW = L"INSERT INTO Pets (Nome_do_Pet, Raca, Nome_do_Tutor, CEP, Cor, Idade, Peso, Sexo, Castrado, Endereco, Ponto_de_referencia, Banho, Tosa, Obs_Tosa, Parasitas, Lesoes, Obs_Lesoes, Telefone, CPF, Appointment_Date, Appointment_Hour, Date, Hour) VALUES ('Fido', 'Bulldog', 'Laís', '36309016', 'Preto', 5, 25, 'Masculino', 'Sim', 'Rua das flores - Guarda Mor - São João del Rei', 'Perto da pizzaria Agostinho', 'Padrão', 'Tesoura', 'ir qpiofj adfjs kçjf dkfjeif çsdaf jkasdjf iejf sdçf aksdfjis fdfj çaklsfjaksdfj kdsjfçaejf idsjfkasdf jaies', 'Carrapatos', 'Pele', 'asdf façldj fçkalsdj fdaskljf dsçkf jçklasdf jkaldsfj çkldsa fjaçklds jfakdls fjkalsdjf klasdjf çasdfj çasfj çadsklfjklf ', '32998360862', '09813426632', '04/07/2025', '15:00', '" + currentDate + L"', '" + currentHour + L"');";
-                    int required = WideCharToMultiByte(CP_UTF8, 0, sqlInsertW.c_str(), -1, nullptr, 0, nullptr, nullptr);
-                    if (required > 0) {
-                        std::string sqlInsertUtf8(required, '\0');
-                        WideCharToMultiByte(CP_UTF8, 0, sqlInsertW.c_str(), -1, &sqlInsertUtf8[0], required, nullptr, nullptr);
-                        char* errMsg = nullptr;
-                        int rc = sqlite3_exec(db, sqlInsertUtf8.c_str(), nullptr, nullptr, &errMsg);
-                        if (rc != SQLITE_OK) sqlite3_free(errMsg);
-                    }
-                }
+                //std::wstring currentDate = GetCurrentDate();
+                //std::wstring currentHour = GetCurrentHour();
+                //for (int i = 1; i <= 100; i++) {
+                   //std::wstring sqlInsertW = L"INSERT INTO Pets (Nome_do_Pet, Raca, Nome_do_Tutor, CEP, Cor, Idade, Peso, Sexo, Castrado, Endereco, Ponto_de_referencia, Banho, Tosa, Obs_Tosa, Parasitas, Lesoes, Obs_Lesoes, Telefone, CPF, Appointment_Date, Appointment_Hour, Date, Hour) VALUES ('Fido', 'Bulldog', 'Laís', '36309016', 'Preto', 5, 25, 'Masculino', 'Sim', 'Rua das flores - Guarda Mor - São João del Rei', 'Perto da pizzaria Agostinho', 'Padrão', 'Tesoura', 'ir qpiofj adfjs kçjf dkfjeif çsdaf jkasdjf iejf sdçf aksdfjis fdfj çaklsfjaksdfj kdsjfçaejf idsjfkasdf jaies', 'Carrapatos', 'Pele', 'asdf façldj fçkalsdj fdaskljf dsçkf jçklasdf jkaldsfj çkldsa fjaçklds jfakdls fjkalsdjf klasdjf çasdfj çasfj çadsklfjklf ', '32998360862', '09813426632', '04/07/2025', '15:00', '" + currentDate + L"', '" + currentHour + L"');";
+                    //int required = WideCharToMultiByte(CP_UTF8, 0, sqlInsertW.c_str(), -1, nullptr, 0, nullptr, nullptr);
+                    //if (required > 0) {
+                        //std::string sqlInsertUtf8(required, '\0');
+                        //WideCharToMultiByte(CP_UTF8, 0, sqlInsertW.c_str(), -1, &sqlInsertUtf8[0], required, nullptr, nullptr);
+                        //char* errMsg = nullptr;
+                        //int rc = sqlite3_exec(db, sqlInsertUtf8.c_str(), nullptr, nullptr, &errMsg);
+                        //if (rc != SQLITE_OK) sqlite3_free(errMsg);
+                    //}
+                //}
                 //std::wstring sqlInsertW2 = L"INSERT INTO Pets (Nome_do_Pet, Raca, Nome_do_Tutor, CEP, Cor, Idade, Peso, Sexo, Castrado, Endereco, Ponto_de_referencia, Banho, Tosa, Obs_Tosa, Parasitas, Lesoes, Obs_Lesoes, Telefone, CPF, Date, Hour) VALUES ('Astralis', 'Viralata', 'Débora', '36309022', 'Preto', 6, 18, 'Feminino', 'Não', 'Rua Ricador Geraldo dos Santos - Alto das Mercês - nº12', 'Perto da igreja das Mercês', 'Padrão', 'Tesoura', 'aa ksfj asldfj açlksdj fkasjd fçklasdjf aksdlfjkalçsdfj kçalsdjf kçlasjd çfkasdj fklçaj sdçlfkjakslfj çlasdjf çasd jfçaskdjfsdf', 'Carrapatos', 'Pele', ' asdfj açlsjf akçslj fkçlasdj fkçlasdjf lçkasjdf kasdjfkiujriwejfç dfkmdnfçnvçaidsjfçkdsfjaçksdjfkaçsjdfkasdjfkçlasjdçfaksdjf', '32998365552', '09813426789', '" + currentDate + L"', '" + currentHour + L"');";
                 //int required2 = WideCharToMultiByte(CP_UTF8, 0, sqlInsertW2.c_str(), -1, nullptr, 0, nullptr, nullptr);
                 //if (required2 > 0) {
@@ -141,7 +141,7 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
                     //MessageBoxW(hWnd, fullMsg, L"Erro", MB_OK | MB_ICONERROR);
                     //sqlite3_free(errMsg);
                 //}
-            }
+            //}
             sqlite3_close(db);
 
             RecarregarDadosTabela(hWnd);
@@ -262,90 +262,8 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
         }
         else if (wmId == ORDENAR) // Botões "Ordenar"
         {
-            std::string oldOrderColumn = orderColumn;
-
-            // Encontra o HWND do botão (se você não o salvou globalmente)
-            HWND hButtonOrdenar = GetDlgItem(hWnd, ORDENAR);
-
-            while (hButtonOrdenar) {
-                // Verificar se é um botão de ordenar
-                if (GetDlgCtrlID(hButtonOrdenar) >= ORDENAR &&
-                    GetDlgCtrlID(hButtonOrdenar) <= ORDENAR + 7) {
-
-                    // Verificar se é o botão da coluna desejada
-                    LONG_PTR coluna = GetWindowLongPtr(hButtonOrdenar, GWLP_USERDATA);
-                    if (coluna == 0 && orderAscDesc == "ASC") {
-                        // Encontrou o botão certo - mudar ícone
-                        // Mudar para o novo ícone
-                        MudarIconeDoBotao(hButtonOrdenar, IDB_SETAS_BAIXO);
-                    }
-                    else if (coluna == 0 && orderAscDesc == "DESC") {
-                        MudarIconeDoBotao(hButtonOrdenar, IDB_SETAS_CIMA);
-                    }
-                    else {
-                        MudarIconeDoBotao(hButtonOrdenar, IDB_SETAS);
-                    }
-                }
-                hButtonOrdenar = GetWindow(hButtonOrdenar, GW_HWNDNEXT);
-            }
-
-            switch (id)
-            {
-                case 0:
-					orderColumn = "ID";
-				break;
-				case 1: 
-                    orderColumn = "Nome_do_Pet";    
-                break;
-                case 2:
-                    orderColumn = "Nome_do_Tutor";
-                    break;
-                case 3:
-                    orderColumn = "Banho";
-                    break;
-                case 4:
-                    orderColumn = "Tosa";
-                    break;
-                case 5:
-                    orderColumn = "Appointment_Date";
-                    break;
-                case 6:
-                    orderColumn = "Appointment_Hour";
-                    break;
-            default:
-                break;
-            }
-
-            if (orderAscDesc == "DESC" && orderColumn == oldOrderColumn) {
-                orderAscDesc = "ASC";
-            }
-            else if (orderAscDesc == "ASC" && orderColumn == oldOrderColumn) {
-                orderAscDesc = "DESC";
-            }
-            else if(orderColumn != oldOrderColumn){
-                if (id == 0) {
-                    orderAscDesc = "DESC";
-                }
-                else {
-                    orderAscDesc = "ASC";
-                }
-            }
-
-            for (size_t i = 0; i < g_editControlsOrder.size(); i++) {
-                if (i == id && orderAscDesc == "ASC") {
-                    HWND hButton = g_editControlsOrder[i];
-                    MudarIconeDoBotao(hButton, IDB_SETAS_CIMA);
-                }
-                else if (i == id && orderAscDesc == "DESC") {
-                    HWND hButton = g_editControlsOrder[i];
-                    MudarIconeDoBotao(hButton, IDB_SETAS_BAIXO);
-                }
-                else {
-                    HWND hButton = g_editControlsOrder[i];
-                    MudarIconeDoBotao(hButton, IDB_SETAS);
-                }
-            }
-            
+            btnClicado = L"ORDENAR";
+            idBtnGlobal = id;
             RecarregarDadosTabela(hWnd);
         }
         // Verifica se a mensagem veio do seu ComboBox LIMITAR
