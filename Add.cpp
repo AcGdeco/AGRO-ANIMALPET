@@ -778,6 +778,11 @@ LRESULT CALLBACK WndProcAdd(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
         return DefWindowProc(hWnd, message, wParam, lParam);
     }
     break;
+    case WM_KEYDOWN:
+    {
+        Shortcuts(hWnd, message, wParam, lParam);
+        break;
+    }
     default:
         return DefWindowProc(hWnd, message, wParam, lParam);
     }

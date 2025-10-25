@@ -1069,6 +1069,7 @@ void criarInputsFilters(HWND hWnd) {
     int cellHeight = 32;
     int numColumnsFull = 10;
     int cellWidthFull = width / (numColumnsFull > 0 ? numColumnsFull : 1); // +3 para os botões
+    int inputWidth = cellWidthFull - 10;
 
     // Configurar a linha do header
     int startYFull = 80 - g_scrollY;  // Posição Y com scroll
@@ -1089,7 +1090,7 @@ void criarInputsFilters(HWND hWnd) {
                 L"ComboBox",                       // Nome da classe do controle ComboBox
                 L"",                               // Texto inicial (vazio)
                 WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP, // Estilos: Filho, Visível, e lista suspensa que não pode ser editada (SELECT)
-                xPos, yPos, cellWidthFull, 150,
+                xPos, yPos, inputWidth, 150,
                 hWnd,                        // Janela pai
                 (HMENU)(controlID),                        // ID único do controle (para o WM_COMMAND)
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
@@ -1109,7 +1110,7 @@ void criarInputsFilters(HWND hWnd) {
             HWND hEdit = CreateWindowEx(
                 0, L"EDIT", L"",
                 WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP,
-                xPos, yPos, cellWidthFull, 25, hWnd, (HMENU)(controlID), NULL, NULL
+                xPos, yPos, inputWidth, 25, hWnd, (HMENU)(controlID), NULL, NULL
             );
             g_editControlsFilters.push_back(hEdit);
         }
@@ -1124,7 +1125,7 @@ void criarInputsFilters(HWND hWnd) {
     for (int col = colNumber; col < colFinalNumber; col++) {
         int controlID = col + 20;
         yPos = startYFull + row * cellHeight + 7;
-        xPos = startXFull + (col - colNumber) * cellWidthFull + 10;
+        xPos = startXFull + (col - colNumber) * inputWidth + 10;
 
         if (col == 12) {
             HWND hComboBox = CreateWindowEx(
@@ -1132,7 +1133,7 @@ void criarInputsFilters(HWND hWnd) {
                 L"ComboBox",                       // Nome da classe do controle ComboBox
                 L"",                               // Texto inicial (vazio)
                 WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP, // Estilos: Filho, Visível, e lista suspensa que não pode ser editada (SELECT)
-                xPos, yPos, cellWidthFull, 150,
+                xPos, yPos, inputWidth, 150,
                 hWnd,                        // Janela pai
                 (HMENU)(controlID),                        // ID único do controle (para o WM_COMMAND)
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
@@ -1156,7 +1157,7 @@ void criarInputsFilters(HWND hWnd) {
                 L"ComboBox",                       // Nome da classe do controle ComboBox
                 L"",                               // Texto inicial (vazio)
                 WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP, // Estilos: Filho, Visível, e lista suspensa que não pode ser editada (SELECT)
-                xPos, yPos, cellWidthFull, 150,
+                xPos, yPos, inputWidth, 150,
                 hWnd,                        // Janela pai
                 (HMENU)(controlID),                        // ID único do controle (para o WM_COMMAND)
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
@@ -1187,7 +1188,7 @@ void criarInputsFilters(HWND hWnd) {
                 L"ComboBox",                       // Nome da classe do controle ComboBox
                 L"",                               // Texto inicial (vazio)
                 WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP, // Estilos: Filho, Visível, e lista suspensa que não pode ser editada (SELECT)
-                xPos, yPos, cellWidthFull, 150,
+                xPos, yPos, inputWidth, 150,
                 hWnd,                        // Janela pai
                 (HMENU)(controlID),                        // ID único do controle (para o WM_COMMAND)
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
@@ -1222,7 +1223,7 @@ void criarInputsFilters(HWND hWnd) {
                 L"ComboBox",                       // Nome da classe do controle ComboBox
                 L"",                               // Texto inicial (vazio)
                 WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP, // Estilos: Filho, Visível, e lista suspensa que não pode ser editada (SELECT)
-                xPos, yPos, cellWidthFull, 150,
+                xPos, yPos, inputWidth, 150,
                 hWnd,                        // Janela pai
                 (HMENU)(controlID),                        // ID único do controle (para o WM_COMMAND)
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
@@ -1276,7 +1277,7 @@ void criarInputsFilters(HWND hWnd) {
             HWND hEdit = CreateWindowEx(
                 0, L"EDIT", L"",
                 WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP,
-                xPos, yPos, cellWidthFull, 25, hWnd, (HMENU)(controlID), NULL, NULL
+                xPos, yPos, inputWidth, 25, hWnd, (HMENU)(controlID), NULL, NULL
             );
             g_editControlsFilters.push_back(hEdit);
         }
@@ -1292,13 +1293,13 @@ void criarInputsFilters(HWND hWnd) {
     for (int col = colNumber; col < colFinalNumber; col++) {
         controlID = col + 20;
         yPos = startYFull + row * cellHeight + 7;
-        xPos = startXFull + (col - colNumber) * cellWidthFull + 10;
+        xPos = startXFull + (col - colNumber) * inputWidth + 10;
 
         if (col == 20) {
             HWND hEdit = CreateWindowEx(
                 0, L"EDIT", L"",
                 WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP,
-                xPos, yPos, cellWidthFull / 2, 25, hWnd, (HMENU)(controlID), NULL, NULL
+                xPos, yPos, inputWidth / 2, 25, hWnd, (HMENU)(controlID), NULL, NULL
             );
 
             g_editControlsFilters.push_back(hEdit);
@@ -1307,7 +1308,7 @@ void criarInputsFilters(HWND hWnd) {
             HWND hEdit2 = CreateWindowEx(
                 0, L"EDIT", L"",
                 WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP,
-                xPos + cellWidthFull / 2, yPos, cellWidthFull / 2, 25, hWnd, (HMENU)(controlID), NULL, NULL
+                xPos + inputWidth / 2, yPos, inputWidth / 2, 25, hWnd, (HMENU)(controlID), NULL, NULL
             );
 
             g_editControlsFilters.push_back(hEdit2);
@@ -1316,7 +1317,7 @@ void criarInputsFilters(HWND hWnd) {
             HWND hEdit = CreateWindowEx(
                 0, L"EDIT", L"",
                 WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP,
-                xPos, yPos, cellWidthFull / 2, 25, hWnd, (HMENU)(controlID), NULL, NULL
+                xPos, yPos, inputWidth / 2, 25, hWnd, (HMENU)(controlID), NULL, NULL
             );
 
             g_editControlsFilters.push_back(hEdit);
@@ -1325,7 +1326,7 @@ void criarInputsFilters(HWND hWnd) {
             HWND hEdit2 = CreateWindowEx(
                 0, L"EDIT", L"",
                 WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP,
-                xPos + cellWidthFull / 2, yPos, cellWidthFull / 2, 25, hWnd, (HMENU)(controlID), NULL, NULL
+                xPos + inputWidth / 2, yPos, inputWidth / 2, 25, hWnd, (HMENU)(controlID), NULL, NULL
             );
 
             g_editControlsFilters.push_back(hEdit2);
@@ -1334,7 +1335,7 @@ void criarInputsFilters(HWND hWnd) {
             HWND hEdit = CreateWindowEx(
                 0, L"EDIT", L"",
                 WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP,
-                xPos, yPos, cellWidthFull, 25, hWnd, (HMENU)(controlID), NULL, NULL
+                xPos, yPos, inputWidth, 25, hWnd, (HMENU)(controlID), NULL, NULL
             );
             g_editControlsFilters.push_back(hEdit);
         }
