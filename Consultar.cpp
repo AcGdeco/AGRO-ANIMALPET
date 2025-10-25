@@ -150,7 +150,7 @@ LRESULT CALLBACK WndProcRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
 
         if (si.nPos != oldPos) {
             g_scrollY = si.nPos;
-            InvalidateRect(hWnd, NULL, TRUE);
+            invalidateDrawing(hWnd);
             UpdateWindow(hWnd);
         }
         break;
@@ -181,7 +181,7 @@ LRESULT CALLBACK WndProcRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
 
         if (si.nPos != oldPos) {
             g_scrollX = si.nPos;
-            InvalidateRect(hWnd, NULL, TRUE);
+            invalidateDrawing(hWnd);
             UpdateWindow(hWnd);
         }
         break;
@@ -208,7 +208,7 @@ LRESULT CALLBACK WndProcRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
         g_clientWidth = newWidth;
         g_clientHeight = newHeight;
         ConfigurarScrollBarsConsulta(hWnd);
-        InvalidateRect(hWnd, NULL, TRUE);
+        invalidateDrawing(hWnd);
         break;
     }
 
@@ -233,7 +233,7 @@ LRESULT CALLBACK WndProcRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
 
         if (si.nPos != oldPos) {
             g_scrollY = si.nPos;
-            InvalidateRect(hWnd, NULL, TRUE);
+            invalidateDrawing(hWnd);
             UpdateWindow(hWnd);
         }
         return 0;
@@ -444,7 +444,27 @@ LRESULT CALLBACK WndProcRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
         Shortcuts(hWnd, message, wParam, lParam);
         break;
     }
+    case WM_LBUTTONDOWN:
+    {
+        if (g_isRedrawing)
+        {
+            return 0; // Ignora o clique durante o redesenho
+        }
+        // Lógica existente para clique, se aplicável
+        return DefWindowProc(hWnd, message, wParam, lParam);
+    }
+    break;
 
+    case WM_LBUTTONUP:
+    {
+        if (g_isRedrawing)
+        {
+            return 0; // Ignora o clique durante o redesenho
+        }
+        // Lógica existente para clique, se aplicável
+        return DefWindowProc(hWnd, message, wParam, lParam);
+    }
+    break;
     case WM_DESTROY:
     {
         windowClose(hWnd, message, wParam, lParam);

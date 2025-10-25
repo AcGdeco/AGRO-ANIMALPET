@@ -12,26 +12,36 @@ HMENU CriarMenu() {
 
     // Menu Home
     HMENU hFileMenuHome = CreatePopupMenu();
-    AppendMenuW(hFileMenuHome, MF_STRING, IDM_HOME_INICIO, L"&Inicio\tCtrl+I");
+    AppendMenuW(hFileMenuHome, MF_STRING, IDM_HOME_INICIO, L"&Inicio\tCtrl+P");
     AppendMenuW(hFileMenuHome, MF_SEPARATOR, 0, NULL);
     AppendMenuW(hFileMenuHome, MF_STRING, IDM_HOME_SAIR, L"&Sair\tAlt+F4");
 
     // Adiciona o menu Home ao menu principal
     AppendMenuW(hMenu, MF_POPUP, (UINT_PTR)hFileMenuHome, L"&Home");
 
+    // Menu Tutores
+    HMENU hFileMenuTutores = CreatePopupMenu();
+    AppendMenuW(hFileMenuTutores, MF_STRING, IDM_TUTORES_NOVO, L"&Criar\tCtrl+Q");
+    AppendMenuW(hFileMenuTutores, MF_STRING, IDM_TUTORES_CONSULTAR, L"&Consultar\tCtrl+W");
+    AppendMenuW(hFileMenuTutores, MF_STRING, IDM_TUTORES_CONSULTAR, L"&Editar\tCtrl+E");
+    AppendMenuW(hFileMenuTutores, MF_STRING, IDM_TUTORES_CONSULTAR, L"&Deletar\tCtrl+R");
+
+    // Adiciona o menu Arquivo ao menu principal
+    AppendMenuW(hMenu, MF_POPUP, (UINT_PTR)hFileMenuTutores, L"&Tutores");
+
     // Menu Arquivo
     HMENU hFileMenu = CreatePopupMenu();
-    AppendMenuW(hFileMenu, MF_STRING, IDM_ARQUIVO_NOVO, L"&Criar\tCtrl+N");
-    AppendMenuW(hFileMenu, MF_STRING, IDM_ARQUIVO_CONSULTAR, L"&Consultar\tCtrl+O");
-    AppendMenuW(hFileMenu, MF_STRING, IDM_ARQUIVO_CONSULTAR, L"&Editar\tCtrl+E");
-    AppendMenuW(hFileMenu, MF_STRING, IDM_ARQUIVO_CONSULTAR, L"&Deletar\tCtrl+D");
+    AppendMenuW(hFileMenu, MF_STRING, IDM_ARQUIVO_NOVO, L"&Criar\tCtrl+T");
+    AppendMenuW(hFileMenu, MF_STRING, IDM_ARQUIVO_CONSULTAR, L"&Consultar\tCtrl+Y");
+    AppendMenuW(hFileMenu, MF_STRING, IDM_ARQUIVO_CONSULTAR, L"&Editar\tCtrl+U");
+    AppendMenuW(hFileMenu, MF_STRING, IDM_ARQUIVO_CONSULTAR, L"&Deletar\tCtrl+I");
    
     // Adiciona o menu Arquivo ao menu principal
     AppendMenuW(hMenu, MF_POPUP, (UINT_PTR)hFileMenu, L"&Agendamentos");
 
     // Menu Ajuda
     HMENU hFileMenuAjuda = CreatePopupMenu();
-    AppendMenuW(hFileMenuAjuda, MF_STRING, IDM_AJUDA_SOBRE, L"&Sobre\tCtrl+A");
+    AppendMenuW(hFileMenuAjuda, MF_STRING, IDM_AJUDA_SOBRE, L"&Sobre\tCtrl+G");
     
     // Adiciona o menu Ajuda ao menu principal
     AppendMenuW(hMenu, MF_POPUP, (UINT_PTR)hFileMenuAjuda, L"&Ajuda");
@@ -59,6 +69,7 @@ LRESULT ProcessarMenuArquivo(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
         {
             if (!CreateNewWindow(hWnd, hInst, L"JanelaSelectClasse", L"AGRO ANIMAL PET - AGENDAMENTOS"))
             {
+				RecarregarDadosTabela(hWnd);
                 // O erro já é tratado dentro da função
                 break;
             }

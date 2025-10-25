@@ -45,6 +45,9 @@ extern int g_totalRowCount;
 extern void DestroyAllOffsetButtons();
 extern int numeroBtn;
 extern int idNumeroUltimo;
+extern std::vector<HWND> g_editControlsOrder;
+extern bool g_isRedrawing;
+extern int rowsNumberSemCabecalho;
 
 std::wstring GetCurrentDate();
 std::wstring GetCurrentHour();
@@ -77,7 +80,6 @@ void createHeaderFilters(HDC hdc, HWND hWnd);
 void criarInputsFilters(HWND hWnd);
 void AtualizarPosicoesInputs(HWND hWnd);
 void verificarFiltro(const std::vector<std::wstring>& dados, std::vector<int>& naoDesenharIntern);
-void verificarFiltro(const std::vector<std::wstring>& dados);
 void selectDB();
 void createOrderBtn(HWND hWnd);
 void AtualizarPosicoesOrder(HWND hWnd);
@@ -90,6 +92,12 @@ void handleLimitChange(HWND hComboBox);
 void createBtnPageLimit(HWND hWnd);
 void AtualizarPosicoesOffset(HWND hWnd);
 void mudarPagina(int id);
+void MudarIconeDoBotao(HWND hButton, int novoIconeID);
+std::wstring toLower(std::wstring str);
+void invalidateDrawing(HWND hWnd);
+void DestroyAllControls();
+void DestroyControlsFromVector(std::vector<HWND>& controls);
+void SetFilterValues(const std::vector<std::wstring>& dados);
 
 // Definição da estrutura
 struct Data {

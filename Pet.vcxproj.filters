@@ -81,7 +81,13 @@
     <Image Include="Pet.ico">
       <Filter>Arquivos de Recurso</Filter>
     </Image>
-    <Image Include="Setas.bmp">
+    <Image Include="Images\Setas.ico">
+      <Filter>Arquivos de Recurso</Filter>
+    </Image>
+    <Image Include="Images\Seta-Cima.ico">
+      <Filter>Arquivos de Recurso</Filter>
+    </Image>
+    <Image Include="Images\Seta-Baixo.ico">
       <Filter>Arquivos de Recurso</Filter>
     </Image>
   </ItemGroup>

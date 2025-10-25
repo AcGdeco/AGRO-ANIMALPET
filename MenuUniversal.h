@@ -9,6 +9,12 @@
 #define IDM_ARQUIVO_SAIR     1003
 #define IDM_AJUDA_SOBRE 1004
 #define IDM_HOME_SAIR 1005
+#define IDM_TUTORES_NOVO     1006
+#define IDM_TUTORES_CONSULTAR    1007
+#define IDM_PETS_NOVO     1008
+#define IDM_PETS_CONSULTAR    1009
+#define IDM_AGENDAMENTOS_NOVO     1010
+#define IDM_AGENDAMENTOS_CONSULTAR    1011
 
 // Funções do Menu Simples
 HMENU CriarMenu();

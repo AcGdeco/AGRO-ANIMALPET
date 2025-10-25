@@ -14,6 +14,9 @@ extern int g_scrollY;
 extern int g_clientHeight;
 extern int g_contentHeight;
 
+bool g_wasInactive = false; // Inicialização
+HWND g_hWndMain = NULL;     // Inicialização
+
 std::vector<int> naoDesenhar;
 
 // Declaração do procedimento da janela
@@ -29,6 +32,7 @@ std::wstring utf8_to_wstring(const char* str) {
     return wstr;
 }
 
+std::wstring className = L"JanelaSelectClasse";
 // Função para registrar a classe da janela (pode ser chamada de outro lugar, como Pet.cpp)
 BOOL RegisterSelectClass(HINSTANCE hInstance)
 {
@@ -40,7 +44,7 @@ BOOL RegisterSelectClass(HINSTANCE hInstance)
     wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
     wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
     wcex.lpszMenuName = NULL;  // Menu será definido dinamicamente
-    wcex.lpszClassName = L"JanelaSelectClasse";
+    wcex.lpszClassName = className.c_str();
     wcex.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_PET));
     wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
 
@@ -62,6 +66,9 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
     {
     case WM_CREATE:
     {
+        g_wasInactive = false;
+        g_hWndMain = hWnd;
+
         // Garantir que a janela tenha WS_VSCROLL
         LONG style = GetWindowLongPtr(hWnd, GWL_STYLE);
         if (!(style & WS_VSCROLL)) {
@@ -78,12 +85,12 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
         }
         else {
             // Código de criação de tabela e inserção (mantido como está)
-            //const char* sqlDrop = "DROP TABLE IF EXISTS Pets;";
-            //rc = sqlite3_exec(db, sqlDrop, 0, 0, &errMsg);
-            //if (rc != SQLITE_OK) {
-                //MessageBox(hWnd, L"Erro ao dropar tabela!", L"Erro", MB_OK | MB_ICONERROR);
-                //sqlite3_free(errMsg);
-            //}
+            const char* sqlDrop = "DROP TABLE IF EXISTS Pets;";
+            rc = sqlite3_exec(db, sqlDrop, 0, 0, &errMsg);
+            if (rc != SQLITE_OK) {
+                MessageBox(hWnd, L"Erro ao dropar tabela!", L"Erro", MB_OK | MB_ICONERROR);
+                sqlite3_free(errMsg);
+            }
             const char* sqlCreate = "CREATE TABLE IF NOT EXISTS Pets (ID INTEGER PRIMARY KEY AUTOINCREMENT, Nome_do_Pet TEXT, Raca TEXT, Nome_do_Tutor TEXT, CEP TEXT, Cor TEXT, Idade TEXT, Peso TEXT, Sexo TEXT, Castrado TEXT, Endereco TEXT, Ponto_de_referencia TEXT, Banho TEXT, Tosa TEXT, Obs_Tosa TEXT, Parasitas TEXT, Lesoes TEXT, Obs_Lesoes TEXT, Telefone TEXT, CPF TEXT, Appointment_Date TEXT, Appointment_Hour TEXT, Date TEXT, Hour TEXT);";
             rc = sqlite3_exec(db, sqlCreate, 0, 0, &errMsg);
             if (rc != SQLITE_OK) {
@@ -103,19 +110,19 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
             }
             else {
                 // Inserções (código original mantido)
-                //std::wstring currentDate = GetCurrentDate();
-                //std::wstring currentHour = GetCurrentHour();
-                //for (int i = 1; i <= 100; i++) {
-                   //std::wstring sqlInsertW = L"INSERT INTO Pets (Nome_do_Pet, Raca, Nome_do_Tutor, CEP, Cor, Idade, Peso, Sexo, Castrado, Endereco, Ponto_de_referencia, Banho, Tosa, Obs_Tosa, Parasitas, Lesoes, Obs_Lesoes, Telefone, CPF, Appointment_Date, Appointment_Hour, Date, Hour) VALUES ('Fido', 'Bulldog', 'Laís', '36309016', 'Preto', 5, 25, 'Masculino', 'Sim', 'Rua das flores - Guarda Mor - São João del Rei', 'Perto da pizzaria Agostinho', 'Padrão', 'Tesoura', 'ir qpiofj adfjs kçjf dkfjeif çsdaf jkasdjf iejf sdçf aksdfjis fdfj çaklsfjaksdfj kdsjfçaejf idsjfkasdf jaies', 'Carrapatos', 'Pele', 'asdf façldj fçkalsdj fdaskljf dsçkf jçklasdf jkaldsfj çkldsa fjaçklds jfakdls fjkalsdjf klasdjf çasdfj çasfj çadsklfjklf ', '32998360862', '09813426632', '04/07/2025', '15:00', '" + currentDate + L"', '" + currentHour + L"');";
-                    //int required = WideCharToMultiByte(CP_UTF8, 0, sqlInsertW.c_str(), -1, nullptr, 0, nullptr, nullptr);
-                    //if (required > 0) {
-                        //std::string sqlInsertUtf8(required, '\0');
-                        //WideCharToMultiByte(CP_UTF8, 0, sqlInsertW.c_str(), -1, &sqlInsertUtf8[0], required, nullptr, nullptr);
-                        //char* errMsg = nullptr;
-                        //int rc = sqlite3_exec(db, sqlInsertUtf8.c_str(), nullptr, nullptr, &errMsg);
-                        //if (rc != SQLITE_OK) sqlite3_free(errMsg);
-                    //}
-                //}
+                std::wstring currentDate = GetCurrentDate();
+                std::wstring currentHour = GetCurrentHour();
+                for (int i = 1; i <= 100; i++) {
+                   std::wstring sqlInsertW = L"INSERT INTO Pets (Nome_do_Pet, Raca, Nome_do_Tutor, CEP, Cor, Idade, Peso, Sexo, Castrado, Endereco, Ponto_de_referencia, Banho, Tosa, Obs_Tosa, Parasitas, Lesoes, Obs_Lesoes, Telefone, CPF, Appointment_Date, Appointment_Hour, Date, Hour) VALUES ('Fido', 'Bulldog', 'Laís', '36309016', 'Preto', 5, 25, 'Masculino', 'Sim', 'Rua das flores - Guarda Mor - São João del Rei', 'Perto da pizzaria Agostinho', 'Padrão', 'Tesoura', 'ir qpiofj adfjs kçjf dkfjeif çsdaf jkasdjf iejf sdçf aksdfjis fdfj çaklsfjaksdfj kdsjfçaejf idsjfkasdf jaies', 'Carrapatos', 'Pele', 'asdf façldj fçkalsdj fdaskljf dsçkf jçklasdf jkaldsfj çkldsa fjaçklds jfakdls fjkalsdjf klasdjf çasdfj çasfj çadsklfjklf ', '32998360862', '09813426632', '04/07/2025', '15:00', '" + currentDate + L"', '" + currentHour + L"');";
+                    int required = WideCharToMultiByte(CP_UTF8, 0, sqlInsertW.c_str(), -1, nullptr, 0, nullptr, nullptr);
+                    if (required > 0) {
+                        std::string sqlInsertUtf8(required, '\0');
+                        WideCharToMultiByte(CP_UTF8, 0, sqlInsertW.c_str(), -1, &sqlInsertUtf8[0], required, nullptr, nullptr);
+                        char* errMsg = nullptr;
+                        int rc = sqlite3_exec(db, sqlInsertUtf8.c_str(), nullptr, nullptr, &errMsg);
+                        if (rc != SQLITE_OK) sqlite3_free(errMsg);
+                    }
+                }
                 //std::wstring sqlInsertW2 = L"INSERT INTO Pets (Nome_do_Pet, Raca, Nome_do_Tutor, CEP, Cor, Idade, Peso, Sexo, Castrado, Endereco, Ponto_de_referencia, Banho, Tosa, Obs_Tosa, Parasitas, Lesoes, Obs_Lesoes, Telefone, CPF, Date, Hour) VALUES ('Astralis', 'Viralata', 'Débora', '36309022', 'Preto', 6, 18, 'Feminino', 'Não', 'Rua Ricador Geraldo dos Santos - Alto das Mercês - nº12', 'Perto da igreja das Mercês', 'Padrão', 'Tesoura', 'aa ksfj asldfj açlksdj fkasjd fçklasdjf aksdlfjkalçsdfj kçalsdjf kçlasjd çfkasdj fklçaj sdçlfkjakslfj çlasdjf çasd jfçaskdjfsdf', 'Carrapatos', 'Pele', ' asdfj açlsjf akçslj fkçlasdj fkçlasdjf lçkasjdf kasdjfkiujriwejfç dfkmdnfçnvçaidsjfçkdsfjaçksdjfkaçsjdfkasdjfkçlasjdçfaksdjf', '32998365552', '09813426789', '" + currentDate + L"', '" + currentHour + L"');";
                 //int required2 = WideCharToMultiByte(CP_UTF8, 0, sqlInsertW2.c_str(), -1, nullptr, 0, nullptr, nullptr);
                 //if (required2 > 0) {
@@ -137,29 +144,7 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
             }
             sqlite3_close(db);
 
-            selectDB();
-
-            // Criar botões de ordenamento das colunas da tabela
-            createOrderBtn(hWnd);
-
-            //Criar inputs dos filtros
-            criarInputsFilters(hWnd);
-
-            naoDesenhar.resize(g_tableData.size());
-			//Verificar filtros
-            verificarFiltro(dados, naoDesenhar);
-
-            // Criar botões após carregar os dados
-            CriarBotoesTabela(hWnd);
-
-            // Criar limite de linhas da tabela
-            createInputLimit(hWnd);
-
-            // Configurar scroll bars após criar tudo
-            ConfigurarScrollBars(hWnd);
-
-            // Criar limite das páginas
-            createBtnPageLimit(hWnd);
+            RecarregarDadosTabela(hWnd);
             
         }
         return 0;
@@ -183,6 +168,14 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
             {
                 // O erro já é tratado dentro da função
                 break;
+            }
+            else {
+                HWND hWndRead = FindWindowW(L"JanelaReadClasse", NULL);
+                if (hWndRead != NULL)
+                {
+                    ShowWindow(hWndRead, SW_MAXIMIZE);
+                    SetForegroundWindow(hWndRead);
+                }
             }
         }
         else if (wmId == EDITAR) // Botões "Editar"
@@ -218,9 +211,9 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
             //swprintf_s(msg, L"Botão %s%d clicado!", L"Filtrar", (int)id, (int)id);
             //MessageBoxW(hWnd, msg, L"Info", MB_OK);
 
-            for (int i = 0; i <= 23; i++) {
+            for (int i = 0; i <= 25; i++) {
                 std::wstring controlIDStr = std::to_wstring(i);
-                HWND input = GetDlgItem(hWnd, i + 100000);
+                HWND input = GetDlgItem(hWnd, i + 20);
                 if (i == 9 || i == 12 || i == 13 || i == 15 || i == 16) { // Se o comando veio do nosso ComboBox
                     // 1. Obter o índice do item selecionado
                     int indiceSelecionado = (int)SendMessageW(
@@ -253,23 +246,48 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
                 }
             }
 
-            HWND input = GetDlgItem(hWnd, 20 + 2 * 100000);
+            HWND input = GetDlgItem(hWnd, 20 + 2 * 20);
             wchar_t buffer[256];
             GetWindowText(input, buffer, 256);
             dataAte = std::wstring(buffer);
 
-            input = GetDlgItem(hWnd, 22 + 2 * 100000);
+            input = GetDlgItem(hWnd, 22 + 2 * 20);
             GetWindowText(input, buffer, 256);
             dataRegistroAte = std::wstring(buffer);
 
             idNumeroUltimo = 1;
-            offsetTableRow = 0;
+            offsetTableRow = 1;
 
             RecarregarDadosTabela(hWnd);
         }
         else if (wmId == ORDENAR) // Botões "Ordenar"
         {
             std::string oldOrderColumn = orderColumn;
+
+            // Encontra o HWND do botão (se você não o salvou globalmente)
+            HWND hButtonOrdenar = GetDlgItem(hWnd, ORDENAR);
+
+            while (hButtonOrdenar) {
+                // Verificar se é um botão de ordenar
+                if (GetDlgCtrlID(hButtonOrdenar) >= ORDENAR &&
+                    GetDlgCtrlID(hButtonOrdenar) <= ORDENAR + 7) {
+
+                    // Verificar se é o botão da coluna desejada
+                    LONG_PTR coluna = GetWindowLongPtr(hButtonOrdenar, GWLP_USERDATA);
+                    if (coluna == 0 && orderAscDesc == "ASC") {
+                        // Encontrou o botão certo - mudar ícone
+                        // Mudar para o novo ícone
+                        MudarIconeDoBotao(hButtonOrdenar, IDB_SETAS_BAIXO);
+                    }
+                    else if (coluna == 0 && orderAscDesc == "DESC") {
+                        MudarIconeDoBotao(hButtonOrdenar, IDB_SETAS_CIMA);
+                    }
+                    else {
+                        MudarIconeDoBotao(hButtonOrdenar, IDB_SETAS);
+                    }
+                }
+                hButtonOrdenar = GetWindow(hButtonOrdenar, GW_HWNDNEXT);
+            }
 
             switch (id)
             {
@@ -313,11 +331,26 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
                 }
             }
 
-            RecarregarDadosTabela(hWnd);
+            for (size_t i = 0; i < g_editControlsOrder.size(); i++) {
+                if (i == id && orderAscDesc == "ASC") {
+                    HWND hButton = g_editControlsOrder[i];
+                    MudarIconeDoBotao(hButton, IDB_SETAS_CIMA);
+                }
+                else if (i == id && orderAscDesc == "DESC") {
+                    HWND hButton = g_editControlsOrder[i];
+                    MudarIconeDoBotao(hButton, IDB_SETAS_BAIXO);
+                }
+                else {
+                    HWND hButton = g_editControlsOrder[i];
+                    MudarIconeDoBotao(hButton, IDB_SETAS);
+                }
+            }
             
+            RecarregarDadosTabela(hWnd);
         }
         // Verifica se a mensagem veio do seu ComboBox LIMITAR
         else if (wmId == LIMITAR) {
+
             // HIWORD(wParam) é o código de notificação específico do controle
             int notificationCode = HIWORD(wParam);
 
@@ -328,6 +361,10 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 
                 // Obtém o Handle do ComboBox (opcional, mas bom para clareza)
                 HWND hComboBox = (HWND)lParam;
+
+                if (!IsWindow(hComboBox)) {
+                    return 0;
+                }
 
                 // CHAMAR FUNÇÃO DE AÇÃO
                 handleLimitChange(hComboBox);
@@ -342,8 +379,6 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 
             mudarPagina(id);
             RecarregarDadosTabela(hWnd);
-
-
         }
         break;
     }
@@ -393,19 +428,18 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
         int linha = 1;
         int counter = 0;
 
-        //offsetTableRow = limitTableRow
+        // CORREÇÃO: Cálculo seguro do limite
         int limit;
-        limit = offsetTableRow + limitTableRow;
-
-        if (limit < rowsNumber) {
-            limit = offsetTableRow + limitTableRow;
-        } else {
-            limit = rowsNumber;
+        if (rowsNumber == 0) {
+            limit = 0;
         }
-         
+        else {
+            limit = min(offsetTableRow + limitTableRow, rowsNumber);
+        }
+
         // DESENHAR APENAS UMA VEZ - REMOVER loops desnecessários
-        for (size_t row = offsetTableRow; row < limit; row++) {
-            if (row != 0) {
+        for (size_t row = offsetTableRow; row < limit && row < g_tableData.size(); row++) {
+            if (row < g_tableData.size()) {
                 HBRUSH hCurrentBrush = (linha % 2 == 0) ? hBrushGray : hBrushWhite;
 
                 if (linha == 0) {
@@ -438,6 +472,9 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
                         if (width <= 1600 && displayText.length() > 15) {
                             qtyCaracters = 15;
 
+                        }
+                        else if (width <= 2000 && displayText.length() > 28) {
+                            qtyCaracters = 25;
                         }
                         TextOut(hdc, xPos, yPos, displayText.c_str(), static_cast<int>(qtyCaracters));
                         counter++;
@@ -491,28 +528,28 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
     }
     case WM_SIZE:
     {
-        naoDesenhar.resize(g_tableData.size());
-        //Verificar filtros
-        verificarFiltro(dados, naoDesenhar);
-
-        g_clientHeight = HIWORD(lParam);
-        ConfigurarScrollBars(hWnd);
-
-        // Atualizar offset botões
-        AtualizarPosicoesOffset(hWnd);
-
-        // Atualizar order botões
-        AtualizarPosicoesOrder(hWnd);
-
-		// Atualizar limite de linhas
-        AtualizarPosicoesLimit(hWnd);
-
-        // Apenas atualizar botões, NÃO chamar InvalidateRect aqui
-        AtualizarPosicoesBotoes(hWnd);
-
-        // Atualizar posições dos inputs dos filtros
-        AtualizarPosicoesInputs(hWnd);
+        RecarregarDadosTabela(hWnd);
     }
+    case WM_ACTIVATE:
+    {
+        if (LOWORD(wParam) == WA_INACTIVE) {
+            g_wasInactive = true; // Marca como inativa quando perde foco para outra janela
+        }
+        else if (LOWORD(wParam) != WA_INACTIVE && g_wasInactive) {
+            //RecarregarDadosTabela(hWnd);
+            //MessageBoxW(hWnd, L"A janela ganhou foco novamente!", L"Aviso", MB_OK | MB_ICONINFORMATION);
+            g_wasInactive = false; // Resetar após exibir o popup
+        }
+        return 0;
+    }
+    break;
+
+    case WM_KILLFOCUS:
+    {
+        g_wasInactive = true; // Marca como inativa quando perde foco para outro controle
+        return 0;
+    }
+    break;
 
     case WM_VSCROLL: {
         SCROLLINFO si = {};
@@ -542,27 +579,7 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
         if (si.nPos != oldPos) {
             g_scrollY = si.nPos;
 
-            naoDesenhar.resize(g_tableData.size());
-            //Verificar filtros
-            verificarFiltro(dados, naoDesenhar);
-
-            g_clientHeight = HIWORD(lParam);
-            ConfigurarScrollBars(hWnd);
-
-            // Atualizar offset botões
-            AtualizarPosicoesOffset(hWnd);
-
-            // Atualizar order botões
-            AtualizarPosicoesOrder(hWnd);
-
-            // Atualizar limite de linhas
-            AtualizarPosicoesLimit(hWnd);
-
-            // Apenas atualizar botões, NÃO chamar InvalidateRect aqui
-            AtualizarPosicoesBotoes(hWnd);
-
-            // Atualizar posições dos inputs dos filtros
-            AtualizarPosicoesInputs(hWnd);
+            RecarregarDadosTabela(hWnd);
         }
         break;
     }
@@ -587,27 +604,7 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
         if (si.nPos != oldPos) {
             g_scrollY = si.nPos;
 
-            naoDesenhar.resize(g_tableData.size());
-            //Verificar filtros
-            verificarFiltro(dados, naoDesenhar);
-
-            g_clientHeight = HIWORD(lParam);
-            ConfigurarScrollBars(hWnd);
-
-            // Atualizar offset botões
-            AtualizarPosicoesOffset(hWnd);
-
-            // Atualizar order botões
-            AtualizarPosicoesOrder(hWnd);
-
-            // Atualizar limite de linhas
-            AtualizarPosicoesLimit(hWnd);
-
-            // Apenas atualizar botões, NÃO chamar InvalidateRect aqui
-            AtualizarPosicoesBotoes(hWnd);
-
-            // Atualizar posições dos inputs dos filtros
-            AtualizarPosicoesInputs(hWnd);
+            RecarregarDadosTabela(hWnd);
         }
         return 0;
     }

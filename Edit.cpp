@@ -147,7 +147,7 @@ LRESULT CALLBACK WndProcEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
                 HWND hCheckbox = CreateWindowW(
                     L"BUTTON",                       // Classe do controle
                     NULL,    // Texto da checkbox
-                    WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX,  // Estilos IMPORTANTES
+                    WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX | WS_TABSTOP,  // Estilos IMPORTANTES
                     xPos, yPos,                      // Posição X, Y
                     20, 20,                         // Largura, Altura  
                     hWnd,                            // Janela pai
@@ -167,7 +167,7 @@ LRESULT CALLBACK WndProcEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
                 hRadio = CreateWindowW(
                     L"BUTTON",                       // Classe do controle
                     L"Padrão",    // Texto do radio button
-                    WS_VISIBLE | WS_CHILD | WS_GROUP | BS_AUTORADIOBUTTON,  // Estilos IMPORTANTES
+                    WS_VISIBLE | WS_CHILD | WS_GROUP | BS_AUTORADIOBUTTON | WS_TABSTOP,  // Estilos IMPORTANTES
                     xPos, yPos,                      // Posição X, Y
                     100, 20,                         // Largura ajustada para texto
                     hWnd,                            // Janela pai
@@ -185,7 +185,7 @@ LRESULT CALLBACK WndProcEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
                 hRadio = CreateWindowW(
                     L"BUTTON",                       // Classe do controle
                     L"Hidratação",    // Texto do radio button
-                    WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON,  // Estilos IMPORTANTES
+                    WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP,  // Estilos IMPORTANTES
                     xPos + cellWidth + 10, yPos,     // Posição X, Y
                     100, 20,                         // Largura ajustada para texto
                     hWnd,                            // Janela pai
@@ -203,7 +203,7 @@ LRESULT CALLBACK WndProcEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
                 hRadio = CreateWindowW(
                     L"BUTTON",                       // Classe do controle
                     L"Nenhum",    // Texto do radio button
-                    WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON,  // Estilos IMPORTANTES
+                    WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP,  // Estilos IMPORTANTES
                     xPos + 2 * cellWidth + 10, yPos,     // Posição X, Y
                     100, 20,                         // Largura ajustada para texto
                     hWnd,                            // Janela pai
@@ -224,7 +224,7 @@ LRESULT CALLBACK WndProcEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
                 hRadio = CreateWindowW(
                     L"BUTTON",                       // Classe do controle
                     L"Tesoura",    // Texto do radio button
-                    WS_VISIBLE | WS_CHILD | WS_GROUP | BS_AUTORADIOBUTTON,  // Estilos IMPORTANTES
+                    WS_VISIBLE | WS_CHILD | WS_GROUP | BS_AUTORADIOBUTTON | WS_TABSTOP,  // Estilos IMPORTANTES
                     xPos, yPos,                      // Posição X, Y
                     100, 20,                         // Largura ajustada para texto
                     hWnd,                            // Janela pai
@@ -242,7 +242,7 @@ LRESULT CALLBACK WndProcEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
                 hRadio = CreateWindowW(
                     L"BUTTON",                       // Classe do controle
                     L"Máquina",    // Texto do radio button
-                    WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON,  // Estilos IMPORTANTES
+                    WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP,  // Estilos IMPORTANTES
                     xPos + cellWidth + 10, yPos,     // Posição X, Y
                     100, 20,                         // Largura ajustada para texto
                     hWnd,                            // Janela pai
@@ -260,7 +260,7 @@ LRESULT CALLBACK WndProcEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
                 hRadio = CreateWindowW(
                     L"BUTTON",                       // Classe do controle
                     L"Higiênica",    // Texto do radio button
-                    WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON,  // Estilos IMPORTANTES
+                    WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP,  // Estilos IMPORTANTES
                     xPos + 2 * cellWidth + 10, yPos,     // Posição X, Y
                     100, 20,                         // Largura ajustada para texto
                     hWnd,                            // Janela pai
@@ -278,7 +278,7 @@ LRESULT CALLBACK WndProcEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
                 hRadio = CreateWindowW(
                     L"BUTTON",                       // Classe do controle
                     L"Tosa da Raça",    // Texto do radio button
-                    WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON,  // Estilos IMPORTANTES
+                    WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP,  // Estilos IMPORTANTES
                     xPos + 3 * cellWidth + 10, yPos,     // Posição X, Y
                     100, 20,                         // Largura ajustada para texto
                     hWnd,                            // Janela pai
@@ -296,7 +296,7 @@ LRESULT CALLBACK WndProcEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
                 hRadio = CreateWindowW(
                     L"BUTTON",                       // Classe do controle
                     L"Nenhum",    // Texto do radio button
-                    WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON,  // Estilos IMPORTANTES
+                    WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP,  // Estilos IMPORTANTES
                     xPos + 4 * cellWidth + 10, yPos,     // Posição X, Y
                     100, 20,                         // Largura ajustada para texto
                     hWnd,                            // Janela pai
@@ -315,7 +315,7 @@ LRESULT CALLBACK WndProcEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
                 hCheckbox = CreateWindowW(
                     L"BUTTON",                       // Classe do controle
                     L"Pulgas",    // Texto da checkbox
-                    WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX,  // Estilos IMPORTANTES
+                    WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX | WS_TABSTOP,  // Estilos IMPORTANTES
                     xPos, yPos,                      // Posição X, Y
                     20, 20,                         // Largura, Altura  
                     hWnd,                            // Janela pai
@@ -331,7 +331,7 @@ LRESULT CALLBACK WndProcEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
                 hCheckbox = CreateWindowW(
                     L"BUTTON",                       // Classe do controle
                     L"Carrapatos",    // Texto da checkbox
-                    WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX,  // Estilos IMPORTANTES
+                    WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX | WS_TABSTOP,  // Estilos IMPORTANTES
                     xPos, yPos,                      // Posição X, Y
                     20, 20,                         // Largura, Altura  
                     hWnd,                            // Janela pai
@@ -349,7 +349,7 @@ LRESULT CALLBACK WndProcEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
                 hCheckbox = CreateWindowW(
                     L"BUTTON",                       // Classe do controle
                     L"Pele",    // Texto da checkbox
-                    WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX,  // Estilos IMPORTANTES
+                    WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX | WS_TABSTOP,  // Estilos IMPORTANTES
                     xPos, yPos,                      // Posição X, Y
                     20, 20,                         // Largura, Altura  
                     hWnd,                            // Janela pai
@@ -365,7 +365,7 @@ LRESULT CALLBACK WndProcEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
                 hCheckbox = CreateWindowW(
                     L"BUTTON",                       // Classe do controle
                     L"Olhos",    // Texto da checkbox
-                    WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX,  // Estilos IMPORTANTES
+                    WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX | WS_TABSTOP,  // Estilos IMPORTANTES
                     xPos, yPos,                      // Posição X, Y
                     20, 20,                         // Largura, Altura  
                     hWnd,                            // Janela pai
@@ -381,7 +381,7 @@ LRESULT CALLBACK WndProcEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
                 hCheckbox = CreateWindowW(
                     L"BUTTON",                       // Classe do controle
                     L"Secreção",    // Texto da checkbox
-                    WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX,  // Estilos IMPORTANTES
+                    WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX | WS_TABSTOP,  // Estilos IMPORTANTES
                     xPos, yPos,                      // Posição X, Y
                     20, 20,                         // Largura, Altura  
                     hWnd,                            // Janela pai
@@ -397,7 +397,7 @@ LRESULT CALLBACK WndProcEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
                 hCheckbox = CreateWindowW(
                     L"BUTTON",                       // Classe do controle
                     L"Ouvido",    // Texto da checkbox
-                    WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX,  // Estilos IMPORTANTES
+                    WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX | WS_TABSTOP,  // Estilos IMPORTANTES
                     xPos, yPos,                      // Posição X, Y
                     20, 20,                         // Largura, Altura  
                     hWnd,                            // Janela pai
@@ -416,7 +416,7 @@ LRESULT CALLBACK WndProcEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
 
                 HWND hEdit = CreateWindowEx(
                     0, L"EDIT", displayText.c_str(),
-                    WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL,
+                    WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP,
                     xPos, yPos, 200, 25, hWnd, (HMENU)(controlID), NULL, NULL
                 );
                 g_editControls.push_back(hEdit);
@@ -427,7 +427,7 @@ LRESULT CALLBACK WndProcEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
         int buttonY = startY + 22 * cellHeight + 3;
         g_hButton = CreateWindowW(
             L"BUTTON", L"Salvar",
-            WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
+            WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON | WS_TABSTOP,
             startX, buttonY, 150, 30,
             hWnd, (HMENU)(1),
             (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL
@@ -464,7 +464,7 @@ LRESULT CALLBACK WndProcEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
             g_scrollY = si.nPos;
             // Atualizar posições dos controles ANTES do redraw
             AtualizarPosicoesControlesAgendamento(hWnd);
-            InvalidateRect(hWnd, NULL, TRUE);
+            invalidateDrawing(hWnd);
             UpdateWindow(hWnd);
         }
         break;
@@ -497,7 +497,7 @@ LRESULT CALLBACK WndProcEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
             g_scrollX = si.nPos;
             // Atualizar posições dos controles ANTES do redraw
             AtualizarPosicoesControlesAgendamento(hWnd);
-            InvalidateRect(hWnd, NULL, TRUE);
+            invalidateDrawing(hWnd);
             UpdateWindow(hWnd);
         }
         break;
@@ -514,7 +514,7 @@ LRESULT CALLBACK WndProcEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
         // Atualizar posições dos controles após redimensionamento
         AtualizarPosicoesControlesAgendamento(hWnd);
 
-        InvalidateRect(hWnd, NULL, TRUE);
+        invalidateDrawing(hWnd);
         break;
     }
 
@@ -540,12 +540,32 @@ LRESULT CALLBACK WndProcEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
             g_scrollY = si.nPos;
             // Atualizar posições dos controles ANTES do redraw
             AtualizarPosicoesControlesAgendamento(hWnd);
-            InvalidateRect(hWnd, NULL, TRUE);
+            invalidateDrawing(hWnd);
             UpdateWindow(hWnd);
         }
         return 0;
     }
+    case WM_LBUTTONDOWN:
+    {
+        if (g_isRedrawing)
+        {
+            return 0; // Ignora o clique durante o redesenho
+        }
+        // Lógica existente para clique, se aplicável
+        return DefWindowProc(hWnd, message, wParam, lParam);
+    }
+    break;
 
+    case WM_LBUTTONUP:
+    {
+        if (g_isRedrawing)
+        {
+            return 0; // Ignora o clique durante o redesenho
+        }
+        // Lógica existente para clique, se aplicável
+        return DefWindowProc(hWnd, message, wParam, lParam);
+    }
+    break;
     case WM_ERASEBKGND: {
         HDC hdc = (HDC)wParam;
         HBRUSH hbr = CreateSolidBrush(RGB(30, 30, 30));
