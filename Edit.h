@@ -2,6 +2,7 @@
 #include <windows.h>
 #include <vector>
 #include <string>
+#include "Global.h"
 
 extern HINSTANCE hInst;
 extern std::vector<std::vector<std::wstring>> g_tableDataEditar;
@@ -9,3 +10,4 @@ extern std::vector<std::vector<std::wstring>> g_tableDataEditar;
 LRESULT CALLBACK NewWndProcEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 BOOL InitEdit(HINSTANCE hInstance);
 BOOL RegisterEditClass(HINSTANCE hInstance); // Nova função
+void selectBD();

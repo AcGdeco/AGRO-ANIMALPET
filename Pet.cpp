@@ -12,9 +12,18 @@
 #include "Select.h"
 #include "MenuUniversal.h"
 #include <Add.h>
+#include <TutoresAdd.h>
+#include <PetsAdd.h>
+#include <AgendamentosAdd.h>
 #include <Consultar.h>
+#include <TutoresConsultar.h>
+#include <PetsConsultar.h>
+#include <AgendamentosConsultar.h>
 #include <regex>
 #include <Edit.h>
+#include <TutoresEdit.h>
+#include <PetsEdit.h>
+#include <AgendamentosEdit.h>
 #include <sstream>
 #include <tuple>
 #include <algorithm>
@@ -35,6 +44,7 @@ int idNumeroUltimo = 1;
 int rowsNumberSemCabecalho = 0;
 LONG_PTR idBtnGlobal = 0;
 std::wstring btnClicado;
+int numberRowsTable = 26;
 
 bool g_isRedrawing = false;
 
@@ -51,7 +61,7 @@ std::string orderColumn = "ID";
 std::string orderAscDesc = "DESC";
 std::vector<int> naoDesenharInternRowsNumber;
 
-std::vector<std::wstring> dados(26);
+std::vector<std::wstring> dados(numberRowsTable);
 std::wstring dataAte;
 std::wstring dataRegistroAte;
 
@@ -59,8 +69,6 @@ std::vector<HWND> g_buttons;
 
 // Substitua o macro por constexpr conforme sugerido pelo VCR101
 constexpr int MAX_LOADSTRING = 100;
-
-int windowsNumber = 1;
 
 // Instância da aplicação (global para uso em outros arquivos)
 HINSTANCE hInstMenu;
@@ -356,6 +364,10 @@ void DestroyAllOffsetButtons() {
 
 void createBtnPageLimit(HWND hWnd) {
     DestroyAllOffsetButtons();
+
+    if(idNumeroUltimo != 1 && offsetTableRow > rowsNumberSemCabecalho) {
+        mudarPagina(idNumeroUltimo - 1);
+    }
 
     // Obter dimensões da janela
     RECT rect;
@@ -869,15 +881,33 @@ bool estaEntreDatas(const std::wstring& dataIntervalo1,
     if (!dataIntervalo1.empty() && !dataIntervalo2.empty()) {
         // 1. Garante que dataA é a data de início e dataB é a data de fim.
         //    Se a ordem estiver invertida, troca.
-        const Data& dataInicio = (dataA <= dataB) ? dataA : dataB;
-        const Data& dataFim = (dataA <= dataB) ? dataB : dataA;
+        const Data& dataInicio = dataA;
+        const Data& dataFim = dataB;
 
         // 2. Verifica se a dataTeste está depois/igual ao início E antes/igual ao fim.
         // dataInicio <= dataTeste   => A data de teste é posterior ou igual ao início
         // dataTeste <= dataFim      => A data de teste é anterior ou igual ao fim
         return (dataInicio <= dataTeste) && (dataTeste <= dataFim);
     }
-    else if(!dataIntervalo1.empty() || !dataIntervalo2.empty()){
+    else if (!dataIntervalo1.empty() || dataIntervalo2.empty()) {
+        const Data& dataInicio = dataA;
+        const Data& dataFim = dataB;
+
+        // 2. Verifica se a dataTeste está depois/igual ao início E antes/igual ao fim.
+        // dataInicio <= dataTeste   => A data de teste é posterior ou igual ao início
+        // dataTeste <= dataFim      => A data de teste é anterior ou igual ao fim
+        return dataInicio <= dataTeste;
+    }
+    else if (dataIntervalo1.empty() || !dataIntervalo2.empty()) {
+        const Data& dataInicio = dataA;
+        const Data& dataFim = dataB;
+
+        // 2. Verifica se a dataTeste está depois/igual ao início E antes/igual ao fim.
+        // dataInicio <= dataTeste   => A data de teste é posterior ou igual ao início
+        // dataTeste <= dataFim      => A data de teste é anterior ou igual ao fim
+        return dataTeste <= dataFim;
+    }
+    else if (!dataIntervalo1.empty() || !dataIntervalo2.empty()) {
         if (dataIntervalo1 == dataParaTestar || dataIntervalo2 == dataParaTestar) {
             return true;
         }
@@ -1009,16 +1039,16 @@ void AtualizarPosicoesInputs(HWND hWnd) {
     xPos = startXFull;
     yPos = startYFull;
 
-    SetWindowPos(g_editControlsFilters[26], NULL, xPos, yPos, 70, 30,
+    SetWindowPos(g_editControlsFilters[numberRowsTable], NULL, xPos, yPos, 70, 30,
         SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE | SWP_HIDEWINDOW);
-    SetWindowPos(g_editControlsFilters[26], NULL, xPos, yPos, 70, 30,
+    SetWindowPos(g_editControlsFilters[numberRowsTable], NULL, xPos, yPos, 70, 30,
         SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE | SWP_SHOWWINDOW);
 }
 
 void SetFilterValues(const std::vector<std::wstring>& dados) {
 
     // CORRIGIDO: O vetor 'dados' tem 26 posições.
-    size_t dataSize = 26;
+    size_t dataSize = numberRowsTable;
 
     // NOTA: Se você ainda tiver o erro 'esperado um identificador', use (std::min)
     // Se o erro foi resolvido com NOMINMAX, use std::min
@@ -1287,7 +1317,7 @@ void criarInputsFilters(HWND hWnd) {
     startYFull = startYFull + 2 * cellHeight + 7;  // Posição Y com scroll
     startXFull = 22 - g_scrollX;  // Posição X com scroll
     colNumber = 20;
-    colFinalNumber = 26;
+    colFinalNumber = numberRowsTable;
     int controlID;
 
     for (int col = colNumber; col < colFinalNumber; col++) {
@@ -1506,6 +1536,9 @@ void createHeaderTable(HWND hWnd, HDC hdc) {
                 qtyCaracters = 15;
 
             }
+            else if (width <= 2000 && displayText.length() > 25) {
+                qtyCaracters = 25;
+            }
             TextOut(hdc, xPos, yPos, displayText.c_str(), static_cast<int>(qtyCaracters));
             counter++;
         }
@@ -1520,7 +1553,7 @@ void selectHeaderDB() {
     int rc = sqlite3_open("pet.db", &db);
 
     errMsg = 0;
-    const char* sqlPragma = "PRAGMA table_info(Pets);";
+    const char* sqlPragma = "PRAGMA table_info(Tudo);";
 
     // 2. Executar o PRAGMA usando o callback que criamos
     rc = sqlite3_exec(
@@ -1632,7 +1665,7 @@ bool deleteRecordById(const std::string& databasePath, int id, HWND hWnd) {
     }
 
     // Preparar a query SQL
-    std::string sql = "DELETE FROM Pets WHERE ID = " + std::to_string(id) + ";";
+    std::string sql = "DELETE FROM Tudo WHERE ID = " + std::to_string(id) + ";";
 
     // Executar a query
     rc = sqlite3_exec(db, sql.c_str(), NULL, NULL, &errMsg);
@@ -1681,19 +1714,19 @@ void selectDB() {
                 // 2. Concatena com os minutos (incluindo o ':')
                 " || SUBSTR(Appointment_Hour, INSTR(Appointment_Hour, ':'))";
 
-            sqlSelect = "SELECT * FROM Pets ORDER BY " + hourSorting + " " + orderAscDesc;
+            sqlSelect = "SELECT * FROM Tudo ORDER BY " + hourSorting + " " + orderAscDesc;
         }
         else if (orderColumn == "Appointment_Date") {
 
             // Define a string de ordenação complexa para a data DD/MM/YYYY
             std::string dataSorting =
                 "SUBSTR(Appointment_Date, 7, 4) || SUBSTR(Appointment_Date, 4, 2) || SUBSTR(Appointment_Date, 1, 2)";
-            sqlSelect = "SELECT * FROM Pets ORDER BY " + dataSorting + " " + orderAscDesc;
+            sqlSelect = "SELECT * FROM Tudo ORDER BY " + dataSorting + " " + orderAscDesc;
 
         }
         else {
             //const char* sqlSelect = "SELECT ID, Nome_do_Pet, Nome_do_Tutor, Banho, Tosa, Appointment_Date, Appointment_Hour FROM Pets;";
-            sqlSelect = "SELECT * FROM Pets ORDER BY " + orderColumn + " COLLATE NOCASE " + orderAscDesc;
+            sqlSelect = "SELECT * FROM Tudo ORDER BY " + orderColumn + " COLLATE NOCASE " + orderAscDesc;
         }
 
         //std::string limitClause = " LIMIT " + std::to_string(limitTableRow) + " OFFSET " + std::to_string(offsetTableRow);
@@ -1752,7 +1785,7 @@ void verificarFiltro(const std::vector<std::wstring>& dados, std::vector<int>& n
     }
 
     int column;
-    int numeroColIteracoes = 26;
+    int numeroColIteracoes = numberRowsTable;
     for (size_t row = 0; row < g_tableData.size(); row++) {
 
         // CORREÇÃO: Verificar se o índice é válido
@@ -1793,23 +1826,41 @@ void verificarFiltro(const std::vector<std::wstring>& dados, std::vector<int>& n
                     break;
                 }
             }
-            else if ((!dados[col].empty() || !dados[21].empty()) && (col == 20 || col == 21)) {
+            else if (!dados[col].empty() && (col == 20 || col == 21)) {
 
                 // CORREÇÃO: Verificar se a coluna existe na linha atual
-                if (col < g_tableData[row].size()) {
-                    bool estaEntre = estaEntreDatas(dados[20], dados[21], dadoTable);
-                    if (!estaEntre) {
+                if (col == 21) {
+                    dadoTable = g_tableData[row][col - 1];
+
+                }
+
+                bool estaEntre = estaEntreDatas(dados[20], dados[21], dadoTable);
+                if (!estaEntre) {
+                    if (col == 21 && dados[20].empty()) {
+                        naoDesenharIntern[row] = 1;
+                        break;
+                    }
+                    else {
                         naoDesenharIntern[row] = 1;
                         break;
                     }
                 }
             }
-            else if ((!dados[col].empty() || !dados[23].empty()) && (col == 23 || col == 24)) {
+            else if (!dados[col].empty() && (col == 23 || col == 24)) {
 
                 // CORREÇÃO: Verificar se a coluna existe na linha atual
-                if (col < g_tableData[row].size()) {
-                    bool estaEntre = estaEntreDatas(dados[23], dados[24], dadoTable);
-                    if (!estaEntre) {
+                if (col == 24) {
+                    dadoTable = g_tableData[row][col - 2];
+
+                }
+
+                bool estaEntre = estaEntreDatas(dados[23], dados[24], dadoTable);
+                if (!estaEntre) {
+                    if (col == 24 && dados[23].empty()) {
+                        naoDesenharIntern[row] = 1;
+                        break;
+                    }
+                    else {
                         naoDesenharIntern[row] = 1;
                         break;
                     }
@@ -1925,7 +1976,7 @@ void CriarBotoesTabela(HWND hWnd)
         limit = offsetTableRow + limitTableRow;
     }
     else {
-        limit = rowsNumberSemCabecalho;
+        limit = rowsNumberSemCabecalho + 1;
     }
 
     int inicio;
@@ -2710,30 +2761,30 @@ BOOL Shortcuts(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
         switch (wParam)
         {
-        case VK_P: SendMessage(hWnd, WM_COMMAND, IDM_HOME_INICIO, 0); break;
-        case VK_G: SendMessage(hWnd, WM_COMMAND, IDM_AJUDA_SOBRE, 0); break;
+            case VK_P: SendMessage(hWnd, WM_COMMAND, IDM_HOME_INICIO, 0); break;
+            case VK_G: SendMessage(hWnd, WM_COMMAND, IDM_AJUDA_SOBRE, 0); break;
 
-        case VK_Q: SendMessage(hWnd, WM_COMMAND, IDM_TUTORES_NOVO, 0); break;
-        case VK_W: SendMessage(hWnd, WM_COMMAND, IDM_TUTORES_CONSULTAR, 0); break;
-        case VK_E: SendMessage(hWnd, WM_COMMAND, IDM_TUTORES_CONSULTAR, 0); break;
-        case VK_R: SendMessage(hWnd, WM_COMMAND, IDM_TUTORES_CONSULTAR, 0); break;
+            case VK_Q: SendMessage(hWnd, WM_COMMAND, IDM_TUTORES_NOVO, 0); break;
+            case VK_W: SendMessage(hWnd, WM_COMMAND, IDM_TUTORES_CONSULTAR, 0); break;
+            case VK_E: SendMessage(hWnd, WM_COMMAND, IDM_TUTORES_CONSULTAR, 0); break;
+            case VK_R: SendMessage(hWnd, WM_COMMAND, IDM_TUTORES_CONSULTAR, 0); break;
 
-        case VK_T: SendMessage(hWnd, WM_COMMAND, IDM_ARQUIVO_NOVO, 0); break;
-        case VK_Y: SendMessage(hWnd, WM_COMMAND, IDM_ARQUIVO_CONSULTAR, 0); break;
-        case VK_U: SendMessage(hWnd, WM_COMMAND, IDM_ARQUIVO_CONSULTAR, 0); break;
-        case VK_I: SendMessage(hWnd, WM_COMMAND, IDM_ARQUIVO_CONSULTAR, 0); break;
+            case VK_T: SendMessage(hWnd, WM_COMMAND, IDM_ARQUIVO_NOVO, 0); break;
+            case VK_Y: SendMessage(hWnd, WM_COMMAND, IDM_ARQUIVO_CONSULTAR, 0); break;
+            case VK_U: SendMessage(hWnd, WM_COMMAND, IDM_ARQUIVO_CONSULTAR, 0); break;
+            case VK_I: SendMessage(hWnd, WM_COMMAND, IDM_ARQUIVO_CONSULTAR, 0); break;
 
-            // --- NOVAS TECLAS (ASDF) ---
-        case VK_A: SendMessage(hWnd, WM_COMMAND, IDM_PETS_NOVO, 0); break;
-        case VK_S: SendMessage(hWnd, WM_COMMAND, IDM_PETS_CONSULTAR, 0); break;
-        case VK_D: SendMessage(hWnd, WM_COMMAND, IDM_PETS_CONSULTAR, 0); break;
-        case VK_F: SendMessage(hWnd, WM_COMMAND, IDM_PETS_CONSULTAR, 0); break;
+                // --- NOVAS TECLAS (ASDF) ---
+            case VK_A: SendMessage(hWnd, WM_COMMAND, IDM_PETS_NOVO, 0); break;
+            case VK_S: SendMessage(hWnd, WM_COMMAND, IDM_PETS_CONSULTAR, 0); break;
+            case VK_D: SendMessage(hWnd, WM_COMMAND, IDM_PETS_CONSULTAR, 0); break;
+            case VK_F: SendMessage(hWnd, WM_COMMAND, IDM_PETS_CONSULTAR, 0); break;
 
-            // --- NOVAS TECLAS (ZXCV) ---
-        case VK_Z: SendMessage(hWnd, WM_COMMAND, IDM_AGENDAMENTOS_NOVO, 0); break;
-        case VK_X: SendMessage(hWnd, WM_COMMAND, IDM_AGENDAMENTOS_CONSULTAR, 0); break;
-        case VK_C: SendMessage(hWnd, WM_COMMAND, IDM_AGENDAMENTOS_CONSULTAR, 0); break;
-        case VK_V: SendMessage(hWnd, WM_COMMAND, IDM_AGENDAMENTOS_CONSULTAR, 0); break;
+                // --- NOVAS TECLAS (ZXCV) ---
+            case VK_Z: SendMessage(hWnd, WM_COMMAND, IDM_AGENDAMENTOS_NOVO, 0); break;
+            case VK_X: SendMessage(hWnd, WM_COMMAND, IDM_AGENDAMENTOS_CONSULTAR, 0); break;
+            case VK_C: SendMessage(hWnd, WM_COMMAND, IDM_AGENDAMENTOS_CONSULTAR, 0); break;
+            case VK_V: SendMessage(hWnd, WM_COMMAND, IDM_AGENDAMENTOS_CONSULTAR, 0); break;
         }
     }
 
@@ -2902,6 +2953,27 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
        return FALSE;
    }
 
+   // Registrar a classe da janela Add, se ainda não registrada
+   if (!RegisterTutoresAddClass(hInst))
+   {
+       MessageBoxW(hWnd, L"Falha ao registrar classe da janela Tutores Add!", L"Erro", MB_OK | MB_ICONERROR);
+       return FALSE;
+   }
+
+   // Registrar a classe da janela Add, se ainda não registrada
+   if (!RegisterPetsAddClass(hInst))
+   {
+       MessageBoxW(hWnd, L"Falha ao registrar classe da janela Pets Add!", L"Erro", MB_OK | MB_ICONERROR);
+       return FALSE;
+   }
+
+   // Registrar a classe da janela Add, se ainda não registrada
+   if (!RegisterAgendamentosAddClass(hInst))
+   {
+       MessageBoxW(hWnd, L"Falha ao registrar classe da janela Pets Add!", L"Erro", MB_OK | MB_ICONERROR);
+       return FALSE;
+   }
+
    // Registrar a classe da janela Read, se ainda não registrada
    if (!RegisterReadClass(hInst))
    {
@@ -2909,10 +2981,74 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
        return FALSE;
    }
 
+   // Registrar a classe da janela Read, se ainda não registrada
+   if (!RegisterTutoresReadClass(hInst))
+   {
+       MessageBoxW(hWnd, L"Falha ao registrar classe da janela Read!", L"Erro", MB_OK | MB_ICONERROR);
+       return FALSE;
+   }
+
+   // Registrar a classe da janela Read, se ainda não registrada
+   if (!RegisterPetsReadClass(hInst))
+   {
+       MessageBoxW(hWnd, L"Falha ao registrar classe da janela Read!", L"Erro", MB_OK | MB_ICONERROR);
+       return FALSE;
+   }
+
+   // Registrar a classe da janela Read, se ainda não registrada
+   if (!RegisterAgendamentosReadClass(hInst))
+   {
+       MessageBoxW(hWnd, L"Falha ao registrar classe da janela Read!", L"Erro", MB_OK | MB_ICONERROR);
+       return FALSE;
+   }
+
+
    // Registrar a classe da janela Edit, se ainda não registrada
    if (!RegisterEditClass(hInst))
    {
        MessageBoxW(hWnd, L"Falha ao registrar classe da janela Edit!", L"Erro", MB_OK | MB_ICONERROR);
+       return FALSE;
+   }
+
+   // Registrar a classe da janela Edit, se ainda não registrada
+   if (!RegisterTutoresEditClass(hInst))
+   {
+       MessageBoxW(hWnd, L"Falha ao registrar classe da janela Edit!", L"Erro", MB_OK | MB_ICONERROR);
+       return FALSE;
+   }
+
+   // Registrar a classe da janela Edit, se ainda não registrada
+   if (!RegisterPetsEditClass(hInst))
+   {
+       MessageBoxW(hWnd, L"Falha ao registrar classe da janela Edit!", L"Erro", MB_OK | MB_ICONERROR);
+       return FALSE;
+   }
+
+   // Registrar a classe da janela Edit, se ainda não registrada
+   if (!RegisterAgendamentosEditClass(hInst))
+   {
+       MessageBoxW(hWnd, L"Falha ao registrar classe da janela Edit!", L"Erro", MB_OK | MB_ICONERROR);
+       return FALSE;
+   }
+
+   // Registrar a classe da janela TutoresSelect, se ainda não registrada
+   if (!RegisterTutoresSelectClass(hInst))
+   {
+       MessageBoxW(hWnd, L"Falha ao registrar classe da janela Tutores!", L"Erro", MB_OK | MB_ICONERROR);
+       return FALSE;
+   }
+
+   // Registrar a classe da janela PetsSelect, se ainda não registrada
+   if (!RegisterPetsSelectClass(hInst))
+   {
+       MessageBoxW(hWnd, L"Falha ao registrar classe da janela Pets!", L"Erro", MB_OK | MB_ICONERROR);
+       return FALSE;
+   }
+
+   // Registrar a classe da janela PetsSelect, se ainda não registrada
+   if (!RegisterAgendamentosSelectClass(hInst))
+   {
+       MessageBoxW(hWnd, L"Falha ao registrar classe da janela Agendamentos!", L"Erro", MB_OK | MB_ICONERROR);
        return FALSE;
    }
 

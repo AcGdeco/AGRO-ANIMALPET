@@ -4,9 +4,12 @@
 #include <string>
 #include "resource.h"
 #include "Select.h"
+#include "TutoresSelect.h"
+#include "PetsSelect.h"
+#include "AgendamentosSelect.h"
+#include "Global.h"
 
 extern int windowsNumber;
-
 extern int g_scrollX;
 extern int g_scrollY;
 extern int g_contentWidth;

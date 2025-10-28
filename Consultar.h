@@ -1,5 +1,6 @@
 #pragma once
 #include <windows.h>
+#include "Global.h"
 
 extern HINSTANCE hInst;
 

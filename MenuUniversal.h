@@ -1,6 +1,7 @@
 #pragma once
 
 #include <windows.h>
+#include "Global.h"
 
 // IDs dos itens do menu
 #define IDM_HOME_INICIO 1000

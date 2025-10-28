@@ -32,6 +32,286 @@
 
 std::vector<std::vector<std::wstring>> g_tableDataEditar;
 
+void PreencherControlesEdicao(HWND hWnd) {
+    // 1. Busca os Dados no Banco de Dados
+    selectBD();
+
+    // Se não houver dados, retorna
+    if (g_tableDataEditar.size() <= 1) {
+        return;
+    }
+
+    // 2. Preenchimento dos Campos de Entrada
+    // O loop deve corresponder ao loop de criação para garantir que 
+    // os dados e os controles (controlID = col + 2) estejam sincronizados.
+    for (int col = 0; col < 21; col++) {
+        int controlID = col + 2;
+        std::wstring displayText = g_tableDataEditar[1][col + 1];
+
+        // 3. Obter o HWND do controle (pelo ID ou pelo vetor g_editControls)
+        // Usar GetDlgItem(hWnd, controlID) ou iterar sobre g_editControls
+        HWND hControl = GetDlgItem(hWnd, controlID);
+
+        if (hControl == NULL) {
+            // Se hControl é NULL, é porque ele é um Radio Button (que tem IDs diferentes)
+            // ou é um dos outros Checkboxes.
+            // Para os Checkboxes e Edit Controls, o hControl não será NULL aqui.
+        }
+
+        if (col == 8) { // Castrado (Checkbox)
+            // Para Checkbox, usa-se o ID do controle principal (controlID)
+            checarInput(hControl, col, L"Sim", displayText);
+        }
+        else if (col == 11) { // Banho (Radio Buttons)
+            // Aqui, precisamos de todos os HWNDs de rádio, 
+            // pois eles têm IDs únicos e não o controlID.
+
+            // Padrão
+            HWND hRadio1 = GetDlgItem(hWnd, ID_RADIO_EDIT_PADRAO);
+            checarInput(hRadio1, col, L"Padrão", displayText);
+
+            // Hidratação
+            HWND hRadio2 = GetDlgItem(hWnd, ID_RADIO_EDIT_HIDRATACAO);
+            checarInput(hRadio2, col, L"Hidratação", displayText);
+
+            // Nenhum
+            HWND hRadio3 = GetDlgItem(hWnd, ID_RADIO_EDIT_BANHO_NENHUM);
+            checarInput(hRadio3, col, L"Nenhum", displayText);
+        }
+        else if (col == 12) { // Tosa (Radio Buttons)
+            // Tesoura
+            HWND hRadio1 = GetDlgItem(hWnd, ID_RADIO_EDIT_TESOURA);
+            checarInput(hRadio1, col, L"Tesoura", displayText);
+
+            // Máquina
+            HWND hRadio2 = GetDlgItem(hWnd, ID_RADIO_EDIT_MAQUINA);
+            checarInput(hRadio2, col, L"Máquina", displayText);
+
+            // Higiênica
+            HWND hRadio3 = GetDlgItem(hWnd, ID_RADIO_EDIT_HIGIENICA);
+            checarInput(hRadio3, col, L"Higiênica", displayText);
+
+            // Tosa da Raça
+            HWND hRadio4 = GetDlgItem(hWnd, ID_RADIO_EDIT_TOSADARACA);
+            checarInput(hRadio4, col, L"Tosa da Raça", displayText);
+
+            // Nenhum (Tosa)
+            HWND hRadio5 = GetDlgItem(hWnd, ID_RADIO_EDIT_TOSA_NENHUM);
+            checarInput(hRadio5, col, L"Nenhum", displayText);
+        }
+        else if (col == 14) { // Pulgas/Carrapatos (Checkboxes)
+            // Pulgas
+            HWND hCheckbox1 = GetDlgItem(hWnd, ID_CHECKBOX_EDIT_PULGAS);
+            checarInput(hCheckbox1, col, L"Pulgas", displayText);
+
+            // Carrapatos
+            HWND hCheckbox2 = GetDlgItem(hWnd, ID_CHECKBOX_EDIT_CARRAPATOS);
+            checarInput(hCheckbox2, col, L"Carrapatos", displayText);
+        }
+        else if (col == 15) { // Lesões (Checkboxes)
+            // Pele
+            HWND hCheckbox1 = GetDlgItem(hWnd, ID_CHECKBOX_EDIT_PELE);
+            checarInput(hCheckbox1, col, L"Pele", displayText);
+
+            // Olhos
+            HWND hCheckbox2 = GetDlgItem(hWnd, ID_CHECKBOX_EDIT_OLHOS);
+            checarInput(hCheckbox2, col, L"Olhos", displayText);
+
+            // Secreção
+            HWND hCheckbox3 = GetDlgItem(hWnd, ID_CHECKBOX_EDIT_SECRECAO);
+            checarInput(hCheckbox3, col, L"Secreção", displayText);
+
+            // Ouvido
+            HWND hCheckbox4 = GetDlgItem(hWnd, ID_CHECKBOX_EDIT_OUVIDO);
+            checarInput(hCheckbox4, col, L"Ouvido", displayText);
+        }
+        else { // Campos de Edição Padrão (EDIT)
+            // Para Edit Controls, basta usar SetWindowText
+            SetWindowText(hControl, displayText.c_str());
+        }
+    }
+}
+
+void CriarControlesEdicao(HWND hWnd) {
+    // 1. Resetar Scroll e Limpar Controles Antigos
+    g_scrollY = 0;
+    g_scrollX = 0;
+
+    // É crucial DESTRUIR os HWNDs antes de limpar o vetor,
+    // para evitar vazamento de recursos.
+    // Assumindo que você tem uma função para isso:
+    // DestroyAllControls(); 
+    g_editControls.clear();
+
+    ConfigurarScrollBarsAgendamento(hWnd);
+
+    // 2. Cálculo de Dimensões
+    RECT rect;
+    GetClientRect(hWnd, &rect);
+    int width = (rect.right - rect.left) - 44;
+
+    int cellHeight = 32;
+    int numColumns = 21;
+    int cellWidth = (width + 2000) / (numColumns > 0 ? numColumns : 1);
+
+    // As posições iniciais dependem do scroll, mas aqui elas são 0
+    // pois os scrollbars acabaram de ser resetados.
+    int startY = 40; // O scroll será aplicado na função de atualização de posição
+    int startX = 22;
+
+    // 3. Criação dos Campos de Entrada
+    for (int col = 0; col < 21; col++) {
+        int colNumber = col + 1;
+        int controlID = col + 2; // IDs de 2 a 22
+        int xPos = startX + cellWidth + 10;
+        int yPos = startY + colNumber * cellHeight + 3;
+
+        // Em CriarControlesEdicao, não precisamos do displayText
+
+        if (col == 8) { // Castrado (Checkbox)
+            HWND hCheckbox = CreateWindowW(
+                L"BUTTON", NULL,
+                WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX | WS_TABSTOP,
+                xPos, yPos, 20, 20,
+                hWnd, (HMENU)(controlID), NULL, NULL
+            );
+            g_editControls.push_back(hCheckbox);
+        }
+        else if (col == 11) { // Banho (Radio Buttons)
+            HWND hRadio;
+
+            // Padrão
+            hRadio = CreateWindowW(
+                L"BUTTON", L"Padrão", WS_VISIBLE | WS_CHILD | WS_GROUP | BS_AUTORADIOBUTTON | WS_TABSTOP,
+                xPos, yPos, 100, 20, hWnd, (HMENU)(ID_RADIO_EDIT_PADRAO), NULL, NULL
+            );
+            SetWindowTheme(hRadio, L"", L"");
+            g_editControls.push_back(hRadio);
+
+            // Hidratação
+            hRadio = CreateWindowW(
+                L"BUTTON", L"Hidratação", WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP,
+                xPos + cellWidth + 10, yPos, 100, 20, hWnd, (HMENU)(ID_RADIO_EDIT_HIDRATACAO), NULL, NULL
+            );
+            SetWindowTheme(hRadio, L"", L"");
+            g_editControls.push_back(hRadio);
+
+            // Nenhum
+            hRadio = CreateWindowW(
+                L"BUTTON", L"Nenhum", WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP,
+                xPos + 2 * cellWidth + 10, yPos, 100, 20, hWnd, (HMENU)(ID_RADIO_EDIT_BANHO_NENHUM), NULL, NULL
+            );
+            SetWindowTheme(hRadio, L"", L"");
+            g_editControls.push_back(hRadio);
+        }
+        else if (col == 12) { // Tosa (Radio Buttons)
+            HWND hRadio;
+
+            // Tesoura
+            hRadio = CreateWindowW(
+                L"BUTTON", L"Tesoura", WS_VISIBLE | WS_CHILD | WS_GROUP | BS_AUTORADIOBUTTON | WS_TABSTOP,
+                xPos, yPos, 100, 20, hWnd, (HMENU)(ID_RADIO_EDIT_TESOURA), NULL, NULL
+            );
+            SetWindowTheme(hRadio, L"", L"");
+            g_editControls.push_back(hRadio);
+
+            // Máquina
+            hRadio = CreateWindowW(
+                L"BUTTON", L"Máquina", WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP,
+                xPos + cellWidth + 10, yPos, 100, 20, hWnd, (HMENU)(ID_RADIO_EDIT_MAQUINA), NULL, NULL
+            );
+            SetWindowTheme(hRadio, L"", L"");
+            g_editControls.push_back(hRadio);
+
+            // Higiênica
+            hRadio = CreateWindowW(
+                L"BUTTON", L"Higiênica", WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP,
+                xPos + 2 * cellWidth + 10, yPos, 100, 20, hWnd, (HMENU)(ID_RADIO_EDIT_HIGIENICA), NULL, NULL
+            );
+            SetWindowTheme(hRadio, L"", L"");
+            g_editControls.push_back(hRadio);
+
+            // Tosa da Raça
+            hRadio = CreateWindowW(
+                L"BUTTON", L"Tosa da Raça", WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP,
+                xPos + 3 * cellWidth + 10, yPos, 100, 20, hWnd, (HMENU)(ID_RADIO_EDIT_TOSADARACA), NULL, NULL
+            );
+            SetWindowTheme(hRadio, L"", L"");
+            g_editControls.push_back(hRadio);
+
+            // Nenhum (Tosa)
+            hRadio = CreateWindowW(
+                L"BUTTON", L"Nenhum", WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP,
+                xPos + 4 * cellWidth + 10, yPos, 100, 20, hWnd, (HMENU)(ID_RADIO_EDIT_TOSA_NENHUM), NULL, NULL
+            );
+            SetWindowTheme(hRadio, L"", L"");
+            g_editControls.push_back(hRadio);
+        }
+        else if (col == 14) { // Pulgas/Carrapatos (Checkboxes)
+            // Pulgas
+            HWND hCheckbox = CreateWindowW(
+                L"BUTTON", L"Pulgas", WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX | WS_TABSTOP,
+                xPos, yPos, 20, 20, hWnd, (HMENU)(ID_CHECKBOX_EDIT_PULGAS), NULL, NULL
+            );
+            g_editControls.push_back(hCheckbox);
+
+            // Carrapatos
+            hCheckbox = CreateWindowW(
+                L"BUTTON", L"Carrapatos", WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX | WS_TABSTOP,
+                xPos + cellWidth + 10, yPos, 20, 20, hWnd, (HMENU)(ID_CHECKBOX_EDIT_CARRAPATOS), NULL, NULL
+            );
+            g_editControls.push_back(hCheckbox);
+        }
+        else if (col == 15) { // Lesões (Checkboxes)
+            // Pele
+            HWND hCheckbox = CreateWindowW(
+                L"BUTTON", L"Pele", WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX | WS_TABSTOP,
+                xPos, yPos, 20, 20, hWnd, (HMENU)(ID_CHECKBOX_EDIT_PELE), NULL, NULL
+            );
+            g_editControls.push_back(hCheckbox);
+
+            // Olhos
+            hCheckbox = CreateWindowW(
+                L"BUTTON", L"Olhos", WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX | WS_TABSTOP,
+                xPos + cellWidth + 10, yPos, 20, 20, hWnd, (HMENU)(ID_CHECKBOX_EDIT_OLHOS), NULL, NULL
+            );
+            g_editControls.push_back(hCheckbox);
+
+            // Secreção
+            hCheckbox = CreateWindowW(
+                L"BUTTON", L"Secreção", WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX | WS_TABSTOP,
+                xPos + 2 * cellWidth + 10, yPos, 20, 20, hWnd, (HMENU)(ID_CHECKBOX_EDIT_SECRECAO), NULL, NULL
+            );
+            g_editControls.push_back(hCheckbox);
+
+            // Ouvido
+            hCheckbox = CreateWindowW(
+                L"BUTTON", L"Ouvido", WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX | WS_TABSTOP,
+                xPos + 3 * cellWidth + 10, yPos, 20, 20, hWnd, (HMENU)(ID_CHECKBOX_EDIT_OUVIDO), NULL, NULL
+            );
+            g_editControls.push_back(hCheckbox);
+        }
+        else { // Campos de Edição Padrão (EDIT)
+            HWND hEdit = CreateWindowEx(
+                0, L"EDIT", L"", // Cria vazio
+                WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP,
+                xPos, yPos, 200, 25, hWnd, (HMENU)(controlID), NULL, NULL
+            );
+            g_editControls.push_back(hEdit);
+        }
+    }
+
+    // 4. Criação do Botão Salvar
+    int buttonY = startY + 22 * cellHeight + 3;
+    g_hButton = CreateWindowW(
+        L"BUTTON", L"Salvar",
+        WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON | WS_TABSTOP,
+        startX, buttonY, 150, 30,
+        hWnd, (HMENU)(1),
+        (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL
+    );
+}
+
 void selectBD() {
     // 1. LIMPAR DADOS ANTIGOS ANTES DE CADA CONSULTA
     g_tableDataEditar.clear();
@@ -42,7 +322,7 @@ void selectBD() {
     int rc = sqlite3_open("pet.db", &db);
     if (rc == SQLITE_OK) {
         std::string idRecordStr = std::to_string(idRecord);
-        std::string sqlSelect = "SELECT * FROM Pets WHERE ID = '" + idRecordStr + "';";
+        std::string sqlSelect = "SELECT * FROM Tudo WHERE ID = '" + idRecordStr + "';";
 
         rc = sqlite3_exec(db, sqlSelect.c_str(), sqlite_callback, &g_tableDataEditar, &errMsg);
         if (rc != SQLITE_OK) {
@@ -113,325 +393,9 @@ LRESULT CALLBACK WndProcEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
     {
     case WM_CREATE:
     {
-        selectBD();
+        // 1. Cria a interface
+        CriarControlesEdicao(hWnd);
 
-        // Resetar scroll para garantir que comece do topo
-        g_scrollY = 0;
-        g_scrollX = 0;
-
-        // Limpar array de controles
-        g_editControls.clear();
-
-        ConfigurarScrollBarsAgendamento(hWnd);
-
-        RECT rect;
-        GetClientRect(hWnd, &rect);
-        int width = (rect.right - rect.left) - 44;
-
-        // Configurar a tabela com scroll
-        int cellHeight = 32;
-        int numColumns = 21;
-        int cellWidth = (width + 2000) / (numColumns > 0 ? numColumns : 1);
-        int startY = 40 - g_scrollY;
-        int startX = 22 - g_scrollX;
-
-        // Criar campos de entrada
-        for (int col = 0; col < 21; col++) {
-            int colNumber = col + 1;
-            int controlID = col + 2; // IDs de 2 a 22
-            int xPos = startX + cellWidth + 10;
-            int yPos = startY + colNumber * cellHeight + 3;
-            std::wstring displayText = g_tableDataEditar[1][col + 1];
-
-            if (col == 8) {
-                HWND hCheckbox = CreateWindowW(
-                    L"BUTTON",                       // Classe do controle
-                    NULL,    // Texto da checkbox
-                    WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX | WS_TABSTOP,  // Estilos IMPORTANTES
-                    xPos, yPos,                      // Posição X, Y
-                    20, 20,                         // Largura, Altura  
-                    hWnd,                            // Janela pai
-                    (HMENU)(controlID),              // ID único
-                    NULL,                       // Instância
-                    NULL
-                );
-                
-                checarInput(hCheckbox, col, L"Sim", displayText);
-
-                g_editControls.push_back(hCheckbox);
-            }
-            else if (col == 11) {
-                HWND hRadio;
-
-                // Criar radio button 1
-                hRadio = CreateWindowW(
-                    L"BUTTON",                       // Classe do controle
-                    L"Padrão",    // Texto do radio button
-                    WS_VISIBLE | WS_CHILD | WS_GROUP | BS_AUTORADIOBUTTON | WS_TABSTOP,  // Estilos IMPORTANTES
-                    xPos, yPos,                      // Posição X, Y
-                    100, 20,                         // Largura ajustada para texto
-                    hWnd,                            // Janela pai
-                    (HMENU)(ID_RADIO_EDIT_PADRAO),       // ID único
-                    NULL,                            // Instância
-                    NULL
-                );
-
-                checarInput(hRadio, col, L"Padrão", displayText);
-
-                SetWindowTheme(hRadio, L"", L""); // Desativar tema para fundo transparente
-                g_editControls.push_back(hRadio);
-
-                // Criar radio button 2
-                hRadio = CreateWindowW(
-                    L"BUTTON",                       // Classe do controle
-                    L"Hidratação",    // Texto do radio button
-                    WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP,  // Estilos IMPORTANTES
-                    xPos + cellWidth + 10, yPos,     // Posição X, Y
-                    100, 20,                         // Largura ajustada para texto
-                    hWnd,                            // Janela pai
-                    (HMENU)(ID_RADIO_EDIT_HIDRATACAO),       // ID único
-                    NULL,                            // Instância
-                    NULL
-                );
-
-                checarInput(hRadio, col, L"Hidratação", displayText);
-
-                SetWindowTheme(hRadio, L"", L""); // Desativar tema para fundo transparente
-                g_editControls.push_back(hRadio);
-
-                // Criar radio button 3
-                hRadio = CreateWindowW(
-                    L"BUTTON",                       // Classe do controle
-                    L"Nenhum",    // Texto do radio button
-                    WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP,  // Estilos IMPORTANTES
-                    xPos + 2 * cellWidth + 10, yPos,     // Posição X, Y
-                    100, 20,                         // Largura ajustada para texto
-                    hWnd,                            // Janela pai
-                    (HMENU)(ID_RADIO_EDIT_BANHO_NENHUM),       // ID único
-                    NULL,                            // Instância
-                    NULL
-                );
-
-                checarInput(hRadio, col, L"Nenhum", displayText);
-
-                SetWindowTheme(hRadio, L"", L""); // Desativar tema para fundo transparente
-                g_editControls.push_back(hRadio);
-            }
-            else if (col == 12) {
-                HWND hRadio;
-
-                // Criar radio button 1
-                hRadio = CreateWindowW(
-                    L"BUTTON",                       // Classe do controle
-                    L"Tesoura",    // Texto do radio button
-                    WS_VISIBLE | WS_CHILD | WS_GROUP | BS_AUTORADIOBUTTON | WS_TABSTOP,  // Estilos IMPORTANTES
-                    xPos, yPos,                      // Posição X, Y
-                    100, 20,                         // Largura ajustada para texto
-                    hWnd,                            // Janela pai
-                    (HMENU)(ID_RADIO_EDIT_TESOURA),       // ID único
-                    NULL,                            // Instância
-                    NULL
-                );
-
-                checarInput(hRadio, col, L"Tesoura", displayText);
-
-                SetWindowTheme(hRadio, L"", L""); // Desativar tema para fundo transparente
-                g_editControls.push_back(hRadio);
-
-                // Criar radio button 2
-                hRadio = CreateWindowW(
-                    L"BUTTON",                       // Classe do controle
-                    L"Máquina",    // Texto do radio button
-                    WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP,  // Estilos IMPORTANTES
-                    xPos + cellWidth + 10, yPos,     // Posição X, Y
-                    100, 20,                         // Largura ajustada para texto
-                    hWnd,                            // Janela pai
-                    (HMENU)(ID_RADIO_EDIT_MAQUINA),       // ID único
-                    NULL,                            // Instância
-                    NULL
-                );
-
-                checarInput(hRadio, col, L"Máquina", displayText);
-
-                SetWindowTheme(hRadio, L"", L""); // Desativar tema para fundo transparente
-                g_editControls.push_back(hRadio);
-
-                // Criar radio button 3
-                hRadio = CreateWindowW(
-                    L"BUTTON",                       // Classe do controle
-                    L"Higiênica",    // Texto do radio button
-                    WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP,  // Estilos IMPORTANTES
-                    xPos + 2 * cellWidth + 10, yPos,     // Posição X, Y
-                    100, 20,                         // Largura ajustada para texto
-                    hWnd,                            // Janela pai
-                    (HMENU)(ID_RADIO_EDIT_HIGIENICA),       // ID único
-                    NULL,                            // Instância
-                    NULL
-                );
-
-                checarInput(hRadio, col, L"Higiênica", displayText);
-
-                SetWindowTheme(hRadio, L"", L""); // Desativar tema para fundo transparente
-                g_editControls.push_back(hRadio);
-
-                // Criar radio button 4
-                hRadio = CreateWindowW(
-                    L"BUTTON",                       // Classe do controle
-                    L"Tosa da Raça",    // Texto do radio button
-                    WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP,  // Estilos IMPORTANTES
-                    xPos + 3 * cellWidth + 10, yPos,     // Posição X, Y
-                    100, 20,                         // Largura ajustada para texto
-                    hWnd,                            // Janela pai
-                    (HMENU)(ID_RADIO_EDIT_TOSADARACA),       // ID único
-                    NULL,                            // Instância
-                    NULL
-                );
-
-                checarInput(hRadio, col, L"Tosa da Raça", displayText);
-
-                SetWindowTheme(hRadio, L"", L""); // Desativar tema para fundo transparente
-                g_editControls.push_back(hRadio);
-
-                // Criar radio button 5
-                hRadio = CreateWindowW(
-                    L"BUTTON",                       // Classe do controle
-                    L"Nenhum",    // Texto do radio button
-                    WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP,  // Estilos IMPORTANTES
-                    xPos + 4 * cellWidth + 10, yPos,     // Posição X, Y
-                    100, 20,                         // Largura ajustada para texto
-                    hWnd,                            // Janela pai
-                    (HMENU)(ID_RADIO_EDIT_TOSA_NENHUM),       // ID único
-                    NULL,                            // Instância
-                    NULL
-                );
-
-                checarInput(hRadio, col, L"Nenhum", displayText);
-
-                SetWindowTheme(hRadio, L"", L""); // Desativar tema para fundo transparente
-                g_editControls.push_back(hRadio);
-            }
-            else if (col == 14) {
-                HWND hCheckbox;
-                hCheckbox = CreateWindowW(
-                    L"BUTTON",                       // Classe do controle
-                    L"Pulgas",    // Texto da checkbox
-                    WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX | WS_TABSTOP,  // Estilos IMPORTANTES
-                    xPos, yPos,                      // Posição X, Y
-                    20, 20,                         // Largura, Altura  
-                    hWnd,                            // Janela pai
-                    (HMENU)(ID_CHECKBOX_EDIT_PULGAS),              // ID único
-                    NULL,                       // Instância
-                    NULL
-                );
-
-                checarInput(hCheckbox, col, L"Pulgas", displayText);
-
-                g_editControls.push_back(hCheckbox);
-
-                hCheckbox = CreateWindowW(
-                    L"BUTTON",                       // Classe do controle
-                    L"Carrapatos",    // Texto da checkbox
-                    WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX | WS_TABSTOP,  // Estilos IMPORTANTES
-                    xPos, yPos,                      // Posição X, Y
-                    20, 20,                         // Largura, Altura  
-                    hWnd,                            // Janela pai
-                    (HMENU)(ID_CHECKBOX_EDIT_CARRAPATOS),              // ID único
-                    NULL,                       // Instância
-                    NULL
-                );
-
-                checarInput(hCheckbox, col, L"Carrapatos", displayText);
-
-                g_editControls.push_back(hCheckbox);
-            }
-            else if (col == 15) {
-                HWND hCheckbox;
-                hCheckbox = CreateWindowW(
-                    L"BUTTON",                       // Classe do controle
-                    L"Pele",    // Texto da checkbox
-                    WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX | WS_TABSTOP,  // Estilos IMPORTANTES
-                    xPos, yPos,                      // Posição X, Y
-                    20, 20,                         // Largura, Altura  
-                    hWnd,                            // Janela pai
-                    (HMENU)(ID_CHECKBOX_EDIT_PELE),              // ID único
-                    NULL,                       // Instância
-                    NULL
-                );
-
-                checarInput(hCheckbox, col, L"Pele", displayText);
-
-                g_editControls.push_back(hCheckbox);
-
-                hCheckbox = CreateWindowW(
-                    L"BUTTON",                       // Classe do controle
-                    L"Olhos",    // Texto da checkbox
-                    WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX | WS_TABSTOP,  // Estilos IMPORTANTES
-                    xPos, yPos,                      // Posição X, Y
-                    20, 20,                         // Largura, Altura  
-                    hWnd,                            // Janela pai
-                    (HMENU)(ID_CHECKBOX_EDIT_OLHOS),              // ID único
-                    NULL,                       // Instância
-                    NULL
-                );
-
-                checarInput(hCheckbox, col, L"Olhos", displayText);
-
-                g_editControls.push_back(hCheckbox);
-
-                hCheckbox = CreateWindowW(
-                    L"BUTTON",                       // Classe do controle
-                    L"Secreção",    // Texto da checkbox
-                    WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX | WS_TABSTOP,  // Estilos IMPORTANTES
-                    xPos, yPos,                      // Posição X, Y
-                    20, 20,                         // Largura, Altura  
-                    hWnd,                            // Janela pai
-                    (HMENU)(ID_CHECKBOX_EDIT_SECRECAO),              // ID único
-                    NULL,                       // Instância
-                    NULL
-                );
-
-                checarInput(hCheckbox, col, L"Secreção", displayText);
-
-                g_editControls.push_back(hCheckbox);
-
-                hCheckbox = CreateWindowW(
-                    L"BUTTON",                       // Classe do controle
-                    L"Ouvido",    // Texto da checkbox
-                    WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX | WS_TABSTOP,  // Estilos IMPORTANTES
-                    xPos, yPos,                      // Posição X, Y
-                    20, 20,                         // Largura, Altura  
-                    hWnd,                            // Janela pai
-                    (HMENU)(ID_CHECKBOX_EDIT_OUVIDO),              // ID único
-                    NULL,                       // Instância
-                    NULL
-                );
-
-                checarInput(hCheckbox, col, L"Ouvido", displayText);
-
-                g_editControls.push_back(hCheckbox);
-            }
-            else {
-               
-                std::wstring displayText = g_tableDataEditar[1][col + 1];
-
-                HWND hEdit = CreateWindowEx(
-                    0, L"EDIT", displayText.c_str(),
-                    WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP,
-                    xPos, yPos, 200, 25, hWnd, (HMENU)(controlID), NULL, NULL
-                );
-                g_editControls.push_back(hEdit);
-            }
-        }
-
-        // Criar botão
-        int buttonY = startY + 22 * cellHeight + 3;
-        g_hButton = CreateWindowW(
-            L"BUTTON", L"Salvar",
-            WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON | WS_TABSTOP,
-            startX, buttonY, 150, 30,
-            hWnd, (HMENU)(1),
-            (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL
-        );
         break;
     }
 
@@ -719,7 +683,7 @@ LRESULT CALLBACK WndProcEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
                 std::wstring currentDate = GetCurrentDate();
                 std::wstring currentHour = GetCurrentHour();
 
-                std::wstring sqlInsertW = L"UPDATE Pets SET "
+                std::wstring sqlInsertW = L"UPDATE Tudo SET "
                     L"Nome_do_Pet = '" + treatDataAppointment(dados[2], 2) + L"', "
                     L"Raca = '" + treatDataAppointment(dados[3], 3) + L"', "
                     L"Nome_do_Tutor = '" + treatDataAppointment(dados[4], 4) + L"', "
@@ -761,7 +725,17 @@ LRESULT CALLBACK WndProcEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
                         sqlite3_free(errMsg);
                     }
                     else {
-                        updateWindow(L"JanelaSelectClasse");
+                        HWND hwndSelect = FindWindow(TEXT("JanelaSelectClasse"), NULL);
+                        if (hwndSelect != NULL) {
+                            //std::cout << "Janela encontrada! HWND: " << hwnd << std::endl;
+                            RecarregarDadosTabela(hwndSelect);
+                        }
+                        hwndSelect = FindWindow(TEXT("JanelaReadClasse"), NULL);
+                        if (hwndSelect != NULL) {
+                            //std::cout << "Janela encontrada! HWND: " << hwnd << std::endl;
+                            invalidateDrawing(hwndSelect);
+                            UpdateWindow(hwndSelect);
+                        }
                         MessageBox(hWnd, L"Dados inseridos com sucesso!", L"Sucesso", MB_OK);
                     }
                 }
@@ -775,6 +749,9 @@ LRESULT CALLBACK WndProcEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
     {
         PAINTSTRUCT ps;
         HDC hdc = BeginPaint(hWnd, &ps);
+
+        // 2. Preenche os campos com os dados do banco de dados
+        PreencherControlesEdicao(hWnd);
 
         // Double buffering
         HDC hdcMem = CreateCompatibleDC(hdc);

@@ -1,6 +1,9 @@
 ﻿#include "MenuUniversal.h"
 #include "Pet.h"
 #include "Select.h"
+#include "TutoresFuncoes.h"
+#include "PetsFuncoes.h"
+#include "AgendamentosFuncoes.h"
 #include <format>
 #include <cwchar> // Adicione esta linha no topo do arquivo, junto com os outros includes
 
@@ -29,6 +32,26 @@ HMENU CriarMenu() {
     // Adiciona o menu Arquivo ao menu principal
     AppendMenuW(hMenu, MF_POPUP, (UINT_PTR)hFileMenuTutores, L"&Tutores");
 
+    // Menu Pets
+    HMENU hFileMenuPets = CreatePopupMenu();
+    AppendMenuW(hFileMenuPets, MF_STRING, IDM_PETS_NOVO, L"&Criar\tCtrl+A");
+    AppendMenuW(hFileMenuPets, MF_STRING, IDM_PETS_CONSULTAR, L"&Consultar\tCtrl+S");
+    AppendMenuW(hFileMenuPets, MF_STRING, IDM_PETS_CONSULTAR, L"&Editar\tCtrl+D");
+    AppendMenuW(hFileMenuPets, MF_STRING, IDM_PETS_CONSULTAR, L"&Deletar\tCtrl+F");
+
+    // Adiciona o menu Arquivo ao menu principal
+    AppendMenuW(hMenu, MF_POPUP, (UINT_PTR)hFileMenuPets, L"&Pets");
+
+	// Menu Agendamentos
+    HMENU hFileMenuAgendamentos = CreatePopupMenu();
+    AppendMenuW(hFileMenuAgendamentos, MF_STRING, IDM_AGENDAMENTOS_NOVO, L"&Criar\tCtrl+Z");
+    AppendMenuW(hFileMenuAgendamentos, MF_STRING, IDM_AGENDAMENTOS_CONSULTAR, L"&Consultar\tCtrl+X");
+    AppendMenuW(hFileMenuAgendamentos, MF_STRING, IDM_AGENDAMENTOS_CONSULTAR, L"&Editar\tCtrl+C");
+    AppendMenuW(hFileMenuAgendamentos, MF_STRING, IDM_AGENDAMENTOS_CONSULTAR, L"&Deletar\tCtrl+V");
+
+    // Adiciona o menu Arquivo ao menu principal
+    AppendMenuW(hMenu, MF_POPUP, (UINT_PTR)hFileMenuAgendamentos, L"&Agendamentos");
+
     // Menu Arquivo
     HMENU hFileMenu = CreatePopupMenu();
     AppendMenuW(hFileMenu, MF_STRING, IDM_ARQUIVO_NOVO, L"&Criar\tCtrl+T");
@@ -37,7 +60,7 @@ HMENU CriarMenu() {
     AppendMenuW(hFileMenu, MF_STRING, IDM_ARQUIVO_CONSULTAR, L"&Deletar\tCtrl+I");
    
     // Adiciona o menu Arquivo ao menu principal
-    AppendMenuW(hMenu, MF_POPUP, (UINT_PTR)hFileMenu, L"&Agendamentos");
+    AppendMenuW(hMenu, MF_POPUP, (UINT_PTR)hFileMenu, L"&Tudo");
 
     // Menu Ajuda
     HMENU hFileMenuAjuda = CreatePopupMenu();
@@ -55,27 +78,90 @@ LRESULT ProcessarMenuArquivo(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
         int wmId = LOWORD(wParam);
 
         switch (wmId) {
-        case IDM_ARQUIVO_NOVO:
-        {
-            if (!CreateNewWindow(hWnd, hInst, L"JanelaAddClasse", L"AGRO ANIMAL PET - CRIAR AGENDAMENTO"))
+            case IDM_ARQUIVO_NOVO:
             {
-                // O erro já é tratado dentro da função
+                if (!CreateNewWindow(hWnd, hInst, L"JanelaAddClasse", L"AGRO ANIMAL PET - CRIAR AGENDAMENTO"))
+                {
+                    // O erro já é tratado dentro da função
+                    break;
+                }
                 break;
+                return 1;
             }
-            break;
-            return 1;
-        }
-        case IDM_ARQUIVO_CONSULTAR:
-        {
-            if (!CreateNewWindow(hWnd, hInst, L"JanelaSelectClasse", L"AGRO ANIMAL PET - AGENDAMENTOS"))
+            case IDM_ARQUIVO_CONSULTAR:
             {
-				RecarregarDadosTabela(hWnd);
-                // O erro já é tratado dentro da função
+                if (!CreateNewWindow(hWnd, hInst, L"JanelaSelectClasse", L"AGRO ANIMAL PET - AGENDAMENTOS"))
+                {
+				    RecarregarDadosTabela(hWnd);
+                    // O erro já é tratado dentro da função
+                    break;
+                }
                 break;
+                return 1;
             }
-            break;
-            return 1;
-        }
+            case IDM_TUTORES_NOVO:
+            {
+                if (!CreateNewWindow(hWnd, hInst, L"JanelaTutoresAddClasse", L"AGRO ANIMAL PET - CRIAR TUTOR"))
+                {
+                    // O erro já é tratado dentro da função
+                    break;
+                }
+                break;
+                return 1;
+            }
+            case IDM_TUTORES_CONSULTAR:
+            {
+                if (!CreateNewWindow(hWnd, hInst, L"JanelaTutoresSelectClasse", L"AGRO ANIMAL PET - TUTORES"))
+                {
+                    TutoresSelect_RecarregarDadosTabela(hWnd);
+                    // O erro já é tratado dentro da função
+                    break;
+                }
+                break;
+                return 1;
+            }
+            case IDM_PETS_NOVO:
+            {
+                if (!CreateNewWindow(hWnd, hInst, L"JanelaPetsAddClasse", L"AGRO ANIMAL PET - CRIAR PETS"))
+                {
+                    // O erro já é tratado dentro da função
+                    break;
+                }
+                break;
+                return 1;
+            }
+            case IDM_PETS_CONSULTAR:
+            {
+                if (!CreateNewWindow(hWnd, hInst, L"JanelaPetsSelectClasse", L"AGRO ANIMAL PET - PETS"))
+                {
+                    PetsSelect_RecarregarDadosTabela(hWnd);
+                    // O erro já é tratado dentro da função
+                    break;
+                }
+                break;
+                return 1;
+            }
+            case IDM_AGENDAMENTOS_NOVO:
+            {
+                if (!CreateNewWindow(hWnd, hInst, L"JanelaAgendamentosAddClasse", L"AGRO ANIMAL PET - CRIAR AGENDAMENTOS"))
+                {
+                    // O erro já é tratado dentro da função
+                    break;
+                }
+                break;
+                return 1;
+            }
+            case IDM_AGENDAMENTOS_CONSULTAR:
+            {
+                if (!CreateNewWindow(hWnd, hInst, L"JanelaAgendamentosSelectClasse", L"AGRO ANIMAL PET - AGENDAMENTOS"))
+                {
+                    AgendamentosSelect_RecarregarDadosTabela(hWnd);
+                    // O erro já é tratado dentro da função
+                    break;
+                }
+                break;
+                return 1;
+            }
         }
     }
     return 0;

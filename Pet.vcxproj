@@ -126,24 +126,51 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\OneDrive\Área de Trabalho\Programação\SQLite\sqlite-amalgamation-3500400\sqlite3.h" />
     <ClInclude Include="Add.h" />
+    <ClInclude Include="AgendamentosAdd.h" />
+    <ClInclude Include="AgendamentosConsultar.h" />
+    <ClInclude Include="AgendamentosEdit.h" />
+    <ClInclude Include="AgendamentosFuncoes.h" />
+    <ClInclude Include="AgendamentosSelect.h" />
     <ClInclude Include="Consultar.h" />
     <ClInclude Include="Edit.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="Global.h" />
     <ClInclude Include="MenuUniversal.h" />
+    <ClInclude Include="PetsAdd.h" />
+    <ClInclude Include="PetsConsultar.h" />
+    <ClInclude Include="PetsEdit.h" />
+    <ClInclude Include="PetsFuncoes.h" />
+    <ClInclude Include="PetsSelect.h" />
     <ClInclude Include="Select.h" />
     <ClInclude Include="Pet.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="TutoresAdd.h" />
+    <ClInclude Include="TutoresConsultar.h" />
+    <ClInclude Include="TutoresEdit.h" />
+    <ClInclude Include="TutoresSelect.h" />
+    <ClInclude Include="TutoresFuncoes.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\OneDrive\Área de Trabalho\Programação\SQLite\sqlite-amalgamation-3500400\sqlite3.c" />
     <ClCompile Include="Add.cpp" />
+    <ClCompile Include="AgendamentosAdd.cpp" />
+    <ClCompile Include="AgendamentosConsultar.cpp" />
+    <ClCompile Include="AgendamentosEdit.cpp" />
+    <ClCompile Include="AgendamentosFuncoes.cpp" />
+    <ClCompile Include="AgendamentosSelect.cpp" />
     <ClCompile Include="Consultar.cpp" />
     <ClCompile Include="Edit.cpp" />
+    <ClCompile Include="Global.cpp" />
     <ClCompile Include="MenuUniversal.cpp">
       <UseUnicodeForAssemblerListing Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</UseUnicodeForAssemblerListing>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'"> /source-charset:utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="PetsAdd.cpp" />
+    <ClCompile Include="PetsConsultar.cpp" />
+    <ClCompile Include="PetsEdit.cpp" />
+    <ClCompile Include="PetsFuncoes.cpp" />
+    <ClCompile Include="PetsSelect.cpp" />
     <ClCompile Include="Select.cpp">
       <UseUnicodeForAssemblerListing Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</UseUnicodeForAssemblerListing>
     </ClCompile>
@@ -151,6 +178,11 @@
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)</AdditionalIncludeDirectories>
       <UseUnicodeForAssemblerListing Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</UseUnicodeForAssemblerListing>
     </ClCompile>
+    <ClCompile Include="TutoresAdd.cpp" />
+    <ClCompile Include="TutoresConsultar.cpp" />
+    <ClCompile Include="TutoresEdit.cpp" />
+    <ClCompile Include="TutoresFuncoes.cpp" />
+    <ClCompile Include="TutoresSelect.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Pet.rc" />

@@ -610,7 +610,7 @@ LRESULT CALLBACK WndProcAdd(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
                 std::wstring currentDate = GetCurrentDate();
                 std::wstring currentHour = GetCurrentHour();
 
-                std::wstring sqlInsertW = L"INSERT INTO Pets (Nome_do_Pet, Raca, Nome_do_Tutor, CEP, Cor, Idade, Peso, Sexo, Castrado, Endereco, Ponto_de_referencia, Banho, Tosa, Obs_Tosa, Parasitas, Lesoes, Obs_Lesoes, Telefone, CPF, Appointment_Date, Appointment_Hour, Date, Hour) VALUES ('" + treatDataAppointment(dados[2], 2) + L"', '" + treatDataAppointment(dados[3], 3) + L"', '" + treatDataAppointment(dados[4], 4) + L"', '" + treatDataAppointment(dados[5], 5) + L"', '" + treatDataAppointment(dados[6], 6) + L"', '" + treatDataAppointment(dados[7], 7) + L"', '" + treatDataAppointment(dados[8], 8) + L"', '" + treatDataAppointment(dados[9], 9) + L"', '" + treatDataAppointment(dados[10], 10) + L"', '" + treatDataAppointment(dados[11], 11) + L"', '" + treatDataAppointment(dados[12], 12) + L"', '" + treatDataAppointment(dados[13], 13) + L"', '" + treatDataAppointment(dados[14], 14) + L"', '" + treatDataAppointment(dados[15], 15) + L"', '" + treatDataAppointment(dados[16], 16) + L"', '" + treatDataAppointment(dados[17], 17) + L"', '" + treatDataAppointment(dados[18], 18) + L"', '" + treatDataAppointment(dados[19], 19) + L"', '" + treatDataAppointment(dados[20], 20) + L"', '" + treatDataAppointment(dados[21], 21) + L"', '" + treatDataAppointment(dados[22], 22) + L"', '" + currentDate + L"', '" + currentHour + L"');";
+                std::wstring sqlInsertW = L"INSERT INTO Tudo (Nome_do_Pet, Raca, Nome_do_Tutor, CEP, Cor, Idade, Peso, Sexo, Castrado, Endereco, Ponto_de_referencia, Banho, Tosa, Obs_Tosa, Parasitas, Lesoes, Obs_Lesoes, Telefone, CPF, Appointment_Date, Appointment_Hour, Date, Hour) VALUES ('" + treatDataAppointment(dados[2], 2) + L"', '" + treatDataAppointment(dados[3], 3) + L"', '" + treatDataAppointment(dados[4], 4) + L"', '" + treatDataAppointment(dados[5], 5) + L"', '" + treatDataAppointment(dados[6], 6) + L"', '" + treatDataAppointment(dados[7], 7) + L"', '" + treatDataAppointment(dados[8], 8) + L"', '" + treatDataAppointment(dados[9], 9) + L"', '" + treatDataAppointment(dados[10], 10) + L"', '" + treatDataAppointment(dados[11], 11) + L"', '" + treatDataAppointment(dados[12], 12) + L"', '" + treatDataAppointment(dados[13], 13) + L"', '" + treatDataAppointment(dados[14], 14) + L"', '" + treatDataAppointment(dados[15], 15) + L"', '" + treatDataAppointment(dados[16], 16) + L"', '" + treatDataAppointment(dados[17], 17) + L"', '" + treatDataAppointment(dados[18], 18) + L"', '" + treatDataAppointment(dados[19], 19) + L"', '" + treatDataAppointment(dados[20], 20) + L"', '" + treatDataAppointment(dados[21], 21) + L"', '" + treatDataAppointment(dados[22], 22) + L"', '" + currentDate + L"', '" + currentHour + L"');";
 
                 if (error == L"1") {
                     MessageBox(hWnd, msg, L"Erro", MB_OK | MB_ICONERROR);
@@ -628,7 +628,11 @@ LRESULT CALLBACK WndProcAdd(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
                         sqlite3_free(errMsg);
                     }
                     else {
-                        updateWindow(L"JanelaSelectClasse");
+                        HWND hwndSelect = FindWindow(TEXT("JanelaSelectClasse"), NULL);
+                        if (hwndSelect != NULL) {
+                            //std::cout << "Janela encontrada! HWND: " << hwnd << std::endl;
+                            RecarregarDadosTabela(hwndSelect);
+                        }
                         MessageBox(hWnd, L"Dados inseridos com sucesso!", L"Sucesso", MB_OK);
                     }
                 }

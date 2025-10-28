@@ -1,0 +1,65 @@
+﻿A construção começou em 14:41...
+1>------ Compilação iniciada: Projeto: Pet, Configuração: Debug x64 ------
+1>PetsAdd.cpp
+1>C:\Users\Andre\source\repos\Pet\PetsAdd.h(1,1): warning C4828: O arquivo contém um caractere começando com o deslocamento 0x112 que é inválido no conjunto de caracteres de origem atual (página de código 65001).
+1>(compilando o arquivo fonte 'PetsAdd.cpp')
+1>C:\Users\Andre\source\repos\Pet\MenuUniversal.h(1,1): warning C4828: O arquivo contém um caractere começando com o deslocamento 0x206 que é inválido no conjunto de caracteres de origem atual (página de código 65001).
+1>(compilando o arquivo fonte 'PetsAdd.cpp')
+1>C:\Users\Andre\source\repos\Pet\PetsFuncoes.h(1,1): warning C4828: O arquivo contém um caractere começando com o deslocamento 0x1546 que é inválido no conjunto de caracteres de origem atual (página de código 65001).
+1>(compilando o arquivo fonte 'PetsAdd.cpp')
+1>C:\Users\Andre\source\repos\Pet\resource.h(1,1): warning C4828: O arquivo contém um caractere começando com o deslocamento 0x2b que é inválido no conjunto de caracteres de origem atual (página de código 65001).
+1>(compilando o arquivo fonte 'PetsAdd.cpp')
+1>C:\Users\Andre\source\repos\Pet\PetsFuncoes.h(34,13): warning C4091: 'extern ': ignorado à esquerda de 'PetsSelect_ButtonAction' quando nenhuma variável é declarada
+1>(compilando o arquivo fonte 'PetsAdd.cpp')
+1>C:\Users\Andre\source\repos\Pet\PetsAdd.cpp(97,34): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
+1>C:\Users\Andre\source\repos\Pet\PetsAdd.cpp(322,48): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
+1>C:\Users\Andre\source\repos\Pet\PetsAdd.cpp(717,74): warning C4267: 'argumento': conversão de 'size_t' para 'int', possível perda de dados
+1>Pet.cpp
+1>C:\Users\Andre\source\repos\Pet\Pet.h(1,1): warning C4828: O arquivo contém um caractere começando com o deslocamento 0x10ea que é inválido no conjunto de caracteres de origem atual (página de código 65001).
+1>(compilando o arquivo fonte 'Pet.cpp')
+1>C:\Users\Andre\source\repos\Pet\resource.h(1,1): warning C4828: O arquivo contém um caractere começando com o deslocamento 0x2b que é inválido no conjunto de caracteres de origem atual (página de código 65001).
+1>(compilando o arquivo fonte 'Pet.cpp')
+1>C:\Users\Andre\source\repos\Pet\Select.h(1,1): warning C4828: O arquivo contém um caractere começando com o deslocamento 0x24f que é inválido no conjunto de caracteres de origem atual (página de código 65001).
+1>(compilando o arquivo fonte 'Pet.cpp')
+1>C:\Users\Andre\source\repos\Pet\Pet.h(37,13): warning C4091: 'extern ': ignorado à esquerda de 'ButtonAction' quando nenhuma variável é declarada
+1>(compilando o arquivo fonte 'Pet.cpp')
+1>C:\Users\Andre\source\repos\Pet\MenuUniversal.h(1,1): warning C4828: O arquivo contém um caractere começando com o deslocamento 0x206 que é inválido no conjunto de caracteres de origem atual (página de código 65001).
+1>(compilando o arquivo fonte 'Pet.cpp')
+1>C:\Users\Andre\source\repos\Pet\Add.h(1,1): warning C4828: O arquivo contém um caractere começando com o deslocamento 0x109 que é inválido no conjunto de caracteres de origem atual (página de código 65001).
+1>(compilando o arquivo fonte 'Pet.cpp')
+1>C:\Users\Andre\source\repos\Pet\TutoresAdd.h(1,1): warning C4828: O arquivo contém um caractere começando com o deslocamento 0x11b que é inválido no conjunto de caracteres de origem atual (página de código 65001).
+1>(compilando o arquivo fonte 'Pet.cpp')
+1>C:\Users\Andre\source\repos\Pet\Consultar.h(1,1): warning C4828: O arquivo contém um caractere começando com o deslocamento 0x10c que é inválido no conjunto de caracteres de origem atual (página de código 65001).
+1>(compilando o arquivo fonte 'Pet.cpp')
+1>C:\Users\Andre\source\repos\Pet\Pet.cpp(23,9): warning C4005: 'min': redefinição de macro
+1>    C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\shared\minwindef.h(197,9):
+1>    ver a definição anterior de "min"
+1>C:\Users\Andre\source\repos\Pet\Pet.cpp(991,17): warning C4101: 'column': variável local não referenciada
+1>C:\Users\Andre\source\repos\Pet\Pet.cpp(1094,17): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
+1>C:\Users\Andre\source\repos\Pet\Pet.cpp(1112,51): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
+1>C:\Users\Andre\source\repos\Pet\Pet.cpp(1137,17): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
+1>C:\Users\Andre\source\repos\Pet\Pet.cpp(1161,17): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
+1>C:\Users\Andre\source\repos\Pet\Pet.cpp(1192,17): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
+1>C:\Users\Andre\source\repos\Pet\Pet.cpp(1227,17): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
+1>C:\Users\Andre\source\repos\Pet\Pet.cpp(1279,51): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
+1>C:\Users\Andre\source\repos\Pet\Pet.cpp(1301,55): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
+1>C:\Users\Andre\source\repos\Pet\Pet.cpp(1310,72): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
+1>C:\Users\Andre\source\repos\Pet\Pet.cpp(1319,55): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
+1>C:\Users\Andre\source\repos\Pet\Pet.cpp(1328,72): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
+1>C:\Users\Andre\source\repos\Pet\Pet.cpp(1337,51): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
+1>C:\Users\Andre\source\repos\Pet\Pet.cpp(1409,50): warning C4267: '=': conversão de 'size_t' para 'int', possível perda de dados
+1>C:\Users\Andre\source\repos\Pet\Pet.cpp(1410,67): warning C4267: '=': conversão de 'size_t' para 'int', possível perda de dados
+1>C:\Users\Andre\source\repos\Pet\Pet.cpp(1503,30): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
+1>C:\Users\Andre\source\repos\Pet\Pet.cpp(1601,18): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
+1>C:\Users\Andre\source\repos\Pet\Pet.cpp(1781,14): warning C4267: '=': conversão de 'size_t' para 'int', possível perda de dados
+1>C:\Users\Andre\source\repos\Pet\Pet.cpp(1914,20): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
+1>C:\Users\Andre\source\repos\Pet\Pet.cpp(1940,18): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
+1>C:\Users\Andre\source\repos\Pet\Pet.cpp(2748,16): warning C4244: 'return': conversão de 'LRESULT' para 'BOOL', possível perda de dados
+1>C:\Users\Andre\source\repos\Pet\Pet.cpp(2754,16): warning C4244: 'return': conversão de 'LRESULT' para 'BOOL', possível perda de dados
+1>C:\Users\Andre\source\repos\Pet\Pet.cpp(2760,16): warning C4244: 'return': conversão de 'LRESULT' para 'BOOL', possível perda de dados
+1>C:\Users\Andre\source\repos\Pet\Pet.cpp(2912,9): error C3861: 'RegisterPetsAddClass': identificador não encontrado
+1>C:\Users\Andre\source\repos\Pet\Pet.cpp(3046,52): warning C4267: 'argumento': conversão de 'size_t' para 'int', possível perda de dados
+1>C:\Users\Andre\source\repos\Pet\Pet.cpp(3051,45): warning C4267: 'argumento': conversão de 'size_t' para 'int', possível perda de dados
+1>Projeto de compilação pronto "Pet.vcxproj" -- FALHA.
+========== Compilação: 0 bem-sucedida, 1 com falha, 0 atualizada, 0 ignorada ==========
+========== Compilação concluído às 14:41 e levou 02,644 segundos ==========

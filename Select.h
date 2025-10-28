@@ -2,6 +2,7 @@
 #include <windows.h>
 #include <vector>
 #include <string>
+#include "Global.h"
 
 extern HINSTANCE hInst;
 extern std::vector<std::vector<std::wstring>> g_tableData;

@@ -263,7 +263,7 @@ LRESULT CALLBACK WndProcRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
         char* errMsg = 0;
         int rc = sqlite3_open("pet.db", &db);
         if (rc == SQLITE_OK) {
-            const char* sqlSelectConsulta = "SELECT * FROM Pets;";
+            const char* sqlSelectConsulta = "SELECT * FROM Tudo;";
             rc = sqlite3_exec(db, sqlSelectConsulta, sqlite_callback_consulta, &g_tableDataConsulta, &errMsg);
             if (rc != SQLITE_OK) {
                 if (errMsg) {
