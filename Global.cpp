@@ -88,7 +88,14 @@ void TutoresSelect_Global_preencherComboBox(HWND hComboBox) {
             cpfTutor = !TutoresSelect_Global_g_tableData[i][6].empty() ? L" - " + TutoresSelect_Global_g_tableData[i][6] : L"";
             valorInput = nomeTutor;
 
-            SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)valorInput.c_str());
+            LRESULT itemIndex = SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)valorInput.c_str());
+            LRESULT idTutorNum = std::stoll(TutoresSelect_Global_g_tableData[i][0]);
+            SendMessage(
+                hComboBox,
+                CB_SETITEMDATA,
+                (WPARAM)itemIndex,     // wParam: O ÍNDICE numérico recém-adicionado
+                (LPARAM)idTutorNum     // lParam: O VALOR NUMÉRICO (ID) a ser armazenado
+            );
         }
     }
 }

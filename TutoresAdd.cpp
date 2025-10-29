@@ -301,6 +301,13 @@ LRESULT CALLBACK WndProcTutoresAdd(HWND hWnd, UINT message, WPARAM wParam, LPARA
                             //std::cout << "Janela encontrada! HWND: " << hwnd << std::endl;
                             TutoresSelect_RecarregarDadosTabela(hwndSelect);
                         }
+
+                        hwndSelect = FindWindow(TEXT("JanelaPetsAddClasse"), NULL);
+                        if (hwndSelect != NULL) {
+                            //std::cout << "Janela encontrada! HWND: " << hwnd << std::endl;
+                            TutoresSelect_invalidateDrawing(hwndSelect);
+                            UpdateWindow(hwndSelect);
+                        }
                         
                         MessageBox(hWnd, L"Dados inseridos com sucesso!", L"Sucesso", MB_OK);
                     }

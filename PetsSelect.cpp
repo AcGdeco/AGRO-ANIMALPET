@@ -262,7 +262,7 @@ LRESULT CALLBACK WndProcPetsSelect(HWND hWnd, UINT message, WPARAM wParam, LPARA
                         {
                             // Se a seleção for inválida ou inexistente, armazena string vazia.
                             PetsSelect_dados[i] = L"";
-                            break;
+                            continue;
                         }
 
                         // 2. Envia a mensagem CB_GETLBTEXTLEN (Get ListBox Text Length) para obter o tamanho do texto.
@@ -278,7 +278,7 @@ LRESULT CALLBACK WndProcPetsSelect(HWND hWnd, UINT message, WPARAM wParam, LPARA
                         {
                             // Erro ao obter o tamanho do texto.
                             PetsSelect_dados[i] = L"";
-                            break;
+                            continue;
                         }
 
                         // 3. Cria uma std::wstring com o tamanho exato + 1 (para o terminador NULL).
@@ -299,7 +299,7 @@ LRESULT CALLBACK WndProcPetsSelect(HWND hWnd, UINT message, WPARAM wParam, LPARA
                         {
                             // Erro ao copiar o texto.
                             PetsSelect_dados[i] = L"";
-                            break;
+                            continue;
                         }
 
                         // 5. Finalização: O texto real copiado exclui o terminador NULL, 

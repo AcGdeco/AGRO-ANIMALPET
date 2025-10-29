@@ -464,17 +464,16 @@ LRESULT CALLBACK WndProcPetsAdd(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
         }
         else if (wmId == 0) { //CONSULTAR
             HWND input = GetDlgItem(hWnd, 4);
-            LRESULT selectedIndex = 0;
+            LRESULT selectedIndex = SendMessage(input, CB_GETCURSEL, 0, 0);
 
             // 2. Envia a mensagem CB_GETCURSEL (Get Current Selection) para o ComboBox.
             //    O resultado (o índice do item selecionado) é retornado no LRESULT.
-            selectedIndex = SendMessage(
+            LRESULT id = SendMessage(
                 input,          // HWND do ComboBox
-                CB_GETCURSEL,   // Mensagem para obter o índice do item selecionado
-                0,              // wParam: Não usado (deve ser 0)
+                CB_GETITEMDATA,   // Mensagem para obter o índice do item selecionado
+                (WPARAM)selectedIndex,              // wParam: Não usado (deve ser 0)
                 0               // lParam: Não usado (deve ser 0)
             );
-            LONG_PTR id = (selectedIndex != -1 && selectedIndex != 0) ? selectedIndex : 0;
             
             if (id == 0) {
                 MessageBox(hWnd, L"Selecione o Tutor!", L"Erro", MB_OK | MB_ICONERROR);

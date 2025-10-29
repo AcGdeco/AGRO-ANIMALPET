@@ -889,9 +889,9 @@ void PetsSelect_AtualizarPosicoesInputs(HWND hWnd) {
         }
         else if (col == 6) {
             SetWindowPos(PetsSelect_g_editControlsFilters[col], NULL, xPos, yPos, cellWidthFull - 15, 200,
-                SWP_NOZORDER | SWP_NOACTIVATE | SWP_HIDEWINDOW);
+                SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE | SWP_HIDEWINDOW);
             SetWindowPos(PetsSelect_g_editControlsFilters[col], NULL, xPos, yPos, cellWidthFull - 15, 200,
-                SWP_NOZORDER | SWP_NOACTIVATE | SWP_SHOWWINDOW);
+                SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE | SWP_SHOWWINDOW);
         }
         else {
             SetWindowPos(PetsSelect_g_editControlsFilters[col], NULL, xPos, yPos, cellWidthFull - 15, 25,
@@ -1069,7 +1069,7 @@ void PetsSelect_criarInputsFilters(HWND hWnd) {
                 NULL,                                // Texto: NULL para ComboBox
                 WS_VISIBLE | WS_CHILD | CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP, // Estilos IMPORTANTES
                 xPos, yPos,                          // Posição X, Y
-                inputWidth, 25,                            // Largura, Altura (A altura precisa ser maior para exibir a lista)
+                inputWidth, 200,                            // Largura, Altura (A altura precisa ser maior para exibir a lista)
                 hWnd,                                // Janela pai
                 (HMENU)(controlID),                  // ID único
                 NULL,                                // Instância
