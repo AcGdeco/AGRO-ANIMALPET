@@ -73,7 +73,6 @@ void PetsSelect_AtualizarPosicoesControlesAgendamento(HWND hWnd);
 int PetsSelect_sqlite_callback(void* data, int argc, char** argv, char** azColName);
 void PetsSelect_checarInput(HWND hinput, int col, std::wstring word, std::wstring tableData);
 bool PetsSelect_deleteRecordById(const std::string& databasePath, int id, HWND hWnd);
-void PetsSelect_RecarregarDadosTabela(HWND hWnd);
 void PetsSelect_CriarBotoesTabela(HWND hWnd);
 void PetsSelect_ConfigurarScrollBars(HWND hWnd);
 void PetsSelect_AtualizarPosicoesBotoes(HWND hWnd);

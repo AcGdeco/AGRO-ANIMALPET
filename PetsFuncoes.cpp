@@ -3,6 +3,7 @@
 
 #include "framework.h"
 #include "PetsFuncoes.h"
+#include "PetsAdd.h"
 #include "PetsSelect.h"
 #include "sqlite3.h"
 #include <string>
@@ -32,7 +33,7 @@ int PetsSelect_idNumeroUltimo = 1;
 int PetsSelect_rowsNumberSemCabecalho = 0;
 LONG_PTR PetsSelect_idBtnGlobal = 0;
 std::wstring PetsSelect_btnClicado;
-int PetsSelect_numberRowsTable = 26;
+int PetsSelect_numberColsTable = 11;
 
 bool PetsSelect_g_isRedrawing = false;
 
@@ -49,7 +50,7 @@ std::string PetsSelect_orderColumn = "ID";
 std::string PetsSelect_orderAscDesc = "DESC";
 std::vector<int> PetsSelect_naoDesenharInternRowsNumber;
 
-std::vector<std::wstring> PetsSelect_dados(PetsSelect_numberRowsTable);
+std::vector<std::wstring> PetsSelect_dados(21);
 std::wstring PetsSelect_dataAte;
 std::wstring PetsSelect_dataRegistroAte;
 
@@ -601,19 +602,19 @@ void PetsSelect_ordenarDefinicoesValores(HWND hWnd) {
             PetsSelect_orderColumn = "Nome_do_Pet";
             break;
         case 2:
-            PetsSelect_orderColumn = "Nome_do_Tutor";
+            PetsSelect_orderColumn = "Raca";
             break;
         case 3:
-            PetsSelect_orderColumn = "Banho";
+            PetsSelect_orderColumn = "Cor";
             break;
         case 4:
-            PetsSelect_orderColumn = "Tosa";
+            PetsSelect_orderColumn = "Idade";
             break;
         case 5:
-            PetsSelect_orderColumn = "Appointment_Date";
+            PetsSelect_orderColumn = "Peso";
             break;
         case 6:
-            PetsSelect_orderColumn = "Appointment_Hour";
+            PetsSelect_orderColumn = "Nome_do_Tutor";
             break;
         default:
             break;
@@ -828,6 +829,7 @@ bool PetsSelect_estaEntreDatas(const std::wstring& dataIntervalo1,
 
 std::wstring PetsSelect_arrumarNomesColunas(std::wstring displayText) {
     if (displayText == L"Nome_do_Pet") displayText = L"Nome do Pet";
+    else if (displayText == L"ID") displayText = L"ID Pet";
     else if (displayText == L"Nome_do_Tutor") displayText = L"Nome do Tutor";
     else if (displayText == L"Raca") displayText = L"Raça";
     else if (displayText == L"Appointment_Date") displayText = L"Data (de - até)";
@@ -840,6 +842,7 @@ std::wstring PetsSelect_arrumarNomesColunas(std::wstring displayText) {
     else if (displayText == L"Obs_Lesoes") displayText = L"Observação";
     else if (displayText == L"Obs_Lesoes") displayText = L"Observação";
     else if (displayText == L"Endereco") displayText = L"Endereço";
+    else if (displayText == L"ID_Tutor_FK") displayText = L"ID Tutor";
 
     return displayText;
 }
@@ -856,83 +859,83 @@ void PetsSelect_AtualizarPosicoesInputs(HWND hWnd) {
     int row = 1;
     int xPos;
     int yPos;
+    int widthDate = cellWidthFull / 2;
 
-    for (int col = 0; col < 10; col++) {
+    for (int col = 0; col < 11; col++) {
         xPos = startXFull + col * cellWidthFull + 10;
         yPos = startYFull + row * cellHeight + 7;
 
-        SetWindowPos(PetsSelect_g_editControlsFilters[col], NULL, xPos, yPos, cellWidthFull - 15, 25,
-            SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE | SWP_HIDEWINDOW);
-        SetWindowPos(PetsSelect_g_editControlsFilters[col], NULL, xPos, yPos, cellWidthFull - 15, 25,
-            SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE | SWP_SHOWWINDOW);
+        if (col == 8) {
+            SetWindowPos(PetsSelect_g_editControlsFilters[col], NULL, xPos, yPos, widthDate, 25,
+                SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE | SWP_HIDEWINDOW);
+            SetWindowPos(PetsSelect_g_editControlsFilters[col], NULL, xPos, yPos, widthDate, 25,
+                SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE | SWP_SHOWWINDOW);
+        }
+        else if (col == 9) {
+            xPos = startXFull + (col - 1) * cellWidthFull + 10;
+
+            SetWindowPos(PetsSelect_g_editControlsFilters[col], NULL, xPos + widthDate, yPos, widthDate, 25,
+                SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE | SWP_HIDEWINDOW);
+            SetWindowPos(PetsSelect_g_editControlsFilters[col], NULL, xPos + widthDate, yPos, widthDate, 25,
+                SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE | SWP_SHOWWINDOW);
+        }
+        else if (col == 10) {
+            xPos = startXFull + (col - 1) * cellWidthFull + 10;
+
+            SetWindowPos(PetsSelect_g_editControlsFilters[col], NULL, xPos, yPos, cellWidthFull - 15, 25,
+                SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE | SWP_HIDEWINDOW);
+            SetWindowPos(PetsSelect_g_editControlsFilters[col], NULL, xPos, yPos, cellWidthFull - 15, 25,
+                SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE | SWP_SHOWWINDOW);
+        }
+        else if (col == 6) {
+            SetWindowPos(PetsSelect_g_editControlsFilters[col], NULL, xPos, yPos, cellWidthFull - 15, 200,
+                SWP_NOZORDER | SWP_NOACTIVATE | SWP_HIDEWINDOW);
+            SetWindowPos(PetsSelect_g_editControlsFilters[col], NULL, xPos, yPos, cellWidthFull - 15, 200,
+                SWP_NOZORDER | SWP_NOACTIVATE | SWP_SHOWWINDOW);
+        }
+        else {
+            SetWindowPos(PetsSelect_g_editControlsFilters[col], NULL, xPos, yPos, cellWidthFull - 15, 25,
+                SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE | SWP_HIDEWINDOW);
+            SetWindowPos(PetsSelect_g_editControlsFilters[col], NULL, xPos, yPos, cellWidthFull - 15, 25,
+                SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE | SWP_SHOWWINDOW);
+        }
     }
 
     // Configurar a linha do input
     startYFull = startYFull + 2 * cellHeight + 7;  // Posição Y com scroll
     startXFull = 22 - PetsSelect_g_scrollX;  // Posição X com scroll
     int colNumber = 10;
-    int colFinalNumber = colNumber + 10;
+    int colFinalNumber = colNumber + 11;
 
-    for (int col = 10; col < 20; col++) {
+    for (int col = 11; col < colFinalNumber; col++) {
         yPos = startYFull + row * cellHeight + 7;
-        xPos = startXFull + (col - colNumber) * cellWidthFull + 10;
+        xPos = startXFull + (col - 1 - colNumber) * cellWidthFull + 10;
 
-        SetWindowPos(PetsSelect_g_editControlsFilters[col], NULL, xPos, yPos, cellWidthFull - 15, 25,
-            SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE | SWP_HIDEWINDOW);
-        SetWindowPos(PetsSelect_g_editControlsFilters[col], NULL, xPos, yPos, cellWidthFull - 15, 25,
-            SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE | SWP_SHOWWINDOW);
-    }
-
-    // Configurar a linha do input
-    startYFull = startYFull + 2 * cellHeight + 7;  // Posição Y com scroll
-    startXFull = 22 - PetsSelect_g_scrollX;  // Posição X com scroll
-    colNumber = 20;
-    colFinalNumber = colNumber + 10;
-
-    for (int col = 20; col < PetsSelect_g_editControlsFilters.size() - 1; col++) {
-        yPos = startYFull + row * cellHeight + 7;
-        xPos = startXFull + (col - colNumber) * cellWidthFull + 10;
-        int widthDate = cellWidthFull / 2;
-
-        if (col == 20) {
-            SetWindowPos(PetsSelect_g_editControlsFilters[col], NULL, xPos, yPos, widthDate, 25,
-                SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE | SWP_HIDEWINDOW);
-            SetWindowPos(PetsSelect_g_editControlsFilters[col], NULL, xPos, yPos, widthDate, 25,
-                SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE | SWP_SHOWWINDOW);
-        }
-        else if (col == 21) {
-            xPos = startXFull + (col - 1 - colNumber) * cellWidthFull + 10;
-
-            SetWindowPos(PetsSelect_g_editControlsFilters[col], NULL, xPos + widthDate, yPos, widthDate, 25,
-                SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE | SWP_HIDEWINDOW);
-            SetWindowPos(PetsSelect_g_editControlsFilters[col], NULL, xPos + widthDate, yPos, widthDate, 25,
-                SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE | SWP_SHOWWINDOW);
-        }
-        else if (col == 23) {
-            xPos = startXFull + (col - 1 - colNumber) * cellWidthFull + 10;
+        if (col == 18) {
+            xPos = startXFull + (col - 1 - 10) * cellWidthFull + 10;
 
             SetWindowPos(PetsSelect_g_editControlsFilters[col], NULL, xPos, yPos, widthDate, 25,
                 SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE | SWP_HIDEWINDOW);
             SetWindowPos(PetsSelect_g_editControlsFilters[col], NULL, xPos, yPos, widthDate, 25,
                 SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE | SWP_SHOWWINDOW);
         }
-        else if (col == 24) {
-            xPos = startXFull + (col - 2 - colNumber) * cellWidthFull + 10;
+        else if (col == 19) {
+            xPos = startXFull + (col - 2 - 10) * cellWidthFull + 10;
 
             SetWindowPos(PetsSelect_g_editControlsFilters[col], NULL, xPos + widthDate, yPos, widthDate, 25,
                 SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE | SWP_HIDEWINDOW);
             SetWindowPos(PetsSelect_g_editControlsFilters[col], NULL, xPos + widthDate, yPos, widthDate, 25,
+                SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE | SWP_SHOWWINDOW);
+        }
+        else if (col == 20) {
+            xPos = startXFull + (col - 2 - 10) * cellWidthFull + 10;
+
+            SetWindowPos(PetsSelect_g_editControlsFilters[col], NULL, xPos, yPos, cellWidthFull - 15, 25,
+                SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE | SWP_HIDEWINDOW);
+            SetWindowPos(PetsSelect_g_editControlsFilters[col], NULL, xPos, yPos, cellWidthFull - 15, 25,
                 SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE | SWP_SHOWWINDOW);
         }
         else {
-            int column;
-            if (col == 22) {
-                xPos = startXFull + (col - 1 - colNumber) * cellWidthFull + 10;
-            }
-            else if (col == 25) {
-                xPos = startXFull + (col - 2 - colNumber) * cellWidthFull + 10;
-            }
-
             SetWindowPos(PetsSelect_g_editControlsFilters[col], NULL, xPos, yPos, cellWidthFull - 15, 25,
                 SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE | SWP_HIDEWINDOW);
             SetWindowPos(PetsSelect_g_editControlsFilters[col], NULL, xPos, yPos, cellWidthFull - 15, 25,
@@ -945,16 +948,16 @@ void PetsSelect_AtualizarPosicoesInputs(HWND hWnd) {
     xPos = startXFull;
     yPos = startYFull;
 
-    SetWindowPos(PetsSelect_g_editControlsFilters[PetsSelect_numberRowsTable], NULL, xPos, yPos, 70, 30,
+    SetWindowPos(PetsSelect_g_editControlsFilters[colFinalNumber], NULL, xPos, yPos, 70, 30,
         SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE | SWP_HIDEWINDOW);
-    SetWindowPos(PetsSelect_g_editControlsFilters[PetsSelect_numberRowsTable], NULL, xPos, yPos, 70, 30,
+    SetWindowPos(PetsSelect_g_editControlsFilters[colFinalNumber], NULL, xPos, yPos, 70, 30,
         SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE | SWP_SHOWWINDOW);
 }
 
 void PetsSelect_SetFilterValues(const std::vector<std::wstring>& dados) {
 
     // CORRIGIDO: O vetor 'dados' tem 26 posições.
-    size_t dataSize = PetsSelect_numberRowsTable;
+    size_t dataSize = PetsSelect_numberColsTable;
 
     // NOTA: Se você ainda tiver o erro 'esperado um identificador', use (std::min)
     // Se o erro foi resolvido com NOMINMAX, use std::min
@@ -1015,12 +1018,12 @@ void PetsSelect_criarInputsFilters(HWND hWnd) {
     int yPos;
     int row = 1;
 
-    for (int col = 0; col < 10; col++) {
+    for (int col = 0; col < 11; col++) {
         int controlID = col + 20;
         yPos = startYFull + row * cellHeight + 7;
         xPos = startXFull + col * cellWidthFull + 10;
 
-        if (col == 9) {
+        if (col == 7) {
             HWND hComboBox = CreateWindowEx(
                 0,                                 // Estilos estendidos
                 L"ComboBox",                       // Nome da classe do controle ComboBox
@@ -1042,6 +1045,43 @@ void PetsSelect_criarInputsFilters(HWND hWnd) {
 
             PetsSelect_g_editControlsFilters.push_back(hComboBox);
         }
+        else if (col == 8) {
+            HWND hEdit = CreateWindowEx(
+                0, L"EDIT", L"",
+                WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP,
+                xPos, yPos, inputWidth / 2, 25, hWnd, (HMENU)(controlID), NULL, NULL
+            );
+
+            PetsSelect_g_editControlsFilters.push_back(hEdit);
+        }
+        else if (col == 9) {
+            HWND hEdit2 = CreateWindowEx(
+                0, L"EDIT", L"",
+                WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP,
+                xPos + inputWidth / 2, yPos, inputWidth / 2, 25, hWnd, (HMENU)(controlID), NULL, NULL
+            );
+
+            PetsSelect_g_editControlsFilters.push_back(hEdit2);
+        }
+        else if (col == 6) {
+            HWND hComboBox = CreateWindowW(
+                L"COMBOBOX",                         // Classe do controle: MUDAR de "BUTTON" para "COMBOBOX"
+                NULL,                                // Texto: NULL para ComboBox
+                WS_VISIBLE | WS_CHILD | CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP, // Estilos IMPORTANTES
+                xPos, yPos,                          // Posição X, Y
+                inputWidth, 25,                            // Largura, Altura (A altura precisa ser maior para exibir a lista)
+                hWnd,                                // Janela pai
+                (HMENU)(controlID),                  // ID único
+                NULL,                                // Instância
+                NULL
+            );
+
+            SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"");
+            SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Masculino");
+            SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Feminino");
+
+            PetsSelect_g_editControlsFilters.push_back(hComboBox);
+        }
         else {
             HWND hEdit = CreateWindowEx(
                 0, L"EDIT", L"",
@@ -1055,217 +1095,46 @@ void PetsSelect_criarInputsFilters(HWND hWnd) {
     // Configurar a linha do input
     startYFull = startYFull + 2 * cellHeight + 7;  // Posição Y com scroll
     startXFull = 22 - PetsSelect_g_scrollX;  // Posição X com scroll
-    int colNumber = 10;
-    int colFinalNumber = colNumber + 10;
+    int colNumber = 11;
+    int colFinalNumber = 21;
 
     for (int col = colNumber; col < colFinalNumber; col++) {
         int controlID = col + 20;
         yPos = startYFull + row * cellHeight + 7;
-        xPos = startXFull + (col - colNumber) * inputWidth + 10;
+        xPos = startXFull + (col - 10) * cellWidthFull + 10;
 
-        if (col == 12) {
-            HWND hComboBox = CreateWindowEx(
-                0,                                 // Estilos estendidos
-                L"ComboBox",                       // Nome da classe do controle ComboBox
-                L"",                               // Texto inicial (vazio)
-                WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP, // Estilos: Filho, Visível, e lista suspensa que não pode ser editada (SELECT)
-                xPos, yPos, inputWidth, 150,
-                hWnd,                        // Janela pai
-                (HMENU)(controlID),                        // ID único do controle (para o WM_COMMAND)
-                (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
-                NULL
+        if (col == 18) {
+            xPos = startXFull + (col - 1 - 10) * cellWidthFull + 10;
+
+            HWND hEdit = CreateWindowEx(
+                0, L"EDIT", L"",
+                WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP,
+                xPos, yPos, inputWidth / 2, 25, hWnd, (HMENU)(controlID), NULL, NULL
             );
 
-            // Adicionar a opção A
-            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"");
-            // Adicionar a opção A
-            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Padrão");
-            // Adicionar a opção B
-            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Hidratação");
-            // Adicionar a opção C
-            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Nenhum");
-
-            PetsSelect_g_editControlsFilters.push_back(hComboBox);
+            PetsSelect_g_editControlsFilters.push_back(hEdit);
         }
-        else if (col == 13) {
-            HWND hComboBox = CreateWindowEx(
-                0,                                 // Estilos estendidos
-                L"ComboBox",                       // Nome da classe do controle ComboBox
-                L"",                               // Texto inicial (vazio)
-                WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP, // Estilos: Filho, Visível, e lista suspensa que não pode ser editada (SELECT)
-                xPos, yPos, inputWidth, 150,
-                hWnd,                        // Janela pai
-                (HMENU)(controlID),                        // ID único do controle (para o WM_COMMAND)
-                (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
-                NULL
+        else if (col == 19) {
+            xPos = startXFull + (col - 1 - 10) * cellWidthFull + 10;
+
+            HWND hEdit2 = CreateWindowEx(
+                0, L"EDIT", L"",
+                WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP,
+                xPos + inputWidth / 2, yPos, inputWidth / 2, 25, hWnd, (HMENU)(controlID), NULL, NULL
             );
 
-            // Adicionar a opção A
-            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"");
-            // Adicionar a opção A
-            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Tesoura");
-            // Adicionar a opção B
-            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Máquina");
-            // Adicionar a opção C
-            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Higiênica");
-            // Adicionar a opção C
-            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Tosa da Raça");
-            // Adicionar a opção C
-            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Nenhum");
-
-            PetsSelect_g_editControlsFilters.push_back(hComboBox);
+            PetsSelect_g_editControlsFilters.push_back(hEdit2);
         }
-        else if (col == 15) {
-            // 1. Defina a largura desejada para a lista suspensa (ex: 300 pixels)
-            int desiredDroppedWidth = 170;
+        else if (col == 20) {
+            xPos = startXFull + (col - 1 - 10) * cellWidthFull + 10;
 
-            HWND hComboBox = CreateWindowEx(
-                0,                                 // Estilos estendidos
-                L"ComboBox",                       // Nome da classe do controle ComboBox
-                L"",                               // Texto inicial (vazio)
-                WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP, // Estilos: Filho, Visível, e lista suspensa que não pode ser editada (SELECT)
-                xPos, yPos, inputWidth, 150,
-                hWnd,                        // Janela pai
-                (HMENU)(controlID),                        // ID único do controle (para o WM_COMMAND)
-                (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
-                NULL
-            );
-
-            // independentemente da largura do controle principal.
-            SendMessageW(
-                hComboBox,
-                CB_SETDROPPEDWIDTH,
-                (WPARAM)desiredDroppedWidth, // Novo valor de largura
-                0
-            );
-
-            // Adicionar a opção A
-            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"");
-            // Adicionar a opção A
-            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Pulgas");
-            // Adicionar a opção B
-            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Carrapatos");
-            // Adicionar a opção B
-            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Pulgas e Carrapatos");
-
-            PetsSelect_g_editControlsFilters.push_back(hComboBox);
-        }
-        else if (col == 16) {
-            // 1. Defina a largura desejada para a lista suspensa (ex: 300 pixels)
-            int desiredDroppedWidth = 250;
-
-            HWND hComboBox = CreateWindowEx(
-                0,                                 // Estilos estendidos
-                L"ComboBox",                       // Nome da classe do controle ComboBox
-                L"",                               // Texto inicial (vazio)
-                WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP, // Estilos: Filho, Visível, e lista suspensa que não pode ser editada (SELECT)
-                xPos, yPos, inputWidth, 150,
-                hWnd,                        // Janela pai
-                (HMENU)(controlID),                        // ID único do controle (para o WM_COMMAND)
-                (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
-                NULL
-            );
-
-            // independentemente da largura do controle principal.
-            SendMessageW(
-                hComboBox,
-                CB_SETDROPPEDWIDTH,
-                (WPARAM)desiredDroppedWidth, // Novo valor de largura
-                0
-            );
-
-            // Adicionar a opção A
-            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"");
-            // Adicionar a opção A
-            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Pele");
-            // Adicionar a opção B
-            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Olhos");
-            // Adicionar a opção A
-            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Secreção");
-            // Adicionar a opção B
-            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Ouvido");
-            // Adicionar a opção B
-            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Pele e Olhos");
-            // Adicionar a opção B
-            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Pele e Secreção");
-            // Adicionar a opção B
-            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Pele e Ouvido");
-            // Adicionar a opção B
-            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Olhos e Secreção");
-            // Adicionar a opção B
-            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Olhos e Ouvido");
-            // Adicionar a opção B
-            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Secreção e Ouvido");
-            // Adicionar a opção B
-            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Olhos, Secreção e Ouvido");
-            // Adicionar a opção B
-            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Pele, Secreção e Ouvido");
-            // Adicionar a opção B
-            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Pele, Olhos e Ouvido");
-            // Adicionar a opção B
-            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Pele, Olhos e Secreção");
-            // Adicionar a opção B
-            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Pele, Olhos, Secreção e Ouvido");
-
-            PetsSelect_g_editControlsFilters.push_back(hComboBox);
-        }
-        else {
             HWND hEdit = CreateWindowEx(
                 0, L"EDIT", L"",
                 WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP,
                 xPos, yPos, inputWidth, 25, hWnd, (HMENU)(controlID), NULL, NULL
             );
-            PetsSelect_g_editControlsFilters.push_back(hEdit);
-        }
-    }
-
-    // Configurar a linha do input
-    startYFull = startYFull + 2 * cellHeight + 7;  // Posição Y com scroll
-    startXFull = 22 - PetsSelect_g_scrollX;  // Posição X com scroll
-    colNumber = 20;
-    colFinalNumber = PetsSelect_numberRowsTable;
-    int controlID;
-
-    for (int col = colNumber; col < colFinalNumber; col++) {
-        controlID = col + 20;
-        yPos = startYFull + row * cellHeight + 7;
-        xPos = startXFull + (col - colNumber) * inputWidth + 10;
-
-        if (col == 20) {
-            HWND hEdit = CreateWindowEx(
-                0, L"EDIT", L"",
-                WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP,
-                xPos, yPos, inputWidth / 2, 25, hWnd, (HMENU)(controlID), NULL, NULL
-            );
 
             PetsSelect_g_editControlsFilters.push_back(hEdit);
-        }
-        else if (col == 21) {
-            HWND hEdit2 = CreateWindowEx(
-                0, L"EDIT", L"",
-                WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP,
-                xPos + inputWidth / 2, yPos, inputWidth / 2, 25, hWnd, (HMENU)(controlID), NULL, NULL
-            );
-
-            PetsSelect_g_editControlsFilters.push_back(hEdit2);
-        }
-        else if (col == 23) {
-            HWND hEdit = CreateWindowEx(
-                0, L"EDIT", L"",
-                WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP,
-                xPos, yPos, inputWidth / 2, 25, hWnd, (HMENU)(controlID), NULL, NULL
-            );
-
-            PetsSelect_g_editControlsFilters.push_back(hEdit);
-        }
-        else if (col == 24) {
-            HWND hEdit2 = CreateWindowEx(
-                0, L"EDIT", L"",
-                WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP,
-                xPos + inputWidth / 2, yPos, inputWidth / 2, 25, hWnd, (HMENU)(controlID), NULL, NULL
-            );
-
-            PetsSelect_g_editControlsFilters.push_back(hEdit2);
         }
         else {
             HWND hEdit = CreateWindowEx(
@@ -1339,6 +1208,7 @@ void PetsSelect_criarHeaderLineFilter(HDC hdc, HWND hWnd, int startYFull, int st
         };
         FillRect(hdc, &rowRect, hCurrentBrush);
 
+        std::wstring displayText;
         // Desenhar as células de dados
         for (size_t col = colNumber; col < colFinalNumber; col++) {
             int xPos;
@@ -1346,7 +1216,12 @@ void PetsSelect_criarHeaderLineFilter(HDC hdc, HWND hWnd, int startYFull, int st
             yPos = startYFull + row * cellHeight + 7;
             xPos = startXFull + (col - colNumber) * cellWidthFull + 10;
 
-            std::wstring displayText = PetsSelect_g_tableDataFull[row][col];
+            if (col > 10 && col < 19) {
+                displayText = PetsSelect_g_tableDataFull[row][col + 1];
+            }
+            else {
+                displayText = PetsSelect_g_tableDataFull[row][col];
+            }
 
             // Traduzir cabeçalhos se necessário
             if (row == 0) {
@@ -1427,7 +1302,7 @@ void PetsSelect_createHeaderTable(HWND hWnd, HDC hdc) {
         int xPos = startX + counter * cellWidth + 10;
         int yPos = startY + 0 * cellHeight + 7;
 
-        if (col == 0 || col == 1 || col == 3 || col == 12 || col == 13 || col == 20 || col == 21) {
+        if (col == 0 || col == 1 || col == 2 || col == 3 || col == 4 || col == 5 || col == 12) {
             // Traduzir cabeçalhos se necessário
             if (displayText == L"Nome_do_Pet") displayText = L"Nome do Pet";
             else if (displayText == L"Nome_do_Tutor") displayText = L"Nome do Tutor";
@@ -1452,31 +1327,55 @@ void PetsSelect_createHeaderTable(HWND hWnd, HDC hdc) {
 }
 
 void PetsSelect_selectHeaderDB() {
-    PetsSelect_g_tableDataFull.clear();
+    PetsSelect_g_tableDataFull.clear(); // Limpa o vetor no início
 
     sqlite3* db;
     char* errMsg = 0;
     int rc = sqlite3_open("pet.db", &db);
 
-    errMsg = 0;
-    const char* sqlPragma = "PRAGMA table_info(Pets);";
+    if (rc != SQLITE_OK) {
+        // Tratar erro de abertura do banco de dados
+        return;
+    }
 
-    // 2. Executar o PRAGMA usando o callback que criamos
+    // --- 1. PEGAR INFORMAÇÕES DA TABELA PETS ---
+    const char* sqlPragmaPets = "PRAGMA table_info(Pets);";
+
     rc = sqlite3_exec(
         db,
-        sqlPragma,
-        PetsSelect_pragma_callback, // Nosso callback personalizado
-        &PetsSelect_g_tableDataFull, // Passamos o vetor global para o callback
+        sqlPragmaPets,
+        PetsSelect_pragma_callback,
+        &PetsSelect_g_tableDataFull, // O callback adiciona aqui
         &errMsg
     );
 
     if (rc != SQLITE_OK) {
-        // Tratar erro (opcional)
         if (errMsg) {
-            fprintf(stderr, "SQL error (PRAGMA): %s\n", errMsg);
+            fprintf(stderr, "SQL error (PRAGMA Pets): %s\n", errMsg);
             sqlite3_free(errMsg);
         }
     }
+
+    // --- 2. PEGAR INFORMAÇÕES DA TABELA TUTORES ---
+    const char* sqlPragmaTutores = "PRAGMA table_info(Tutores);";
+
+    // Reutilizamos a mesma função callback e o mesmo vetor
+    rc = sqlite3_exec(
+        db,
+        sqlPragmaTutores,
+        PetsSelect_pragma_callback,
+        &PetsSelect_g_tableDataFull, // O callback continua a adicionar
+        &errMsg
+    );
+
+    if (rc != SQLITE_OK) {
+        if (errMsg) {
+            fprintf(stderr, "SQL error (PRAGMA Tutores): %s\n", errMsg);
+            sqlite3_free(errMsg);
+        }
+    }
+
+    sqlite3_close(db); // Fechar a conexão com o banco de dados
 }
 
 void PetsSelect_createHeaderFilters(HDC hdc, HWND hWnd) {
@@ -1495,17 +1394,10 @@ void PetsSelect_createHeaderFilters(HDC hdc, HWND hWnd) {
     startYFull = startYFull + 2 * cellHeight + 7;  // Posição Y com scroll
     startXFull = 22 - PetsSelect_g_scrollX;  // Posição X com scroll
     colNumber = 10;
-    colFinalNumber = colNumber + 10;
+    colFinalNumber = PetsSelect_g_tableDataFull[0].size() - 1;
 
     PetsSelect_criarHeaderLineFilter(hdc, hWnd, startYFull, startXFull, colNumber, colFinalNumber);
 
-    // Configurar a linha do header
-    startYFull = startYFull + 2 * cellHeight + 7;  // Posição Y com scroll
-    startXFull = 22 - PetsSelect_g_scrollX;  // Posição X com scroll
-    colNumber = 20;
-    colFinalNumber = 24;
-
-    PetsSelect_criarHeaderLineFilter(hdc, hWnd, startYFull, startXFull, colNumber, colFinalNumber);
 }
 
 void PetsSelect_updateWindow(LPCWSTR className) {
@@ -1620,19 +1512,19 @@ void PetsSelect_selectDB() {
                 // 2. Concatena com os minutos (incluindo o ':')
                 " || SUBSTR(Appointment_Hour, INSTR(Appointment_Hour, ':'))";
 
-            sqlSelect = "SELECT * FROM Pets ORDER BY " + hourSorting + " " + PetsSelect_orderAscDesc;
+            sqlSelect = "SELECT *, P.ID AS ID_Pet, T.ID AS ID_Tutor FROM Pets AS P INNER JOIN Tutores AS T ON ID_Tutor_FK = ID_Tutor ORDER BY " + hourSorting + " " + PetsSelect_orderAscDesc;
         }
         else if (PetsSelect_orderColumn == "Appointment_Date") {
 
             // Define a string de ordenação complexa para a data DD/MM/YYYY
             std::string dataSorting =
                 "SUBSTR(Appointment_Date, 7, 4) || SUBSTR(Appointment_Date, 4, 2) || SUBSTR(Appointment_Date, 1, 2)";
-            sqlSelect = "SELECT * FROM Pets ORDER BY " + dataSorting + " " + PetsSelect_orderAscDesc;
+            sqlSelect = "SELECT *, P.ID AS ID_Pet, T.ID AS ID_Tutor FROM Pets AS P INNER JOIN Tutores AS T ON ID_Tutor_FK = ID_Tutor ORDER BY " + dataSorting + " " + PetsSelect_orderAscDesc;
 
         }
         else {
             //const char* sqlSelect = "SELECT ID, Nome_do_Pet, Nome_do_Tutor, Banho, Tosa, Appointment_Date, Appointment_Hour FROM Pets;";
-            sqlSelect = "SELECT * FROM Pets ORDER BY " + PetsSelect_orderColumn + " COLLATE NOCASE " + PetsSelect_orderAscDesc;
+            sqlSelect = "SELECT *, P.ID AS ID_Pet, T.ID AS ID_Tutor FROM Pets AS P INNER JOIN Tutores AS T ON ID_Tutor_FK = ID_Tutor ORDER BY " + PetsSelect_orderColumn + " COLLATE NOCASE " + PetsSelect_orderAscDesc;
         }
 
         //std::string limitClause = " LIMIT " + std::to_string(limitTableRow) + " OFFSET " + std::to_string(offsetTableRow);
@@ -1691,7 +1583,7 @@ void PetsSelect_verificarFiltro(const std::vector<std::wstring>& dados, std::vec
     }
 
     int column;
-    int numeroColIteracoes = PetsSelect_numberRowsTable;
+    int numeroColIteracoes = 21;
     for (size_t row = 0; row < PetsSelect_g_tableData.size(); row++) {
 
         // CORREÇÃO: Verificar se o índice é válido
@@ -1704,45 +1596,43 @@ void PetsSelect_verificarFiltro(const std::vector<std::wstring>& dados, std::vec
         // CORREÇÃO: Pular linha 0 (cabeçalho) se necessário
         if (row == 0) continue; // Mantém o cabeçalho
 
-        for (size_t col = 0; col < numeroColIteracoes; col++) {
-            if (col == 21) {
-                column = 20;
+        for (size_t col = 0; col < 21; col++) {
+            if (col == 20) {
+                column = col - 1;
             }
-            else if (col == 22) {
-                column = 21;
+            else if (col >= 9 && col < 12) {
+                column = col - 1;
             }
-            else if (col == 23 || col == 24) {
-                column = 22;
-            }
-            else if (col == 25) {
-                column = 23;
+            else if (col >= 12) {
+                column = col;
             }
             else {
                 column = col;
             }
+            
 
             dadoTable = PetsSelect_g_tableData[row][column];
 
             std::wstring displayText = dadoTable;
 
-            if (!dados[col].empty() && (col == 0 || col == 6 || col == 7 || col == 9 || col == 12 || col == 13 || col == 15 || col == 16)) {
+            if (!dados[col].empty() && (col == 0 || col == 4 || col == 5 || col == 7)) {
                 filtro = dados[col];
                 if (filtro != dadoTable) {
                     naoDesenharIntern[row] = 1;
                     break;
                 }
             }
-            else if (!dados[col].empty() && (col == 20 || col == 21)) {
+            else if (!dados[col].empty() && (col == 8 || col == 9)) {
 
                 // CORREÇÃO: Verificar se a coluna existe na linha atual
-                if (col == 21) {
+                if (col == 9) {
                     dadoTable = PetsSelect_g_tableData[row][col - 1];
 
                 }
 
-                bool estaEntre = PetsSelect_estaEntreDatas(dados[20], dados[21], dadoTable);
+                bool estaEntre = PetsSelect_estaEntreDatas(dados[8], dados[9], dadoTable);
                 if (!estaEntre) {
-                    if (col == 21 && dados[20].empty()) {
+                    if (col == 9 && dados[8].empty()) {
                         naoDesenharIntern[row] = 1;
                         break;
                     }
@@ -1752,17 +1642,17 @@ void PetsSelect_verificarFiltro(const std::vector<std::wstring>& dados, std::vec
                     }
                 }
             }
-            else if (!dados[col].empty() && (col == 23 || col == 24)) {
+            else if (!dados[col].empty() && (col == 18 || col == 19)) {
 
                 // CORREÇÃO: Verificar se a coluna existe na linha atual
-                if (col == 24) {
-                    dadoTable = PetsSelect_g_tableData[row][col - 2];
+                if (col == 19) {
+                    dadoTable = PetsSelect_g_tableData[row][col - 1];
 
                 }
 
-                bool estaEntre = PetsSelect_estaEntreDatas(dados[23], dados[24], dadoTable);
+                bool estaEntre = PetsSelect_estaEntreDatas(dados[18], dados[19], dadoTable);
                 if (!estaEntre) {
-                    if (col == 24 && dados[23].empty()) {
+                    if (col == 19 && dados[18].empty()) {
                         naoDesenharIntern[row] = 1;
                         break;
                     }
@@ -2135,10 +2025,25 @@ void PetsSelect_AtualizarPosicoesControlesAgendamento(HWND hWnd)
     for (size_t i = 0; i < PetsSelect_g_editControls.size(); i++) {
         colNumber = countRow + 1;
 
-        if (i == 11) {
+        if (i == 2) {
             xPos = startX + cellWidth + 10;
             yPos = startY + colNumber * cellHeight + 3;
-            SetWindowPos(PetsSelect_g_editControls[i], NULL, xPos, yPos, 110, 25,
+            SetWindowPos(PetsSelect_g_editControls[i], NULL, xPos, yPos, 610, 200,
+                SWP_NOZORDER | SWP_NOACTIVATE);
+
+            // Atualizar posição do botão
+            if (PetsSelect_g_hButton_consultar) {
+                SetWindowPos(PetsSelect_g_hButton_consultar, NULL, xPos + 620, yPos, 80, 25,
+                    SWP_NOZORDER | SWP_NOACTIVATE);
+            }
+
+            countRow++;
+        }
+        else if (i == 6) {
+            xPos = startX + cellWidth + 10;
+            yPos = startY + colNumber * cellHeight + 3;
+
+            SetWindowPos(PetsSelect_g_editControls[i], NULL, xPos, yPos, 700, 200,
                 SWP_NOZORDER | SWP_NOACTIVATE);
             countRow++;
         }
@@ -2221,7 +2126,7 @@ void PetsSelect_AtualizarPosicoesControlesAgendamento(HWND hWnd)
 
     // Atualizar posição do botão
     if (PetsSelect_g_hButton) {
-        int buttonY = startY + 22 * cellHeight + 3;
+        int buttonY = startY + 9 * cellHeight + 3;
         SetWindowPos(PetsSelect_g_hButton, NULL, startX, buttonY, 150, 30,
             SWP_NOZORDER | SWP_NOACTIVATE);
     }
@@ -2385,59 +2290,13 @@ std::wstring PetsSelect_treatDataAppointment(std::wstring dado, int number) {
         PetsSelect_error = L"1";
         PetsSelect_mensagem = L"Insira: 'Nome do Tutor'.\n" + PetsSelect_mensagem;
     }
-    else if (number == 13 && dado.empty()) {
-        PetsSelect_error = L"1";
-        PetsSelect_mensagem = L"Insira: 'Banho'.\n" + PetsSelect_mensagem;
-    }
-    else if (number == 14 && dado.empty()) {
-        PetsSelect_error = L"1";
-        PetsSelect_mensagem = L"Insira: 'Tosa'.\n" + PetsSelect_mensagem;
-    }
-    else if (number == 21) {
-        if (dado.empty()) {
-            PetsSelect_error = L"1";
-            PetsSelect_mensagem = L"Insira: 'Data'.\n" + PetsSelect_mensagem;
-        }
-        else if (!PetsSelect_isValidDate(dado)) {
-            PetsSelect_error = L"1";
-            PetsSelect_mensagem = L"Insira: 'Data' no formato: dd/mm/aaaa.\n" + PetsSelect_mensagem;
-        }
-    }
-    else if (number == 22) {
-        if (dado.empty()) {
-            PetsSelect_error = L"1";
-            PetsSelect_mensagem = L"Insira: 'Hora'.\n" + PetsSelect_mensagem;
-        }
-        else if (!PetsSelect_isValidTime(dado)) {
-            PetsSelect_error = L"1";
-            PetsSelect_mensagem = L"Insira: 'Hora' no formato: hh:mm.\n" + PetsSelect_mensagem;
-        }
-    }
-    else if (number == 5 && !dado.empty()) {
-        if (!PetsSelect_isNumber(dado)) {
-            PetsSelect_error = L"1";
-            PetsSelect_mensagem = L"Insira: Apenas números em 'CEP'.\n" + PetsSelect_mensagem;
-        }
-    }
-    else if (number == 7 && !dado.empty()) {
+    else if (number == 6 && !dado.empty()) {
         if (!PetsSelect_isNumber(dado)) {
             PetsSelect_error = L"1";
             PetsSelect_mensagem = L"Insira: Apenas números em 'Idade'.\n" + PetsSelect_mensagem;
         }
     }
-    else if (number == 19 && !dado.empty()) {
-        if (!PetsSelect_isNumber(dado)) {
-            PetsSelect_error = L"1";
-            PetsSelect_mensagem = L"Insira: Apenas números em 'Telefone'.\n" + PetsSelect_mensagem;
-        }
-    }
-    else if (number == 20 && !dado.empty()) {
-        if (!PetsSelect_isNumber(dado)) {
-            PetsSelect_error = L"1";
-            PetsSelect_mensagem = L"Insira: Apenas números em 'CPF'.\n" + PetsSelect_mensagem;
-        }
-    }
-    else if (number == 8 && !dado.empty()) {
+    else if (number == 7 && !dado.empty()) {
         if (!PetsSelect_isDecimalNumber(dado)) {
             PetsSelect_error = L"1";
             PetsSelect_mensagem = L"Insira: Apenas números decimais ou inteiros em 'Peso'.\n" + PetsSelect_mensagem;

@@ -162,7 +162,7 @@ LRESULT CALLBACK WndProcAgendamentosSelect(HWND hWnd, UINT message, WPARAM wPara
 
             AgendamentosSelect_idRecord = id;
 
-            if (!AgendamentosSelect_CreateNewWindow(hWnd, hInst, L"JanelaAgendamentosReadClasse", L"AGRO ANIMAL PET - CONSULTAR AGENDAMENTO"))
+            if (!AgendamentosSelect_CreateNewWindow(hWnd, hInst, L"JanelaAgendamentosReadClasse", L"CONSULTAR AGENDAMENTO"))
             {
                 // O erro já é tratado dentro da função
                 break;
@@ -184,7 +184,7 @@ LRESULT CALLBACK WndProcAgendamentosSelect(HWND hWnd, UINT message, WPARAM wPara
 
             AgendamentosSelect_idRecord = id;
 
-            if (!AgendamentosSelect_CreateNewWindow(hWnd, hInst, L"JanelaAgendamentosEditClasse", L"AGRO ANIMAL PET - EDITAR AGENDAMENTO"))
+            if (!AgendamentosSelect_CreateNewWindow(hWnd, hInst, L"JanelaAgendamentosEditClasse", L"EDITAR AGENDAMENTO"))
             {
                 // O erro já é tratado dentro da função
                 break;

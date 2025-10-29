@@ -83,13 +83,13 @@ LRESULT CALLBACK WndProcPetsSelect(HWND hWnd, UINT message, WPARAM wParam, LPARA
         }
         else {
             // Código de criação de tabela e inserção (mantido como está)
-            //const char* sqlDrop = "DROP TABLE IF EXISTS Pets;";
-            //rc = sqlite3_exec(db, sqlDrop, 0, 0, &errMsg);
-            //if (rc != SQLITE_OK) {
-                //MessageBox(hWnd, L"Erro ao dropar tabela!", L"Erro", MB_OK | MB_ICONERROR);
-                //sqlite3_free(errMsg);
-            //}
-            const char* sqlCreate = "CREATE TABLE IF NOT EXISTS Pets (ID INTEGER PRIMARY KEY AUTOINCREMENT, Nome_do_Pet TEXT, Raca TEXT, Nome_do_Tutor TEXT, CEP TEXT, Cor TEXT, Idade TEXT, Peso TEXT, Sexo TEXT, Castrado TEXT, Endereco TEXT, Ponto_de_referencia TEXT, Banho TEXT, Tosa TEXT, Obs_Tosa TEXT, Parasitas TEXT, Lesoes TEXT, Obs_Lesoes TEXT, Telefone TEXT, CPF TEXT, Appointment_Date TEXT, Appointment_Hour TEXT, Date TEXT, Hour TEXT);";
+            const char* sqlDrop = "DROP TABLE IF EXISTS Pets;";
+            rc = sqlite3_exec(db, sqlDrop, 0, 0, &errMsg);
+            if (rc != SQLITE_OK) {
+                MessageBox(hWnd, L"Erro ao dropar tabela!", L"Erro", MB_OK | MB_ICONERROR);
+                sqlite3_free(errMsg);
+            }
+            const char* sqlCreate = "CREATE TABLE IF NOT EXISTS Pets (ID INTEGER PRIMARY KEY AUTOINCREMENT, Nome_do_Pet TEXT, Raca TEXT, Cor TEXT, Idade TEXT, Peso TEXT, Sexo TEXT, Castrado TEXT, Date TEXT, Hour TEXT, ID_Tutor_FK INTEGER, FOREIGN KEY (ID_Tutor_FK) REFERENCES Tutores(ID) ON DELETE CASCADE ON UPDATE CASCADE);";
             rc = sqlite3_exec(db, sqlCreate, 0, 0, &errMsg);
             if (rc != SQLITE_OK) {
                 wchar_t fullMsg[512] = L"Erro ao criar tabela! Código: ";
@@ -106,21 +106,21 @@ LRESULT CALLBACK WndProcPetsSelect(HWND hWnd, UINT message, WPARAM wParam, LPARA
                 MessageBox(hWnd, fullMsg, L"Erro", MB_OK | MB_ICONERROR);
                 sqlite3_free(errMsg);
             }
-            //else {
+            else {
                 // Inserções (código original mantido)
-                //std::wstring currentDate = GetCurrentDate();
-                //std::wstring currentHour = GetCurrentHour();
-                //for (int i = 1; i <= 100; i++) {
-                   //std::wstring sqlInsertW = L"INSERT INTO Pets (Nome_do_Pet, Raca, Nome_do_Tutor, CEP, Cor, Idade, Peso, Sexo, Castrado, Endereco, Ponto_de_referencia, Banho, Tosa, Obs_Tosa, Parasitas, Lesoes, Obs_Lesoes, Telefone, CPF, Appointment_Date, Appointment_Hour, Date, Hour) VALUES ('Fido', 'Bulldog', 'Laís', '36309016', 'Preto', 5, 25, 'Masculino', 'Sim', 'Rua das flores - Guarda Mor - São João del Rei', 'Perto da pizzaria Agostinho', 'Padrão', 'Tesoura', 'ir qpiofj adfjs kçjf dkfjeif çsdaf jkasdjf iejf sdçf aksdfjis fdfj çaklsfjaksdfj kdsjfçaejf idsjfkasdf jaies', 'Carrapatos', 'Pele', 'asdf façldj fçkalsdj fdaskljf dsçkf jçklasdf jkaldsfj çkldsa fjaçklds jfakdls fjkalsdjf klasdjf çasdfj çasfj çadsklfjklf ', '32998360862', '09813426632', '04/07/2025', '15:00', '" + currentDate + L"', '" + currentHour + L"');";
-                    //int required = WideCharToMultiByte(CP_UTF8, 0, sqlInsertW.c_str(), -1, nullptr, 0, nullptr, nullptr);
-                    //if (required > 0) {
-                        //std::string sqlInsertUtf8(required, '\0');
-                        //WideCharToMultiByte(CP_UTF8, 0, sqlInsertW.c_str(), -1, &sqlInsertUtf8[0], required, nullptr, nullptr);
-                        //char* errMsg = nullptr;
-                        //int rc = sqlite3_exec(db, sqlInsertUtf8.c_str(), nullptr, nullptr, &errMsg);
-                        //if (rc != SQLITE_OK) sqlite3_free(errMsg);
-                    //}
-                //}
+                std::wstring currentDate = PetsSelect_GetCurrentDate();
+                std::wstring currentHour = PetsSelect_GetCurrentHour();
+                for (int i = 1; i <= 100; i++) {
+                   std::wstring sqlInsertW = L"INSERT INTO Pets (Nome_do_Pet, Raca, Cor, Idade, Peso, Sexo, Castrado, Date, Hour, ID_Tutor_FK) VALUES ('Fido', 'Bulldog', 'Preto', 5, 25, 'Masculino', 'Sim', '" + currentDate + L"', '" + currentHour + L"', 1);";
+                    int required = WideCharToMultiByte(CP_UTF8, 0, sqlInsertW.c_str(), -1, nullptr, 0, nullptr, nullptr);
+                    if (required > 0) {
+                        std::string sqlInsertUtf8(required, '\0');
+                        WideCharToMultiByte(CP_UTF8, 0, sqlInsertW.c_str(), -1, &sqlInsertUtf8[0], required, nullptr, nullptr);
+                        char* errMsg = nullptr;
+                        int rc = sqlite3_exec(db, sqlInsertUtf8.c_str(), nullptr, nullptr, &errMsg);
+                        if (rc != SQLITE_OK) sqlite3_free(errMsg);
+                    }
+                }
                 //std::wstring sqlInsertW2 = L"INSERT INTO Pets (Nome_do_Pet, Raca, Nome_do_Tutor, CEP, Cor, Idade, Peso, Sexo, Castrado, Endereco, Ponto_de_referencia, Banho, Tosa, Obs_Tosa, Parasitas, Lesoes, Obs_Lesoes, Telefone, CPF, Date, Hour) VALUES ('Astralis', 'Viralata', 'Débora', '36309022', 'Preto', 6, 18, 'Feminino', 'Não', 'Rua Ricador Geraldo dos Santos - Alto das Mercês - nº12', 'Perto da igreja das Mercês', 'Padrão', 'Tesoura', 'aa ksfj asldfj açlksdj fkasjd fçklasdjf aksdlfjkalçsdfj kçalsdjf kçlasjd çfkasdj fklçaj sdçlfkjakslfj çlasdjf çasd jfçaskdjfsdf', 'Carrapatos', 'Pele', ' asdfj açlsjf akçslj fkçlasdj fkçlasdjf lçkasjdf kasdjfkiujriwejfç dfkmdnfçnvçaidsjfçkdsfjaçksdjfkaçsjdfkasdjfkçlasjdçfaksdjf', '32998365552', '09813426789', '" + currentDate + L"', '" + currentHour + L"');";
                 //int required2 = WideCharToMultiByte(CP_UTF8, 0, sqlInsertW2.c_str(), -1, nullptr, 0, nullptr, nullptr);
                 //if (required2 > 0) {
@@ -139,7 +139,7 @@ LRESULT CALLBACK WndProcPetsSelect(HWND hWnd, UINT message, WPARAM wParam, LPARA
                     //MessageBoxW(hWnd, fullMsg, L"Erro", MB_OK | MB_ICONERROR);
                     //sqlite3_free(errMsg);
                 //}
-            //}
+            }
             sqlite3_close(db);
 
             PetsSelect_RecarregarDadosTabela(hWnd);
@@ -162,7 +162,7 @@ LRESULT CALLBACK WndProcPetsSelect(HWND hWnd, UINT message, WPARAM wParam, LPARA
 
             PetsSelect_idRecord = id;
 
-            if (!PetsSelect_CreateNewWindow(hWnd, hInst, L"JanelaPetsReadClasse", L"AGRO ANIMAL PET - CONSULTAR AGENDAMENTO"))
+            if (!PetsSelect_CreateNewWindow(hWnd, hInst, L"JanelaPetsReadClasse", L"CONSULTAR PET"))
             {
                 // O erro já é tratado dentro da função
                 break;
@@ -184,7 +184,7 @@ LRESULT CALLBACK WndProcPetsSelect(HWND hWnd, UINT message, WPARAM wParam, LPARA
 
             PetsSelect_idRecord = id;
 
-            if (!PetsSelect_CreateNewWindow(hWnd, hInst, L"JanelaPetsEditClasse", L"AGRO ANIMAL PET - EDITAR AGENDAMENTO"))
+            if (!PetsSelect_CreateNewWindow(hWnd, hInst, L"JanelaPetsEditClasse", L"EDITAR PET"))
             {
                 // O erro já é tratado dentro da função
                 break;
@@ -217,10 +217,10 @@ LRESULT CALLBACK WndProcPetsSelect(HWND hWnd, UINT message, WPARAM wParam, LPARA
             //swprintf_s(msg, L"Botão %s%d clicado!", L"Filtrar", (int)id, (int)id);
             //MessageBoxW(hWnd, msg, L"Info", MB_OK);
 
-            for (int i = 0; i <= 25; i++) {
+            for (int i = 0; i <= 20; i++) {
                 std::wstring controlIDStr = std::to_wstring(i);
                 HWND input = GetDlgItem(hWnd, i + 20);
-                if (i == 9 || i == 12 || i == 13 || i == 15 || i == 16) { // Se o comando veio do nosso ComboBox
+                if (i == 7) { // Se o comando veio do nosso ComboBox
                     // 1. Obter o índice do item selecionado
                     int indiceSelecionado = (int)SendMessageW(
                         input, CB_GETCURSEL, 0, 0
@@ -245,21 +245,78 @@ LRESULT CALLBACK WndProcPetsSelect(HWND hWnd, UINT message, WPARAM wParam, LPARA
                         // aplicarFiltro(valorFiltro);
                     }
                 }
+                else if (i == 6) {
+                    if (input) {
+                        LRESULT selectedIndex = 0;
+
+                        // 1. Envia a mensagem CB_GETCURSEL (Get Current Selection) para obter o índice.
+                        selectedIndex = SendMessage(
+                            input,
+                            CB_GETCURSEL,
+                            0,
+                            0
+                        );
+
+                        // Verifica se a seleção é válida (índice 0 ou maior)
+                        if (selectedIndex == CB_ERR) // CB_ERR (-1) é retornado se não houver seleção ou erro.
+                        {
+                            // Se a seleção for inválida ou inexistente, armazena string vazia.
+                            PetsSelect_dados[i] = L"";
+                            break;
+                        }
+
+                        // 2. Envia a mensagem CB_GETLBTEXTLEN (Get ListBox Text Length) para obter o tamanho do texto.
+                        // O resultado é o tamanho da string em caracteres (sem incluir o terminador NULL).
+                        LRESULT textLength = SendMessage(
+                            input,
+                            CB_GETLBTEXTLEN,
+                            (WPARAM)selectedIndex, // wParam: o índice do item
+                            0                      // lParam: Não usado
+                        );
+
+                        if (textLength == CB_ERR)
+                        {
+                            // Erro ao obter o tamanho do texto.
+                            PetsSelect_dados[i] = L"";
+                            break;
+                        }
+
+                        // 3. Cria uma std::wstring com o tamanho exato + 1 (para o terminador NULL).
+                        // O resize() garante que o buffer interno seja grande o suficiente.
+                        std::wstring selectedText;
+                        selectedText.resize(textLength + 1); // +1 para o terminador NULL
+
+                        // 4. Envia a mensagem CB_GETLBTEXT (Get ListBox Text) para copiar o texto.
+                        // O LPARAM é o ponteiro para o buffer (wchar_t*).
+                        LRESULT result = SendMessage(
+                            input,
+                            CB_GETLBTEXT,
+                            (WPARAM)selectedIndex,           // wParam: o índice do item
+                            (LPARAM)selectedText.data()      // lParam: Ponteiro para o buffer de caracteres (wchar_t*)
+                        );
+
+                        if (result == CB_ERR)
+                        {
+                            // Erro ao copiar o texto.
+                            PetsSelect_dados[i] = L"";
+                            break;
+                        }
+
+                        // 5. Finalização: O texto real copiado exclui o terminador NULL, 
+                        // então é necessário ajustar o tamanho da wstring.
+                        // O 'result' de CB_GETLBTEXT é o número de caracteres copiados (textLength).
+                        selectedText.resize(result);
+
+                        // 6. Armazena o texto no seu vetor de dados.
+                        PetsSelect_dados[i] = selectedText;
+                    }
+                }
                 else if (input) {
                     wchar_t buffer[256];
                     GetWindowText(input, buffer, 256);
                     PetsSelect_dados[i] = std::wstring(buffer);
                 }
             }
-
-            HWND input = GetDlgItem(hWnd, 20 + 2 * 20);
-            wchar_t buffer[256];
-            GetWindowText(input, buffer, 256);
-            PetsSelect_dataAte = std::wstring(buffer);
-
-            input = GetDlgItem(hWnd, 22 + 2 * 20);
-            GetWindowText(input, buffer, 256);
-            PetsSelect_dataRegistroAte = std::wstring(buffer);
 
             PetsSelect_idNumeroUltimo = 1;
             PetsSelect_offsetTableRow = 1;
@@ -386,9 +443,9 @@ LRESULT CALLBACK WndProcPetsSelect(HWND hWnd, UINT message, WPARAM wParam, LPARA
                 counter = 0;
                 // Desenhar as células de dados
                 for (size_t col = 0; col < PetsSelect_g_tableData[row].size(); col++) {
-                    std::wstring displayText = PetsSelect_g_tableData[row][col];
+                    if (col == 0 || col == 1 || col == 2 || col == 3 || col == 4 || col == 5 || col == 12) {
+                        std::wstring displayText = PetsSelect_g_tableData[row][col];
 
-                    if (col == 0 || col == 1 || col == 3 || col == 12 || col == 13 || col == 20 || col == 21) {
                         int xPos = startX + counter * cellWidth + 10;
                         int yPos = startY + linha * cellHeight + 7;
 

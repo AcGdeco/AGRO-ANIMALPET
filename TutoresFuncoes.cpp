@@ -16,6 +16,8 @@
 #include <tuple>
 #include <algorithm>
 #include <cwctype>
+#include <codecvt>
+
 #define min(a, b) ((a) < (b) ? (a) : (b)) 
 
 int TutoresSelect_g_scrollX;      // Posição horizontal do scroll
@@ -32,7 +34,8 @@ int TutoresSelect_idNumeroUltimo = 1;
 int TutoresSelect_rowsNumberSemCabecalho = 0;
 LONG_PTR TutoresSelect_idBtnGlobal = 0;
 std::wstring TutoresSelect_btnClicado;
-int PetsSelect_numberColsTable = 9;
+int TutoresSelect_numberColsTable = 9;
+std::wstring TutoresSelect_cpf;
 
 bool TutoresSelect_g_isRedrawing = false;
 
@@ -44,7 +47,6 @@ std::vector<HWND> TutoresSelect_g_editControlsOffsetLimit;
 std::vector<std::vector<std::wstring>> TutoresSelect_g_tableData;
 std::vector<std::vector<std::wstring>> TutoresSelect_g_tableDataFull;
 std::vector<std::vector<std::wstring>> TutoresSelect_g_tableDataRowsNumber;
-LONG_PTR TutoresSelect_idRecord;
 std::string TutoresSelect_orderColumn = "ID";
 std::string TutoresSelect_orderAscDesc = "DESC";
 std::vector<int> TutoresSelect_naoDesenharInternRowsNumber;
@@ -907,7 +909,7 @@ void TutoresSelect_AtualizarPosicoesInputs(HWND hWnd) {
 void TutoresSelect_SetFilterValues(const std::vector<std::wstring>& dados) {
 
     // CORRIGIDO: O vetor 'dados' tem 26 posições.
-    size_t dataSize = PetsSelect_numberColsTable;
+    size_t dataSize = TutoresSelect_numberColsTable;
 
     // NOTA: Se você ainda tiver o erro 'esperado um identificador', use (std::min)
     // Se o erro foi resolvido com NOMINMAX, use std::min
@@ -1402,7 +1404,7 @@ void TutoresSelect_verificarFiltro(const std::vector<std::wstring>& dados, std::
     }
 
     int column;
-    int numeroColIteracoes = PetsSelect_numberColsTable;
+    int numeroColIteracoes = TutoresSelect_numberColsTable;
     for (size_t row = 0; row < TutoresSelect_g_tableData.size(); row++) {
 
         // CORREÇÃO: Verificar se o índice é válido
@@ -1983,6 +1985,135 @@ bool TutoresSelect_isValidDate(const std::wstring& date) {
     return true;
 }
 
+bool verificar_cpf_valido(const std::string& cpf) {
+    // 1. Verificar o formato básico (11 dígitos) e se contém apenas números.
+    if (cpf.length() != 11 || std::any_of(cpf.begin(), cpf.end(), [](char c) { return !std::isdigit(c); })) {
+        return false;
+    }
+
+    // 2. Checar por sequências inválidas (CPFs com todos os dígitos iguais)
+    // O algoritmo matemático passaria nessas sequências, mas elas são inválidas na prática.
+    if (std::all_of(cpf.begin(), cpf.end(), [&](char c) { return c == cpf[0]; })) {
+        return false;
+    }
+
+    // Variáveis de cálculo
+    int soma = 0;
+    int resto;
+
+    // --- CÁLCULO DO PRIMEIRO DÍGITO VERIFICADOR (DV1) ---
+    // Multiplicadores de 10 a 2.
+    for (int i = 0; i < 9; ++i) {
+        // Converte o caractere do dígito para int e multiplica
+        soma += (cpf[i] - '0') * (10 - i);
+    }
+
+    resto = soma % 11;
+    int dv1 = (resto < 2) ? 0 : (11 - resto);
+
+    // 3. Verificar o primeiro DV
+    if ((cpf[9] - '0') != dv1) {
+        return false;
+    }
+
+    // --- CÁLCULO DO SEGUNDO DÍGITO VERIFICADOR (DV2) ---
+    // Reinicia a soma para o cálculo do segundo DV.
+    soma = 0;
+
+    // Multiplicadores de 11 a 2. Agora o cálculo inclui o primeiro DV (dígito na posição 9).
+    for (int i = 0; i < 10; ++i) {
+        soma += (cpf[i] - '0') * (11 - i);
+    }
+
+    resto = soma % 11;
+    int dv2 = (resto < 2) ? 0 : (11 - resto);
+
+    // 4. Verificar o segundo DV
+    if ((cpf[10] - '0') != dv2) {
+        return false;
+    }
+
+    // 5. Se ambos os DVs estiverem corretos, o CPF é considerado válido.
+    return true;
+}
+
+std::string TutoresSelect_wstring_para_string(const std::wstring& wstr) {
+    // Nota: O uso de std::wstring_convert e std::codecvt_utf8 pode ser
+    // obsoleto ou depender de configurações do compilador (especialmente no Linux).
+    // Para fins de demonstração, usaremos a abordagem comum:
+
+    // Configura o codecvt para UTF-8.
+    using convert_type = std::codecvt_utf8<wchar_t>;
+    std::wstring_convert<convert_type, wchar_t> converter;
+
+    return converter.to_bytes(wstr);
+}
+
+/**
+ * @brief Verifica se um CPF (std::wstring) já está registrado na coluna 'CPF' da tabela 'Tutores'.
+ * * @param cpf_wstring O CPF a ser verificado no formato std::wstring.
+ * @param db O ponteiro para o banco de dados SQLite (já aberto).
+ * @return true Se o CPF já estiver registrado.
+ * @return false Se o CPF não estiver registrado ou em caso de erro.
+ */
+bool TutoresSelect_verificar_cpf_registrado(const std::wstring& cpf_wstring) {
+    sqlite3* db; // Declaração da conexão
+
+    // Conexão é aberta e o ponteiro 'db' é preenchido
+    int rc = sqlite3_open("pet.db", &db);
+
+    if (rc != SQLITE_OK) {
+        // ... tratamento de erro ...
+        return 1;
+    }
+
+    if (!db) {
+        std::cerr << "Erro: Ponteiro para o banco de dados é NULL." << std::endl;
+        return false;
+    }
+
+    // 1. Converter wstring (UTF-16/32) para string (UTF-8)
+    std::string cpf_str = TutoresSelect_wstring_para_string(cpf_wstring);
+
+    // 2. Consulta SQL parametrizada para prevenir SQL Injection
+    std::string sql_query = "SELECT COUNT(*) FROM Tutores WHERE CPF = ?;";
+    sqlite3_stmt* stmt;
+
+    // 3. Preparar a consulta
+    rc = sqlite3_prepare_v2(db, sql_query.c_str(), -1, &stmt, 0);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Erro ao preparar a consulta: " << sqlite3_errmsg(db) << std::endl;
+        return false;
+    }
+
+    // 4. Ligar o parâmetro (o CPF) à consulta
+    // O 1 indica o índice do '?' na query
+    rc = sqlite3_bind_text(stmt, 1, cpf_str.c_str(), -1, SQLITE_STATIC);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Erro ao ligar o parâmetro: " << sqlite3_errmsg(db) << std::endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+
+    // 5. Executar a consulta (espera-se apenas uma linha com o COUNT)
+    rc = sqlite3_step(stmt);
+
+    bool cpf_encontrado = false;
+    if (rc == SQLITE_ROW) {
+        // O valor na coluna 0 é o COUNT(*). Se for > 0, o CPF existe.
+        int count = sqlite3_column_int(stmt, 0);
+        cpf_encontrado = (count > 0);
+    }
+    else if (rc != SQLITE_DONE) {
+        std::cerr << "Erro na execução da consulta: " << sqlite3_errmsg(db) << std::endl;
+    }
+
+    // 6. Finalizar (liberar) a consulta preparada
+    sqlite3_finalize(stmt);
+
+    return cpf_encontrado;
+}
+
 LPCWSTR TutoresSelect_error = L"0";
 std::wstring TutoresSelect_mensagem = L"";
 LPCWSTR TutoresSelect_msg = L"";
@@ -2008,7 +2139,15 @@ std::wstring TutoresSelect_treatDataAppointment(std::wstring dado, int number) {
         }
     }
     else if (number == 7 && !dado.empty()) {
-        if (!TutoresSelect_isNumber(dado)) {
+        if (TutoresSelect_verificar_cpf_registrado(dado) && TutoresSelect_cpf != dado) {
+            TutoresSelect_error = L"1";
+            TutoresSelect_mensagem = L"'CPF' já registrado.\n" + TutoresSelect_mensagem;
+        }
+        else if (!verificar_cpf_valido(TutoresSelect_wstring_para_string(dado))) {
+            TutoresSelect_error = L"1";
+            TutoresSelect_mensagem = L"'CPF' inválido.\n" + TutoresSelect_mensagem;
+        }
+        else if (!TutoresSelect_isNumber(dado)) {
             TutoresSelect_error = L"1";
             TutoresSelect_mensagem = L"Insira: Apenas números em 'CPF'.\n" + TutoresSelect_mensagem;
         }

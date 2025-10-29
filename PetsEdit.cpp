@@ -44,7 +44,7 @@ void PetsSelect_PreencherControlesEdicao(HWND hWnd) {
     // 2. Preenchimento dos Campos de Entrada
     // O loop deve corresponder ao loop de criação para garantir que 
     // os dados e os controles (controlID = col + 2) estejam sincronizados.
-    for (int col = 0; col < 21; col++) {
+    for (int col = 0; col < 8; col++) {
         int controlID = col + 2;
         std::wstring displayText = PetsSelect_g_tableDataEditar[1][col + 1];
 
@@ -58,75 +58,66 @@ void PetsSelect_PreencherControlesEdicao(HWND hWnd) {
             // Para os Checkboxes e Edit Controls, o hControl não será NULL aqui.
         }
 
-        if (col == 8) { // Castrado (Checkbox)
+        if (col == 7) { // Castrado (Checkbox)
+            std::wstring displayText = PetsSelect_g_tableDataEditar[1][col];
             // Para Checkbox, usa-se o ID do controle principal (controlID)
             PetsSelect_checarInput(hControl, col, L"Sim", displayText);
         }
-        else if (col == 11) { // Banho (Radio Buttons)
-            // Aqui, precisamos de todos os HWNDs de rádio, 
-            // pois eles têm IDs únicos e não o controlID.
+        else if (col == 2) {
+            // Variável HWND para o seu ComboBox (obtida com GetDlgItem, por exemplo)
+            HWND hComboBox = GetDlgItem(hWnd, 4);
+            LPARAM indexToSelect = 0;
 
-            // Padrão
-            HWND hRadio1 = GetDlgItem(hWnd, ID_RADIO_EDIT_PADRAO);
-            PetsSelect_checarInput(hRadio1, col, L"Padrão", displayText);
+            long long numericIndex = std::stoll(PetsSelect_g_tableDataEditar[1][11]);
 
-            // Hidratação
-            HWND hRadio2 = GetDlgItem(hWnd, ID_RADIO_EDIT_HIDRATACAO);
-            PetsSelect_checarInput(hRadio2, col, L"Hidratação", displayText);
+            // 3. Atribua o valor numérico (com cast, se necessário) ao LPARAM
+            indexToSelect = (LPARAM)numericIndex;
 
-            // Nenhum
-            HWND hRadio3 = GetDlgItem(hWnd, ID_RADIO_EDIT_BANHO_NENHUM);
-            PetsSelect_checarInput(hRadio3, col, L"Nenhum", displayText);
+            // Envia a mensagem CB_SETCURSEL (Set Current Selection) para o ComboBox
+            // O valor de 'indexToSelect' é passado no parâmetro wParam.
+            LRESULT result = SendMessage(
+                hComboBox,          // HWND do ComboBox
+                CB_SETCURSEL,       // Mensagem para definir o índice do item selecionado
+                (WPARAM)indexToSelect, // wParam: O índice a ser selecionado (baseado em zero)
+                0                   // lParam: Não usado (deve ser 0)
+            );
         }
-        else if (col == 12) { // Tosa (Radio Buttons)
-            // Tesoura
-            HWND hRadio1 = GetDlgItem(hWnd, ID_RADIO_EDIT_TESOURA);
-            PetsSelect_checarInput(hRadio1, col, L"Tesoura", displayText);
+        else if (col == 6) {
+            // Variável HWND para o seu ComboBox (obtida com GetDlgItem, por exemplo)
+            HWND hComboBox = GetDlgItem(hWnd, 8);
+            LPARAM indexToSelect = 0;
+            int index;
 
-            // Máquina
-            HWND hRadio2 = GetDlgItem(hWnd, ID_RADIO_EDIT_MAQUINA);
-            PetsSelect_checarInput(hRadio2, col, L"Máquina", displayText);
+            if (PetsSelect_g_tableDataEditar[1][6] == L"Masculino") {
+                index = 1;
+            }
+            else if (PetsSelect_g_tableDataEditar[1][6] == L"Feminino") {
+                index = 2;
+            }
+            else {
+                index = 0;
+            }
 
-            // Higiênica
-            HWND hRadio3 = GetDlgItem(hWnd, ID_RADIO_EDIT_HIGIENICA);
-            PetsSelect_checarInput(hRadio3, col, L"Higiênica", displayText);
+            // 3. Atribua o valor numérico (com cast, se necessário) ao LPARAM
+            indexToSelect = (LPARAM)index;
 
-            // Tosa da Raça
-            HWND hRadio4 = GetDlgItem(hWnd, ID_RADIO_EDIT_TOSADARACA);
-            PetsSelect_checarInput(hRadio4, col, L"Tosa da Raça", displayText);
-
-            // Nenhum (Tosa)
-            HWND hRadio5 = GetDlgItem(hWnd, ID_RADIO_EDIT_TOSA_NENHUM);
-            PetsSelect_checarInput(hRadio5, col, L"Nenhum", displayText);
+            // Envia a mensagem CB_SETCURSEL (Set Current Selection) para o ComboBox
+            // O valor de 'indexToSelect' é passado no parâmetro wParam.
+            LRESULT result = SendMessage(
+                hComboBox,          // HWND do ComboBox
+                CB_SETCURSEL,       // Mensagem para definir o índice do item selecionado
+                (WPARAM)indexToSelect, // wParam: O índice a ser selecionado (baseado em zero)
+                0                   // lParam: Não usado (deve ser 0)
+            );
         }
-        else if (col == 14) { // Pulgas/Carrapatos (Checkboxes)
-            // Pulgas
-            HWND hCheckbox1 = GetDlgItem(hWnd, ID_CHECKBOX_EDIT_PULGAS);
-            PetsSelect_checarInput(hCheckbox1, col, L"Pulgas", displayText);
-
-            // Carrapatos
-            HWND hCheckbox2 = GetDlgItem(hWnd, ID_CHECKBOX_EDIT_CARRAPATOS);
-            PetsSelect_checarInput(hCheckbox2, col, L"Carrapatos", displayText);
-        }
-        else if (col == 15) { // Lesões (Checkboxes)
-            // Pele
-            HWND hCheckbox1 = GetDlgItem(hWnd, ID_CHECKBOX_EDIT_PELE);
-            PetsSelect_checarInput(hCheckbox1, col, L"Pele", displayText);
-
-            // Olhos
-            HWND hCheckbox2 = GetDlgItem(hWnd, ID_CHECKBOX_EDIT_OLHOS);
-            PetsSelect_checarInput(hCheckbox2, col, L"Olhos", displayText);
-
-            // Secreção
-            HWND hCheckbox3 = GetDlgItem(hWnd, ID_CHECKBOX_EDIT_SECRECAO);
-            PetsSelect_checarInput(hCheckbox3, col, L"Secreção", displayText);
-
-            // Ouvido
-            HWND hCheckbox4 = GetDlgItem(hWnd, ID_CHECKBOX_EDIT_OUVIDO);
-            PetsSelect_checarInput(hCheckbox4, col, L"Ouvido", displayText);
+        else if (col > 2) {
+            std::wstring displayText = PetsSelect_g_tableDataEditar[1][col];
+            HWND hControl = GetDlgItem(hWnd, controlID);
+            SetWindowText(hControl, displayText.c_str());
         }
         else { // Campos de Edição Padrão (EDIT)
             // Para Edit Controls, basta usar SetWindowText
+            HWND hControl = GetDlgItem(hWnd, controlID);
             SetWindowText(hControl, displayText.c_str());
         }
     }
@@ -151,7 +142,7 @@ void PetsSelect_CriarControlesEdicao(HWND hWnd) {
     int width = (rect.right - rect.left) - 44;
 
     int cellHeight = 32;
-    int numColumns = 21;
+    int numColumns = 9;
     int cellWidth = (width + 2000) / (numColumns > 0 ? numColumns : 1);
 
     // As posições iniciais dependem do scroll, mas aqui elas são 0
@@ -160,7 +151,7 @@ void PetsSelect_CriarControlesEdicao(HWND hWnd) {
     int startX = 22;
 
     // 3. Criação dos Campos de Entrada
-    for (int col = 0; col < 21; col++) {
+    for (int col = 0; col < 8; col++) {
         int colNumber = col + 1;
         int controlID = col + 2; // IDs de 2 a 22
         int xPos = startX + cellWidth + 10;
@@ -168,7 +159,7 @@ void PetsSelect_CriarControlesEdicao(HWND hWnd) {
 
         // Em PetsSelect_CriarControlesEdicao, não precisamos do displayText
 
-        if (col == 8) { // Castrado (Checkbox)
+        if (col == 7) { // Castrado (Checkbox)
             HWND hCheckbox = CreateWindowW(
                 L"BUTTON", NULL,
                 WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX | WS_TABSTOP,
@@ -177,119 +168,48 @@ void PetsSelect_CriarControlesEdicao(HWND hWnd) {
             );
             PetsSelect_g_editControls.push_back(hCheckbox);
         }
-        else if (col == 11) { // Banho (Radio Buttons)
-            HWND hRadio;
-
-            // Padrão
-            hRadio = CreateWindowW(
-                L"BUTTON", L"Padrão", WS_VISIBLE | WS_CHILD | WS_GROUP | BS_AUTORADIOBUTTON | WS_TABSTOP,
-                xPos, yPos, 100, 20, hWnd, (HMENU)(ID_RADIO_EDIT_PADRAO), NULL, NULL
+        else if (col == 2) {
+            HWND hComboBox = CreateWindowW(
+                L"COMBOBOX",                         // Classe do controle: MUDAR de "BUTTON" para "COMBOBOX"
+                NULL,                                // Texto: NULL para ComboBox
+                WS_VISIBLE | WS_CHILD | CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP, // Estilos IMPORTANTES
+                xPos, yPos,                          // Posição X, Y
+                200, 200,                            // Largura, Altura (A altura precisa ser maior para exibir a lista)
+                hWnd,                                // Janela pai
+                (HMENU)(controlID),                  // ID único
+                NULL,                                // Instância
+                NULL
             );
-            SetWindowTheme(hRadio, L"", L"");
-            PetsSelect_g_editControls.push_back(hRadio);
 
-            // Hidratação
-            hRadio = CreateWindowW(
-                L"BUTTON", L"Hidratação", WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP,
-                xPos + cellWidth + 10, yPos, 100, 20, hWnd, (HMENU)(ID_RADIO_EDIT_HIDRATACAO), NULL, NULL
-            );
-            SetWindowTheme(hRadio, L"", L"");
-            PetsSelect_g_editControls.push_back(hRadio);
+            PetsSelect_g_editControls.push_back(hComboBox);
 
-            // Nenhum
-            hRadio = CreateWindowW(
-                L"BUTTON", L"Nenhum", WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP,
-                xPos + 2 * cellWidth + 10, yPos, 100, 20, hWnd, (HMENU)(ID_RADIO_EDIT_BANHO_NENHUM), NULL, NULL
+            // Criar botão consultar
+            PetsSelect_g_hButton_consultar = CreateWindowW(
+                L"BUTTON", L"Consultar",
+                WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON | WS_TABSTOP,
+                xPos + 700, yPos, 80, 25,
+                hWnd, (HMENU)(0),
+                (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL
             );
-            SetWindowTheme(hRadio, L"", L"");
-            PetsSelect_g_editControls.push_back(hRadio);
         }
-        else if (col == 12) { // Tosa (Radio Buttons)
-            HWND hRadio;
+        else if (col == 6) {
+            HWND hComboBox = CreateWindowW(
+                L"COMBOBOX",                         // Classe do controle: MUDAR de "BUTTON" para "COMBOBOX"
+                NULL,                                // Texto: NULL para ComboBox
+                WS_VISIBLE | WS_CHILD | CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP, // Estilos IMPORTANTES
+                xPos, yPos,                          // Posição X, Y
+                200, 200,                            // Largura, Altura (A altura precisa ser maior para exibir a lista)
+                hWnd,                                // Janela pai
+                (HMENU)(controlID),                  // ID único
+                NULL,                                // Instância
+                NULL
+            );
 
-            // Tesoura
-            hRadio = CreateWindowW(
-                L"BUTTON", L"Tesoura", WS_VISIBLE | WS_CHILD | WS_GROUP | BS_AUTORADIOBUTTON | WS_TABSTOP,
-                xPos, yPos, 100, 20, hWnd, (HMENU)(ID_RADIO_EDIT_TESOURA), NULL, NULL
-            );
-            SetWindowTheme(hRadio, L"", L"");
-            PetsSelect_g_editControls.push_back(hRadio);
+            SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"");
+            SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Masculino");
+            SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Feminino");
 
-            // Máquina
-            hRadio = CreateWindowW(
-                L"BUTTON", L"Máquina", WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP,
-                xPos + cellWidth + 10, yPos, 100, 20, hWnd, (HMENU)(ID_RADIO_EDIT_MAQUINA), NULL, NULL
-            );
-            SetWindowTheme(hRadio, L"", L"");
-            PetsSelect_g_editControls.push_back(hRadio);
-
-            // Higiênica
-            hRadio = CreateWindowW(
-                L"BUTTON", L"Higiênica", WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP,
-                xPos + 2 * cellWidth + 10, yPos, 100, 20, hWnd, (HMENU)(ID_RADIO_EDIT_HIGIENICA), NULL, NULL
-            );
-            SetWindowTheme(hRadio, L"", L"");
-            PetsSelect_g_editControls.push_back(hRadio);
-
-            // Tosa da Raça
-            hRadio = CreateWindowW(
-                L"BUTTON", L"Tosa da Raça", WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP,
-                xPos + 3 * cellWidth + 10, yPos, 100, 20, hWnd, (HMENU)(ID_RADIO_EDIT_TOSADARACA), NULL, NULL
-            );
-            SetWindowTheme(hRadio, L"", L"");
-            PetsSelect_g_editControls.push_back(hRadio);
-
-            // Nenhum (Tosa)
-            hRadio = CreateWindowW(
-                L"BUTTON", L"Nenhum", WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP,
-                xPos + 4 * cellWidth + 10, yPos, 100, 20, hWnd, (HMENU)(ID_RADIO_EDIT_TOSA_NENHUM), NULL, NULL
-            );
-            SetWindowTheme(hRadio, L"", L"");
-            PetsSelect_g_editControls.push_back(hRadio);
-        }
-        else if (col == 14) { // Pulgas/Carrapatos (Checkboxes)
-            // Pulgas
-            HWND hCheckbox = CreateWindowW(
-                L"BUTTON", L"Pulgas", WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX | WS_TABSTOP,
-                xPos, yPos, 20, 20, hWnd, (HMENU)(ID_CHECKBOX_EDIT_PULGAS), NULL, NULL
-            );
-            PetsSelect_g_editControls.push_back(hCheckbox);
-
-            // Carrapatos
-            hCheckbox = CreateWindowW(
-                L"BUTTON", L"Carrapatos", WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX | WS_TABSTOP,
-                xPos + cellWidth + 10, yPos, 20, 20, hWnd, (HMENU)(ID_CHECKBOX_EDIT_CARRAPATOS), NULL, NULL
-            );
-            PetsSelect_g_editControls.push_back(hCheckbox);
-        }
-        else if (col == 15) { // Lesões (Checkboxes)
-            // Pele
-            HWND hCheckbox = CreateWindowW(
-                L"BUTTON", L"Pele", WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX | WS_TABSTOP,
-                xPos, yPos, 20, 20, hWnd, (HMENU)(ID_CHECKBOX_EDIT_PELE), NULL, NULL
-            );
-            PetsSelect_g_editControls.push_back(hCheckbox);
-
-            // Olhos
-            hCheckbox = CreateWindowW(
-                L"BUTTON", L"Olhos", WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX | WS_TABSTOP,
-                xPos + cellWidth + 10, yPos, 20, 20, hWnd, (HMENU)(ID_CHECKBOX_EDIT_OLHOS), NULL, NULL
-            );
-            PetsSelect_g_editControls.push_back(hCheckbox);
-
-            // Secreção
-            hCheckbox = CreateWindowW(
-                L"BUTTON", L"Secreção", WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX | WS_TABSTOP,
-                xPos + 2 * cellWidth + 10, yPos, 20, 20, hWnd, (HMENU)(ID_CHECKBOX_EDIT_SECRECAO), NULL, NULL
-            );
-            PetsSelect_g_editControls.push_back(hCheckbox);
-
-            // Ouvido
-            hCheckbox = CreateWindowW(
-                L"BUTTON", L"Ouvido", WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX | WS_TABSTOP,
-                xPos + 3 * cellWidth + 10, yPos, 20, 20, hWnd, (HMENU)(ID_CHECKBOX_EDIT_OUVIDO), NULL, NULL
-            );
-            PetsSelect_g_editControls.push_back(hCheckbox);
+            PetsSelect_g_editControls.push_back(hComboBox);
         }
         else { // Campos de Edição Padrão (EDIT)
             HWND hEdit = CreateWindowEx(
@@ -322,7 +242,7 @@ void PetsSelect_selectBD() {
     int rc = sqlite3_open("pet.db", &db);
     if (rc == SQLITE_OK) {
         std::string idRecordStr = std::to_string(PetsSelect_idRecord);
-        std::string sqlSelect = "SELECT * FROM Pets WHERE ID = '" + idRecordStr + "';";
+        std::string sqlSelect = "SELECT *, P.ID AS ID_Pet, T.ID AS ID_Tutor FROM Pets AS P INNER JOIN Tutores AS T ON ID_Tutor_FK = ID_Tutor WHERE ID_Pet = '" + idRecordStr + "';";
 
         rc = sqlite3_exec(db, sqlSelect.c_str(), PetsSelect_sqlite_callback, &PetsSelect_g_tableDataEditar, &errMsg);
         if (rc != SQLITE_OK) {
@@ -558,7 +478,7 @@ LRESULT CALLBACK WndProcPetsEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
                 std::wstring controlIDStr = std::to_wstring(i);
                 HWND input = GetDlgItem(hWnd, i);
 
-                if (i == 10) {
+                if (i == 9) {
                     if (input) {
                         std::wstring resposta;
                         if (SendMessage(input, BM_GETCHECK, 0, 0) == BST_CHECKED) {
@@ -570,98 +490,85 @@ LRESULT CALLBACK WndProcPetsEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
                         dados[i] = std::wstring(resposta);
                     }
                 }
-                else if (i == 13) { // Banho (radio buttons)
-                    HWND hRadio1 = GetDlgItem(hWnd, ID_RADIO_EDIT_PADRAO);
-                    HWND hRadio2 = GetDlgItem(hWnd, ID_RADIO_EDIT_HIDRATACAO);
-                    HWND hRadio3 = GetDlgItem(hWnd, ID_RADIO_EDIT_BANHO_NENHUM);
-                    if (hRadio1 && SendMessage(hRadio1, BM_GETCHECK, 0, 0) == BST_CHECKED) {
-                        dados[i] = L"Padrão";
-                    }
-                    else if (hRadio2 && SendMessage(hRadio2, BM_GETCHECK, 0, 0) == BST_CHECKED) {
-                        dados[i] = L"Hidratação";
-                    }
-                    else if (hRadio3 && SendMessage(hRadio3, BM_GETCHECK, 0, 0) == BST_CHECKED) {
-                        dados[i] = L"Nenhum";
+                else if (i == 4) {
+                    if (input) {
+                        LRESULT selectedIndex = 0;
+
+                        // 2. Envia a mensagem CB_GETCURSEL (Get Current Selection) para o ComboBox.
+                        //    O resultado (o índice do item selecionado) é retornado no LRESULT.
+                        selectedIndex = SendMessage(
+                            input,          // HWND do ComboBox
+                            CB_GETCURSEL,   // Mensagem para obter o índice do item selecionado
+                            0,              // wParam: Não usado (deve ser 0)
+                            0               // lParam: Não usado (deve ser 0)
+                        );
+                        dados[i] = selectedIndex != 0 ? std::to_wstring(selectedIndex) : L"";
                     }
                 }
-                else if (i == 14) { // Tosa (radio buttons)
-                    HWND hRadio1 = GetDlgItem(hWnd, ID_RADIO_EDIT_TESOURA);
-                    HWND hRadio2 = GetDlgItem(hWnd, ID_RADIO_EDIT_MAQUINA);
-                    HWND hRadio3 = GetDlgItem(hWnd, ID_RADIO_EDIT_HIGIENICA);
-                    HWND hRadio4 = GetDlgItem(hWnd, ID_RADIO_EDIT_TOSADARACA);
-                    HWND hRadio5 = GetDlgItem(hWnd, ID_RADIO_EDIT_TOSA_NENHUM);
-                    if (hRadio1 && SendMessage(hRadio1, BM_GETCHECK, 0, 0) == BST_CHECKED) {
-                        dados[i] = L"Tesoura";
-                    }
-                    else if (hRadio2 && SendMessage(hRadio2, BM_GETCHECK, 0, 0) == BST_CHECKED) {
-                        dados[i] = L"Máquina";
-                    }
-                    else if (hRadio3 && SendMessage(hRadio3, BM_GETCHECK, 0, 0) == BST_CHECKED) {
-                        dados[i] = L"Higiênica";
-                    }
-                    else if (hRadio4 && SendMessage(hRadio4, BM_GETCHECK, 0, 0) == BST_CHECKED) {
-                        dados[i] = L"Tosa da Raça";
-                    }
-                    else if (hRadio5 && SendMessage(hRadio5, BM_GETCHECK, 0, 0) == BST_CHECKED) {
-                        dados[i] = L"Nenhum";
-                    }
-                }
-                else if (i == 16) { // Parasitas (radio buttons)
-                    HWND hCheckbox1 = GetDlgItem(hWnd, ID_CHECKBOX_EDIT_PULGAS);
-                    HWND hCheckbox2 = GetDlgItem(hWnd, ID_CHECKBOX_EDIT_CARRAPATOS);
+                else if (i == 8) {
+                    if (input) {
+                        LRESULT selectedIndex = 0;
 
-                    if (hCheckbox1 && SendMessage(hCheckbox1, BM_GETCHECK, 0, 0) == BST_CHECKED && hCheckbox2 && SendMessage(hCheckbox2, BM_GETCHECK, 0, 0) == BST_CHECKED) {
-                        dados[i] = L"Pulgas e Carrapatos";
-                    }
-                    else if (hCheckbox1 && SendMessage(hCheckbox1, BM_GETCHECK, 0, 0) == BST_CHECKED) {
-                        dados[i] = L"Pulgas";
-                    }
-                    else if (hCheckbox2 && SendMessage(hCheckbox2, BM_GETCHECK, 0, 0) == BST_CHECKED) {
-                        dados[i] = L"Carrapatos";
-                    }
-                }
-                else if (i == 17) { // Lesões (checkbox buttons)
-                    HWND hCheckboxPele = GetDlgItem(hWnd, ID_CHECKBOX_EDIT_PELE);
-                    HWND hCheckboxOlhos = GetDlgItem(hWnd, ID_CHECKBOX_EDIT_OLHOS);
-                    HWND hCheckboxSecrecao = GetDlgItem(hWnd, ID_CHECKBOX_EDIT_SECRECAO);
-                    HWND hCheckboxOuvido = GetDlgItem(hWnd, ID_CHECKBOX_EDIT_OUVIDO);
+                        // 1. Envia a mensagem CB_GETCURSEL (Get Current Selection) para obter o índice.
+                        selectedIndex = SendMessage(
+                            input,
+                            CB_GETCURSEL,
+                            0,
+                            0
+                        );
 
-                    // Verificar estado de cada checkbox
-                    bool peleChecked = hCheckboxPele && SendMessage(hCheckboxPele, BM_GETCHECK, 0, 0) == BST_CHECKED;
-                    bool olhosChecked = hCheckboxOlhos && SendMessage(hCheckboxOlhos, BM_GETCHECK, 0, 0) == BST_CHECKED;
-                    bool secrecaoChecked = hCheckboxSecrecao && SendMessage(hCheckboxSecrecao, BM_GETCHECK, 0, 0) == BST_CHECKED;
-                    bool ouvidoChecked = hCheckboxOuvido && SendMessage(hCheckboxOuvido, BM_GETCHECK, 0, 0) == BST_CHECKED;
+                        // Verifica se a seleção é válida (índice 0 ou maior)
+                        if (selectedIndex == CB_ERR) // CB_ERR (-1) é retornado se não houver seleção ou erro.
+                        {
+                            // Se a seleção for inválida ou inexistente, armazena string vazia.
+                            dados[i] = L"";
+                            break;
+                        }
 
-                    // Contar quantos estão selecionados
-                    int countChecked = (peleChecked ? 1 : 0) + (olhosChecked ? 1 : 0) +
-                        (secrecaoChecked ? 1 : 0) + (ouvidoChecked ? 1 : 0);
+                        // 2. Envia a mensagem CB_GETLBTEXTLEN (Get ListBox Text Length) para obter o tamanho do texto.
+                        // O resultado é o tamanho da string em caracteres (sem incluir o terminador NULL).
+                        LRESULT textLength = SendMessage(
+                            input,
+                            CB_GETLBTEXTLEN,
+                            (WPARAM)selectedIndex, // wParam: o índice do item
+                            0                      // lParam: Não usado
+                        );
 
-                    // Lógica para determinar o texto baseado nas combinações
-                    if (countChecked == 0) {
-                        dados[i] = L"N/A"; // ou L"", dependendo do que você preferir
-                    }
-                    else if (countChecked == 4) {
-                        dados[i] = L"Pele, Olhos, Secreção e Ouvido";
-                    }
-                    else if (countChecked == 3) {
-                        if (!peleChecked) dados[i] = L"Olhos, Secreção e Ouvido";
-                        else if (!olhosChecked) dados[i] = L"Pele, Secreção e Ouvido";
-                        else if (!secrecaoChecked) dados[i] = L"Pele, Olhos e Ouvido";
-                        else dados[i] = L"Pele, Olhos e Secreção";
-                    }
-                    else if (countChecked == 2) {
-                        if (peleChecked && olhosChecked) dados[i] = L"Pele e Olhos";
-                        else if (peleChecked && secrecaoChecked) dados[i] = L"Pele e Secreção";
-                        else if (peleChecked && ouvidoChecked) dados[i] = L"Pele e Ouvido";
-                        else if (olhosChecked && secrecaoChecked) dados[i] = L"Olhos e Secreção";
-                        else if (olhosChecked && ouvidoChecked) dados[i] = L"Olhos e Ouvido";
-                        else dados[i] = L"Secreção e Ouvido";
-                    }
-                    else { // countChecked == 1
-                        if (peleChecked) dados[i] = L"Pele";
-                        else if (olhosChecked) dados[i] = L"Olhos";
-                        else if (secrecaoChecked) dados[i] = L"Secreção";
-                        else dados[i] = L"Ouvido";
+                        if (textLength == CB_ERR)
+                        {
+                            // Erro ao obter o tamanho do texto.
+                            dados[i] = L"";
+                            break;
+                        }
+
+                        // 3. Cria uma std::wstring com o tamanho exato + 1 (para o terminador NULL).
+                        // O resize() garante que o buffer interno seja grande o suficiente.
+                        std::wstring selectedText;
+                        selectedText.resize(textLength + 1); // +1 para o terminador NULL
+
+                        // 4. Envia a mensagem CB_GETLBTEXT (Get ListBox Text) para copiar o texto.
+                        // O LPARAM é o ponteiro para o buffer (wchar_t*).
+                        LRESULT result = SendMessage(
+                            input,
+                            CB_GETLBTEXT,
+                            (WPARAM)selectedIndex,           // wParam: o índice do item
+                            (LPARAM)selectedText.data()      // lParam: Ponteiro para o buffer de caracteres (wchar_t*)
+                        );
+
+                        if (result == CB_ERR)
+                        {
+                            // Erro ao copiar o texto.
+                            dados[i] = L"";
+                            break;
+                        }
+
+                        // 5. Finalização: O texto real copiado exclui o terminador NULL, 
+                        // então é necessário ajustar o tamanho da wstring.
+                        // O 'result' de CB_GETLBTEXT é o número de caracteres copiados (textLength).
+                        selectedText.resize(result);
+
+                        // 6. Armazena o texto no seu vetor de dados.
+                        dados[i] = selectedText;
                     }
                 }
                 else {
@@ -686,25 +593,12 @@ LRESULT CALLBACK WndProcPetsEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
                 std::wstring sqlInsertW = L"UPDATE Pets SET "
                     L"Nome_do_Pet = '" + PetsSelect_treatDataAppointment(dados[2], 2) + L"', "
                     L"Raca = '" + PetsSelect_treatDataAppointment(dados[3], 3) + L"', "
-                    L"Nome_do_Tutor = '" + PetsSelect_treatDataAppointment(dados[4], 4) + L"', "
-                    L"CEP = '" + PetsSelect_treatDataAppointment(dados[5], 5) + L"', "
-                    L"Cor = '" + PetsSelect_treatDataAppointment(dados[6], 6) + L"', "
-                    L"Idade = '" + PetsSelect_treatDataAppointment(dados[7], 7) + L"', "
-                    L"Peso = '" + PetsSelect_treatDataAppointment(dados[8], 8) + L"', "
-                    L"Sexo = '" + PetsSelect_treatDataAppointment(dados[9], 9) + L"', "
-                    L"Castrado = '" + PetsSelect_treatDataAppointment(dados[10], 10) + L"', "
-                    L"Endereco = '" + PetsSelect_treatDataAppointment(dados[11], 11) + L"', "
-                    L"Ponto_de_referencia = '" + PetsSelect_treatDataAppointment(dados[12], 12) + L"', "
-                    L"Banho = '" + PetsSelect_treatDataAppointment(dados[13], 13) + L"', "
-                    L"Tosa = '" + PetsSelect_treatDataAppointment(dados[14], 14) + L"', "
-                    L"Obs_Tosa = '" + PetsSelect_treatDataAppointment(dados[15], 15) + L"', "
-                    L"Parasitas = '" + PetsSelect_treatDataAppointment(dados[16], 16) + L"', "
-                    L"Lesoes = '" + PetsSelect_treatDataAppointment(dados[17], 17) + L"', "
-                    L"Obs_Lesoes = '" + PetsSelect_treatDataAppointment(dados[18], 18) + L"', "
-                    L"Telefone = '" + PetsSelect_treatDataAppointment(dados[19], 19) + L"', "
-                    L"CPF = '" + PetsSelect_treatDataAppointment(dados[20], 20) + L"', "
-                    L"Appointment_Date = '" + PetsSelect_treatDataAppointment(dados[21], 21) + L"', "
-                    L"Appointment_Hour = '" + PetsSelect_treatDataAppointment(dados[22], 22) + L"', "
+                    L"ID_Tutor_FK = '" + PetsSelect_treatDataAppointment(dados[4], 4) + L"', "
+                    L"Cor = '" + PetsSelect_treatDataAppointment(dados[5], 5) + L"', "
+                    L"Idade = '" + PetsSelect_treatDataAppointment(dados[6], 6) + L"', "
+                    L"Peso = '" + PetsSelect_treatDataAppointment(dados[7], 7) + L"', "
+                    L"Sexo = '" + PetsSelect_treatDataAppointment(dados[8], 8) + L"', "
+                    L"Castrado = '" + PetsSelect_treatDataAppointment(dados[9], 9) + L"', "
                     L"Date = '" + currentDate + L"', "
                     L"Hour = '" + currentHour + L"' "
                     L"WHERE ID = " + std::to_wstring(PetsSelect_idRecord) + L";";
@@ -742,11 +636,52 @@ LRESULT CALLBACK WndProcPetsEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
                 sqlite3_close(db);
             }
         }
+        else if (wmId == 0) { //CONSULTAR
+            HWND input = GetDlgItem(hWnd, 4);
+            LRESULT selectedIndex = 0;
+
+            // 2. Envia a mensagem CB_GETCURSEL (Get Current Selection) para o ComboBox.
+            //    O resultado (o índice do item selecionado) é retornado no LRESULT.
+            selectedIndex = SendMessage(
+                input,          // HWND do ComboBox
+                CB_GETCURSEL,   // Mensagem para obter o índice do item selecionado
+                0,              // wParam: Não usado (deve ser 0)
+                0               // lParam: Não usado (deve ser 0)
+            );
+            LONG_PTR id = (selectedIndex != -1 && selectedIndex != 0) ? selectedIndex : 0;
+
+            if (id == 0) {
+                MessageBox(hWnd, L"Selecione o Tutor!", L"Erro", MB_OK | MB_ICONERROR);
+                break;
+            }
+
+            TutoresSelect_idRecord = id;
+
+            if (!PetsSelect_CreateNewWindow(hWnd, hInst, L"JanelaTutoresReadClasse", L"AGRO ANIMAL PET - CONSULTAR AGENDAMENTO"))
+            {
+                // O erro já é tratado dentro da função
+                break;
+            }
+            else {
+                HWND hWndRead = FindWindowW(L"JanelaTutoresReadClasse", NULL);
+                if (hWndRead != NULL)
+                {
+                    ShowWindow(hWndRead, SW_MAXIMIZE);
+                    SetForegroundWindow(hWndRead);
+                }
+            }
+        }
         break;
     }
 
     case WM_PAINT:
     {
+        TutoresSelect_Global_selectDB();
+
+        HWND hComboBox = PetsSelect_g_editControls[2];
+        SendMessage(hComboBox, CB_RESETCONTENT, 0, 0);
+        TutoresSelect_Global_preencherComboBox(hComboBox);
+
         PAINTSTRUCT ps;
         HDC hdc = BeginPaint(hWnd, &ps);
 
@@ -777,7 +712,7 @@ LRESULT CALLBACK WndProcPetsEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 
         // Desenhar linhas visíveis
         int firstVisibleRow = max(0, (PetsSelect_g_scrollY - 40) / cellHeight);
-        int lastVisibleRow = min(20, firstVisibleRow + (PetsSelect_g_clientHeight / cellHeight) + 2);
+        int lastVisibleRow = min(7, firstVisibleRow + (PetsSelect_g_clientHeight / cellHeight) + 2);
 
         HBRUSH hBrushWhite = CreateSolidBrush(RGB(255, 255, 255));
         HBRUSH hBrushGray = CreateSolidBrush(RGB(240, 240, 240));
@@ -786,7 +721,7 @@ LRESULT CALLBACK WndProcPetsEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
         SetBkMode(hdcMem, OPAQUE);
 
         for (int row = firstVisibleRow; row <= lastVisibleRow; row++) {
-            if (row >= 21) break;
+            if (row >= 9) break;
 
             HBRUSH hCurrentBrush = (row % 2 == 0) ? hBrushGray : hBrushWhite;
             COLORREF bgColor = (row % 2 == 0) ? RGB(240, 240, 240) : RGB(255, 255, 255);
@@ -811,14 +746,11 @@ LRESULT CALLBACK WndProcPetsEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 
             // Desenhar labels
             const wchar_t* labels[] = {
-                L"Nome do Pet:", L"Raça:", L"Nome do Tutor:", L"CEP:", L"Cor:",
-                L"Idade:", L"Peso:", L"Sexo:", L"Castrado:", L"Endereço:",
-                L"Ponto de Referência:", L"Banho:", L"Tosa:", L"Observação:",
-                L"Parasitas:", L"Lesões:", L"Observação:", L"Telefone:", L"CPF:",
-                L"Data:", L"Hora:"
+                L"Nome do Pet:", L"Raça:", L"Nome do Tutor:", L"Cor:",
+                L"Idade:", L"Peso:", L"Sexo:", L"Castrado:"
             };
 
-            if (row < 21) {
+            if (row < 9) {
                 TextOut(hdcMem, xPosLabel, yPosLabel, labels[row], wcslen(labels[row]));
             }
         }

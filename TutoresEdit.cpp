@@ -35,6 +35,7 @@ std::vector<std::vector<std::wstring>> TutoresSelect_g_tableDataEditar;
 void TutoresSelect_PreencherControlesEdicao(HWND hWnd) {
     // 1. Busca os Dados no Banco de Dados
     TutoresSelect_selectBD();
+    TutoresSelect_cpf = TutoresSelect_g_tableDataEditar[1][6];
 
     // Se não houver dados, retorna
     if (TutoresSelect_g_tableDataEditar.size() <= 1) {
@@ -416,6 +417,11 @@ LRESULT CALLBACK WndProcTutoresEdit(HWND hWnd, UINT message, WPARAM wParam, LPAR
                             //std::cout << "Janela encontrada! HWND: " << hwnd << std::endl;
                             TutoresSelect_invalidateDrawing(hwndSelect);
                             UpdateWindow(hwndSelect);
+                        }
+                        hwndSelect = FindWindow(TEXT("JanelaPetsSelectClasse"), NULL);
+                        if (hwndSelect != NULL) {
+                            //std::cout << "Janela encontrada! HWND: " << hwnd << std::endl;
+                            PetsSelect_RecarregarDadosTabela(hwndSelect);
                         }
                         MessageBox(hWnd, L"Dados inseridos com sucesso!", L"Sucesso", MB_OK);
                     }

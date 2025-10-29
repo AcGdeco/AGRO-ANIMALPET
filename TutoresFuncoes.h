@@ -30,7 +30,6 @@ extern std::vector<std::vector<std::wstring>> TutoresSelect_g_tableDataFull;
 extern std::vector<std::vector<std::wstring>> TutoresSelect_g_tableDataRowsNumber;
 extern std::vector<HWND> TutoresSelect_g_editControlsLimit;
 extern std::vector<HWND> TutoresSelect_g_editControlsOffsetLimit;
-extern LONG_PTR TutoresSelect_idRecord;
 extern enum TutoresSelect_ButtonAction { TutoresSelect_CONSULTAR, TutoresSelect_EDITAR, TutoresSelect_DELETAR, TutoresSelect_FILTRAR, TutoresSelect_ORDENAR, TutoresSelect_LIMITAR, TutoresSelect_OFFSET };
 extern std::vector<HWND> TutoresSelect_g_buttons;
 extern std::vector<std::wstring> TutoresSelect_dados;
@@ -50,6 +49,7 @@ extern bool TutoresSelect_g_isRedrawing;
 extern int TutoresSelect_rowsNumberSemCabecalho;
 extern LONG_PTR TutoresSelect_idBtnGlobal;
 extern std::wstring TutoresSelect_btnClicado;
+extern std::wstring TutoresSelect_cpf;
 
 std::wstring TutoresSelect_GetCurrentDate();
 std::wstring TutoresSelect_GetCurrentHour();

@@ -80,7 +80,7 @@ LRESULT ProcessarMenuArquivo(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
         switch (wmId) {
             case IDM_ARQUIVO_NOVO:
             {
-                if (!CreateNewWindow(hWnd, hInst, L"JanelaAddClasse", L"AGRO ANIMAL PET - CRIAR AGENDAMENTO"))
+                if (!CreateNewWindow(hWnd, hInst, L"JanelaAddClasse", L"CRIAR AGENDAMENTO"))
                 {
                     // O erro já é tratado dentro da função
                     break;
@@ -90,7 +90,7 @@ LRESULT ProcessarMenuArquivo(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
             }
             case IDM_ARQUIVO_CONSULTAR:
             {
-                if (!CreateNewWindow(hWnd, hInst, L"JanelaSelectClasse", L"AGRO ANIMAL PET - AGENDAMENTOS"))
+                if (!CreateNewWindow(hWnd, hInst, L"JanelaSelectClasse", L"AGENDAMENTOS"))
                 {
 				    RecarregarDadosTabela(hWnd);
                     // O erro já é tratado dentro da função
@@ -101,7 +101,7 @@ LRESULT ProcessarMenuArquivo(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
             }
             case IDM_TUTORES_NOVO:
             {
-                if (!CreateNewWindow(hWnd, hInst, L"JanelaTutoresAddClasse", L"AGRO ANIMAL PET - CRIAR TUTOR"))
+                if (!CreateNewWindow(hWnd, hInst, L"JanelaTutoresAddClasse", L"CRIAR TUTOR"))
                 {
                     // O erro já é tratado dentro da função
                     break;
@@ -111,7 +111,7 @@ LRESULT ProcessarMenuArquivo(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
             }
             case IDM_TUTORES_CONSULTAR:
             {
-                if (!CreateNewWindow(hWnd, hInst, L"JanelaTutoresSelectClasse", L"AGRO ANIMAL PET - TUTORES"))
+                if (!CreateNewWindow(hWnd, hInst, L"JanelaTutoresSelectClasse", L"TUTORES"))
                 {
                     TutoresSelect_RecarregarDadosTabela(hWnd);
                     // O erro já é tratado dentro da função
@@ -122,7 +122,7 @@ LRESULT ProcessarMenuArquivo(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
             }
             case IDM_PETS_NOVO:
             {
-                if (!CreateNewWindow(hWnd, hInst, L"JanelaPetsAddClasse", L"AGRO ANIMAL PET - CRIAR PETS"))
+                if (!CreateNewWindow(hWnd, hInst, L"JanelaPetsAddClasse", L"CRIAR PET"))
                 {
                     // O erro já é tratado dentro da função
                     break;
@@ -132,7 +132,7 @@ LRESULT ProcessarMenuArquivo(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
             }
             case IDM_PETS_CONSULTAR:
             {
-                if (!CreateNewWindow(hWnd, hInst, L"JanelaPetsSelectClasse", L"AGRO ANIMAL PET - PETS"))
+                if (!CreateNewWindow(hWnd, hInst, L"JanelaPetsSelectClasse", L"PETS"))
                 {
                     PetsSelect_RecarregarDadosTabela(hWnd);
                     // O erro já é tratado dentro da função
@@ -143,7 +143,7 @@ LRESULT ProcessarMenuArquivo(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
             }
             case IDM_AGENDAMENTOS_NOVO:
             {
-                if (!CreateNewWindow(hWnd, hInst, L"JanelaAgendamentosAddClasse", L"AGRO ANIMAL PET - CRIAR AGENDAMENTOS"))
+                if (!CreateNewWindow(hWnd, hInst, L"JanelaAgendamentosAddClasse", L"CRIAR AGENDAMENTO"))
                 {
                     // O erro já é tratado dentro da função
                     break;
@@ -153,7 +153,7 @@ LRESULT ProcessarMenuArquivo(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
             }
             case IDM_AGENDAMENTOS_CONSULTAR:
             {
-                if (!CreateNewWindow(hWnd, hInst, L"JanelaAgendamentosSelectClasse", L"AGRO ANIMAL PET - AGENDAMENTOS"))
+                if (!CreateNewWindow(hWnd, hInst, L"JanelaAgendamentosSelectClasse", L"AGENDAMENTOS"))
                 {
                     AgendamentosSelect_RecarregarDadosTabela(hWnd);
                     // O erro já é tratado dentro da função

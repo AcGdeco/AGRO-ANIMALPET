@@ -162,7 +162,7 @@ LRESULT CALLBACK WndProcTutoresSelect(HWND hWnd, UINT message, WPARAM wParam, LP
 
             TutoresSelect_idRecord = id;
 
-            if (!TutoresSelect_CreateNewWindow(hWnd, hInst, L"JanelaTutoresReadClasse", L"AGRO ANIMAL PET - CONSULTAR AGENDAMENTO"))
+            if (!TutoresSelect_CreateNewWindow(hWnd, hInst, L"JanelaTutoresReadClasse", L"CONSULTAR TUTOR"))
             {
                 // O erro já é tratado dentro da função
                 break;
@@ -184,7 +184,7 @@ LRESULT CALLBACK WndProcTutoresSelect(HWND hWnd, UINT message, WPARAM wParam, LP
 
             TutoresSelect_idRecord = id;
 
-            if (!TutoresSelect_CreateNewWindow(hWnd, hInst, L"JanelaTutoresEditClasse", L"AGRO ANIMAL PET - EDITAR TUTOR"))
+            if (!TutoresSelect_CreateNewWindow(hWnd, hInst, L"JanelaTutoresEditClasse", L"EDITAR TUTOR"))
             {
                 // O erro já é tratado dentro da função
                 break;
@@ -206,10 +206,16 @@ LRESULT CALLBACK WndProcTutoresSelect(HWND hWnd, UINT message, WPARAM wParam, LP
             //MessageBoxW(hWnd, msg, L"Info", MB_OK);
 
             TutoresSelect_idRecord = id;
-            std::wstring msg = L"Deletar registro ID " + std::to_wstring(TutoresSelect_idRecord) + L"?";
+            std::wstring msg = L"Deletar registro ID " + std::to_wstring(TutoresSelect_idRecord) + L"?\nPets e Agendamentos cadastrados com esse Tutor serão deletados.";
             if (MessageBoxW(hWnd, msg.c_str(), L"Confirmar", MB_YESNO | MB_ICONQUESTION) == IDYES) {
                 TutoresSelect_deleteRecordById("pet.db", TutoresSelect_idRecord, hWnd);
                 TutoresSelect_RecarregarDadosTabela(hWnd);
+            }
+
+            HWND hwndSelect = FindWindow(TEXT("JanelaPetsSelectClasse"), NULL);
+            if (hwndSelect != NULL) {
+                //std::cout << "Janela encontrada! HWND: " << hwnd << std::endl;
+                PetsSelect_RecarregarDadosTabela(hwndSelect);
             }
         }
         else if (wmId == TutoresSelect_FILTRAR)

@@ -1,4 +1,4 @@
-#include "PetsConsultar.h"
+Ôªø#include "PetsConsultar.h"
 #include "MenuUniversal.h"
 #include <windows.h>
 #include <sal.h>
@@ -8,7 +8,7 @@
 #include "sqlite3.h"
 #include <vector>
 
-// Vari·veis externas para scroll
+// Vari√°veis externas para scroll
 extern int PetsSelect_g_scrollY;
 extern int PetsSelect_g_clientHeight;
 extern int PetsSelect_g_contentHeight;
@@ -16,21 +16,23 @@ extern int PetsSelect_g_scrollX;
 extern int PetsSelect_g_clientWidth;
 extern int PetsSelect_g_contentWidth;
 
+std::wstring idTutor;
+
 std::vector<std::vector<std::wstring>> PetsSelect_g_tableDataConsulta;
 
-// FunÁ„o auxiliar para converter de UTF-8 (char*) para std::wstring (UTF-16)
+// Fun√ß√£o auxiliar para converter de UTF-8 (char*) para std::wstring (UTF-16)
 std::wstring PetsSelect_utf8_to_wstring_consulta(const char* str) {
     if (!str) return L"NULL";
     int size_needed = MultiByteToWideChar(CP_UTF8, 0, str, -1, nullptr, 0);
     if (size_needed <= 0) return L"";
-    std::wstring wstr(size_needed - 1, 0); // -1 para n„o incluir o caractere nulo
+    std::wstring wstr(size_needed - 1, 0); // -1 para n√£o incluir o caractere nulo
     MultiByteToWideChar(CP_UTF8, 0, str, -1, &wstr[0], size_needed);
     return wstr;
 }
 
 int PetsSelect_sqlite_callback_consulta(void* data, int argc, char** argv, char** azColName) {
     std::vector<std::vector<std::wstring>>* table = static_cast<std::vector<std::vector<std::wstring>>*>(data);
-    // Primeira chamada: adicionar cabeÁalhos (nomes das colunas)
+    // Primeira chamada: adicionar cabe√ßalhos (nomes das colunas)
     if (table->empty()) {
         std::vector<std::wstring> headers;
         for (int i = 0; i < argc; i++) {
@@ -49,10 +51,37 @@ int PetsSelect_sqlite_callback_consulta(void* data, int argc, char** argv, char*
     return 0;
 }
 
-// DeclaraÁ„o do procedimento da janela
+// Declara√ß√£o do procedimento da janela
 LRESULT CALLBACK WndProcPetsRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
-// FunÁ„o para configurar scroll bars
+// Fun√ß√£o para atualizar posi√ß√£o dos controles com scroll
+void PetsSelect_AtualizarPosicoesControlesAgendamentoConsultar(HWND hWnd)
+{
+    RECT rect;
+    GetClientRect(hWnd, &rect);
+    int width = (rect.right - rect.left) - 44;
+
+    int cellHeight = 32;
+    int numColumns = 21;
+    int cellWidth = (width + 2000) / (numColumns > 0 ? numColumns : 1);
+    int startY = 40 - PetsSelect_g_scrollY;
+    int startX = 22 - PetsSelect_g_scrollX;
+    int xPos = 0;
+    int yPos = 0;
+    int colNumber;
+    int countRow = 0;
+
+    xPos = startX;
+    yPos = startY + 13 * cellHeight + 1;
+
+    // Atualizar posi√ß√£o do bot√£o
+    if (PetsSelect_g_hButton_consultar_consultar) {
+        SetWindowPos(PetsSelect_g_hButton_consultar_consultar, NULL, xPos, yPos, 80, 30,
+            SWP_NOZORDER | SWP_NOACTIVATE);
+    }
+}
+
+// Fun√ß√£o para configurar scroll bars
 void PetsSelect_ConfigurarScrollBarsConsulta(HWND hWnd)
 {
     RECT rect;
@@ -60,10 +89,10 @@ void PetsSelect_ConfigurarScrollBarsConsulta(HWND hWnd)
     PetsSelect_g_clientHeight = rect.bottom - rect.top;
     PetsSelect_g_clientWidth = rect.right - rect.left;
 
-    // Calcular altura total do conte˙do baseado na tabela
+    // Calcular altura total do conte√∫do baseado na tabela
     int cellHeight = 32;
     PetsSelect_g_contentHeight = 24 * cellHeight + 100; // 22 colunas + margem
-    PetsSelect_g_contentWidth = 2000; // Largura fixa para conte˙do largo
+    PetsSelect_g_contentWidth = 2000; // Largura fixa para conte√∫do largo
 
     SCROLLINFO si = {};
     si.cbSize = sizeof(SCROLLINFO);
@@ -84,7 +113,7 @@ void PetsSelect_ConfigurarScrollBarsConsulta(HWND hWnd)
     SetScrollInfo(hWnd, SB_HORZ, &si, TRUE);
 }
 
-// FunÁ„o para registrar a classe da janela (pode ser chamada de outro lugar, como Pet.cpp)
+// Fun√ß√£o para registrar a classe da janela (pode ser chamada de outro lugar, como Pet.cpp)
 BOOL RegisterPetsReadClass(HINSTANCE hInstance)
 {
     WNDCLASSEXW wcex = { 0 };
@@ -94,7 +123,7 @@ BOOL RegisterPetsReadClass(HINSTANCE hInstance)
     wcex.hInstance = hInstance;
     wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
     wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-    wcex.lpszMenuName = NULL;  // Menu ser· definido dinamicamente
+    wcex.lpszMenuName = NULL;  // Menu ser√° definido dinamicamente
     wcex.lpszClassName = L"JanelaPetsReadClasse";
     wcex.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_PET));
     wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
@@ -105,21 +134,72 @@ BOOL RegisterPetsReadClass(HINSTANCE hInstance)
 // Procedimento da janela Read
 LRESULT CALLBACK WndProcPetsRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    // Processar o menu APENAS para mensagens especÌficas
+    // Processar o menu APENAS para mensagens espec√≠ficas
     if (message == WM_COMMAND || message == WM_INITMENU || message == WM_MENUSELECT) {
         if (PetsSelect_ProcessarMenu(hWnd, message, wParam, lParam)) {
-            return 0; // Mensagem j· processada pelo menu
+            return 0; // Mensagem j√° processada pelo menu
         }
     }
 
-    // Depois processa as mensagens especÌficas da janela
+    // Depois processa as mensagens espec√≠ficas da janela
     switch (message)
     {
     case WM_CREATE: {
+
         // Resetar scroll para garantir que comece do topo
         PetsSelect_g_scrollY = 0;
         PetsSelect_g_scrollX = 0;
         PetsSelect_ConfigurarScrollBarsConsulta(hWnd);
+
+        // Obter dimens√µes da janela
+        // Texto de exemplo
+        RECT rect;
+        GetClientRect(hWnd, &rect);
+        int width = (rect.right - rect.left) - 44;
+        int height = rect.bottom - rect.top;
+
+        // Configurar a tabela com scroll
+        int cellHeight = 32;  // Altura de cada c√©lula
+        int numColumns = PetsSelect_g_tableDataConsulta.empty() ? 0 : PetsSelect_g_tableDataConsulta[0].size() + 3;
+        int cellWidth = (width + 2000) / (numColumns > 0 ? numColumns : 1);
+        int startY = 40 - PetsSelect_g_scrollY;  // Posi√ß√£o Y com scroll
+        int startX = 22 - PetsSelect_g_scrollX;  // Posi√ß√£o X com scroll
+
+        int xPos = startX;
+        int yPos = startY + 13 * cellHeight + 1;
+
+        // Criar bot√£o consultar
+        PetsSelect_g_hButton_consultar_consultar = CreateWindowW(
+            L"BUTTON", L"Consultar",
+            WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON | WS_TABSTOP,
+            xPos, yPos, 80, 30,
+            hWnd, (HMENU)(0),
+            (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL
+        );
+
+        break;
+    }
+    case WM_COMMAND:
+    {
+        int wmId = LOWORD(wParam);
+
+        if (wmId == 0) { //CONSULTAR
+            TutoresSelect_idRecord = std::stoll(idTutor);
+
+            if (!PetsSelect_CreateNewWindow(hWnd, hInst, L"JanelaTutoresReadClasse", L"AGRO ANIMAL PET - CONSULTAR AGENDAMENTO"))
+            {
+                // O erro j√° √© tratado dentro da fun√ß√£o
+                break;
+            }
+            else {
+                HWND hWndRead = FindWindowW(L"JanelaTutoresReadClasse", NULL);
+                if (hWndRead != NULL)
+                {
+                    ShowWindow(hWndRead, SW_MAXIMIZE);
+                    SetForegroundWindow(hWndRead);
+                }
+            }
+        }
         break;
     }
 
@@ -150,6 +230,7 @@ LRESULT CALLBACK WndProcPetsRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 
         if (si.nPos != oldPos) {
             PetsSelect_g_scrollY = si.nPos;
+            PetsSelect_AtualizarPosicoesControlesAgendamentoConsultar(hWnd);
             PetsSelect_invalidateDrawing(hWnd);
             UpdateWindow(hWnd);
         }
@@ -181,6 +262,7 @@ LRESULT CALLBACK WndProcPetsRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 
         if (si.nPos != oldPos) {
             PetsSelect_g_scrollX = si.nPos;
+            PetsSelect_AtualizarPosicoesControlesAgendamentoConsultar(hWnd);
             PetsSelect_invalidateDrawing(hWnd);
             UpdateWindow(hWnd);
         }
@@ -191,13 +273,13 @@ LRESULT CALLBACK WndProcPetsRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
         int newWidth = LOWORD(lParam);
         int newHeight = HIWORD(lParam);
 
-        // Verificar se È uma mudanÁa significativa de tamanho (maximizar/restaurar)
+        // Verificar se √© uma mudan√ßa significativa de tamanho (maximizar/restaurar)
         static int oldWidth = 0;
         static int oldHeight = 0;
 
         if ((newWidth > oldWidth * 1.5) || (newHeight > oldHeight * 1.5) ||
             (newWidth < oldWidth * 0.7) || (newHeight < oldHeight * 0.7)) {
-            // MudanÁa significativa - resetar scroll para o topo
+            // Mudan√ßa significativa - resetar scroll para o topo
             PetsSelect_g_scrollY = 0;
             PetsSelect_g_scrollX = 0;
         }
@@ -209,6 +291,7 @@ LRESULT CALLBACK WndProcPetsRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
         PetsSelect_g_clientHeight = newHeight;
         SendMessage(hWnd, WM_SETREDRAW, FALSE, 0);
         PetsSelect_ConfigurarScrollBarsConsulta(hWnd);
+        PetsSelect_AtualizarPosicoesControlesAgendamentoConsultar(hWnd);
         SendMessage(hWnd, WM_SETREDRAW, TRUE, 0);
         PetsSelect_invalidateDrawing(hWnd);
         break;
@@ -235,6 +318,7 @@ LRESULT CALLBACK WndProcPetsRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 
         if (si.nPos != oldPos) {
             PetsSelect_g_scrollY = si.nPos;
+            PetsSelect_AtualizarPosicoesControlesAgendamentoConsultar(hWnd);
             PetsSelect_invalidateDrawing(hWnd);
             UpdateWindow(hWnd);
         }
@@ -263,7 +347,7 @@ LRESULT CALLBACK WndProcPetsRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
         char* errMsg = 0;
         int rc = sqlite3_open("pet.db", &db);
         if (rc == SQLITE_OK) {
-            const char* sqlSelectConsulta = "SELECT * FROM Pets;";
+            const char* sqlSelectConsulta = "SELECT *, P.ID AS ID_Pet, T.ID AS ID_Tutor FROM Pets AS P INNER JOIN Tutores AS T ON ID_Tutor_FK = ID_Tutor;";
             rc = sqlite3_exec(db, sqlSelectConsulta, PetsSelect_sqlite_callback_consulta, &PetsSelect_g_tableDataConsulta, &errMsg);
             if (rc != SQLITE_OK) {
                 if (errMsg) {
@@ -283,22 +367,22 @@ LRESULT CALLBACK WndProcPetsRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
             sqlite3_close(db);
         }
         else {
-            PetsSelect_g_tableDataConsulta.push_back({ L"Erro", L"N„o foi possÌvel abrir o banco" });
+            PetsSelect_g_tableDataConsulta.push_back({ L"Erro", L"N√£o foi poss√≠vel abrir o banco" });
         }
 
-        // Obter dimensıes da janela
+        // Obter dimens√µes da janela
         GetClientRect(hWnd, &rect);
         int width = (rect.right - rect.left) - 44;
         int height = rect.bottom - rect.top;
 
         // Configurar a tabela com scroll
-        int cellHeight = 32;  // Altura de cada cÈlula
+        int cellHeight = 32;  // Altura de cada c√©lula
         int numColumns = PetsSelect_g_tableDataConsulta.empty() ? 0 : PetsSelect_g_tableDataConsulta[0].size() + 3;
         int cellWidth = (width + 2000) / (numColumns > 0 ? numColumns : 1);
-        int startY = 40 - PetsSelect_g_scrollY;  // PosiÁ„o Y com scroll
-        int startX = 22 - PetsSelect_g_scrollX;  // PosiÁ„o X com scroll
+        int startY = 40 - PetsSelect_g_scrollY;  // Posi√ß√£o Y com scroll
+        int startX = 22 - PetsSelect_g_scrollX;  // Posi√ß√£o X com scroll
 
-        //TÌtulo
+        //T√≠tulo
         PetsSelect_windowsTitle(hdc, startX, startY - 20, L"CONSULTAR PET", 13);
 
         // Desenhar a grade
@@ -313,25 +397,39 @@ LRESULT CALLBACK WndProcPetsRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
         HBRUSH hBrushGray = CreateSolidBrush(RGB(240, 240, 240));
         HBRUSH hOldBrush = (HBRUSH)SelectObject(hdc, hBrushWhite);
 
-        // Desenhar o texto nas cÈlulas
+        // Desenhar o texto nas c√©lulas
         SetBkMode(hdc, TRANSPARENT);
         int colNumber = 0;
         int rowNumber = 0;
 
-        for (size_t col = 0; col < 24; col++) {
+        idTutor = PetsSelect_g_tableDataConsulta[1][11];
+
+        for (size_t col = 0; col < 11; col++) {
             colNumber++;
 
             HBRUSH hCurrentBrush = (col % 2 == 0) ? hBrushGray : hBrushWhite;
             SelectObject(hdc, hCurrentBrush);
 
-            // Desenhar o fundo da linha (com scroll)
-            RECT rowRect = {
-                startX,
-                startY + static_cast<int>(colNumber) * cellHeight,
-                startX + width,
-                startY + (static_cast<int>(colNumber) + 1) * cellHeight
-            };
-            FillRect(hdc, &rowRect, hCurrentBrush);
+            if (col == 10) {
+                // Desenhar o fundo da linha (com scroll)
+                RECT rowRect = {
+                    startX,
+                    startY + static_cast<int>(colNumber + 1) * cellHeight,
+                    startX + width,
+                    startY + (static_cast<int>(colNumber + 1) + 1) * cellHeight
+                };
+                FillRect(hdc, &rowRect, hCurrentBrush);
+            }
+            else {
+                // Desenhar o fundo da linha (com scroll)
+                RECT rowRect = {
+                    startX,
+                    startY + static_cast<int>(colNumber) * cellHeight,
+                    startX + width,
+                    startY + (static_cast<int>(colNumber) + 1) * cellHeight
+                };
+                FillRect(hdc, &rowRect, hCurrentBrush);
+            }
 
             for (size_t row = 0; row < PetsSelect_g_tableDataConsulta.size(); row++) {
                 if (PetsSelect_g_tableDataConsulta[row][0] == std::to_wstring(PetsSelect_idRecord) || row == 0) {
@@ -357,7 +455,7 @@ LRESULT CALLBACK WndProcPetsRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
                         TextOut(hdc, xPos, yPos, L"Nome do Pet:", 12);
                     }
                     else if (PetsSelect_g_tableDataConsulta[row][col] == L"Raca") {
-                        TextOut(hdc, xPos, yPos, L"RaÁa:", 5);
+                        TextOut(hdc, xPos, yPos, L"Ra√ßa:", 5);
                     }
                     else if (PetsSelect_g_tableDataConsulta[row][col] == L"Nome_do_Tutor") {
                         TextOut(hdc, xPos, yPos, L"Nome do Tutor:", 14);
@@ -381,10 +479,10 @@ LRESULT CALLBACK WndProcPetsRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
                         TextOut(hdc, xPos, yPos, L"Castrado:", 9);
                     }
                     else if (PetsSelect_g_tableDataConsulta[row][col] == L"Endereco") {
-                        TextOut(hdc, xPos, yPos, L"EndereÁo:", 9);
+                        TextOut(hdc, xPos, yPos, L"Endere√ßo:", 9);
                     }
                     else if (PetsSelect_g_tableDataConsulta[row][col] == L"Ponto_de_referencia") {
-                        TextOut(hdc, xPos, yPos, L"Ponto de ReferÍncia:", 20);
+                        TextOut(hdc, xPos, yPos, L"Ponto de Refer√™ncia:", 20);
                     }
                     else if (PetsSelect_g_tableDataConsulta[row][col] == L"Banho") {
                         TextOut(hdc, xPos, yPos, L"Banho:", 6);
@@ -393,16 +491,16 @@ LRESULT CALLBACK WndProcPetsRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
                         TextOut(hdc, xPos, yPos, L"Tosa:", 5);
                     }
                     else if (PetsSelect_g_tableDataConsulta[row][col] == L"Obs_Tosa") {
-                        TextOut(hdc, xPos, yPos, L"ObservaÁ„o:", 11);
+                        TextOut(hdc, xPos, yPos, L"Observa√ß√£o:", 11);
                     }
                     else if (PetsSelect_g_tableDataConsulta[row][col] == L"Parasitas") {
                         TextOut(hdc, xPos, yPos, L"Parasitas:", 10);
                     }
                     else if (PetsSelect_g_tableDataConsulta[row][col] == L"Lesoes") {
-                        TextOut(hdc, xPos, yPos, L"Lesıes:", 7);
+                        TextOut(hdc, xPos, yPos, L"Les√µes:", 7);
                     }
                     else if (PetsSelect_g_tableDataConsulta[row][col] == L"Obs_Lesoes") {
-                        TextOut(hdc, xPos, yPos, L"ObservaÁ„o:", 11);
+                        TextOut(hdc, xPos, yPos, L"Observa√ß√£o:", 11);
                     }
                     else if (PetsSelect_g_tableDataConsulta[row][col] == L"Telefone") {
                         TextOut(hdc, xPos, yPos, L"Telefone:", 9);
@@ -421,6 +519,15 @@ LRESULT CALLBACK WndProcPetsRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
                     }
                     else if (PetsSelect_g_tableDataConsulta[row][col] == L"Hour") {
                         TextOut(hdc, xPos, yPos, L"Hora do Registro:", 17);
+                    }
+                    else if (PetsSelect_g_tableDataConsulta[row][col] == L"ID_Tutor_FK") {
+                        yPos = startY + (colNumber + 1) * cellHeight + 7;
+                        TextOut(hdc, xPos, yPos, L"Nome do Tutor:", 14);
+                    }
+                    else if (col == 10) {
+                        yPos = startY + (colNumber + 1) * cellHeight + 7;
+                        TextOut(hdc, xPos, yPos, PetsSelect_g_tableDataConsulta[row][12].c_str(),
+                            static_cast<int>(PetsSelect_g_tableDataConsulta[row][12].length()));
                     }
                     else {
                         TextOut(hdc, xPos, yPos, PetsSelect_g_tableDataConsulta[row][col].c_str(),
@@ -452,7 +559,7 @@ LRESULT CALLBACK WndProcPetsRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
         {
             return 0; // Ignora o clique durante o redesenho
         }
-        // LÛgica existente para clique, se aplic·vel
+        // L√≥gica existente para clique, se aplic√°vel
         return DefWindowProc(hWnd, message, wParam, lParam);
     }
     break;
@@ -463,7 +570,7 @@ LRESULT CALLBACK WndProcPetsRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
         {
             return 0; // Ignora o clique durante o redesenho
         }
-        // LÛgica existente para clique, se aplic·vel
+        // L√≥gica existente para clique, se aplic√°vel
         return DefWindowProc(hWnd, message, wParam, lParam);
     }
     break;
@@ -478,7 +585,7 @@ LRESULT CALLBACK WndProcPetsRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
     return 0;
 }
 
-// FunÁ„o obsoleta (removida do WinMain, mas mantida para compatibilidade se necess·ria)
+// Fun√ß√£o obsoleta (removida do WinMain, mas mantida para compatibilidade se necess√°ria)
 LRESULT CALLBACK NewWndProcPetsRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message)
@@ -487,7 +594,7 @@ LRESULT CALLBACK NewWndProcPetsRead(HWND hWnd, UINT message, WPARAM wParam, LPAR
     {
         PAINTSTRUCT ps;
         HDC hdc = BeginPaint(hWnd, &ps);
-        TextOut(hdc, 10, 10, L"Esta È a nova janela Read!", 21);
+        TextOut(hdc, 10, 10, L"Esta √© a nova janela Read!", 21);
         EndPaint(hWnd, &ps);
     }
     break;
@@ -500,7 +607,7 @@ LRESULT CALLBACK NewWndProcPetsRead(HWND hWnd, UINT message, WPARAM wParam, LPAR
     return 0;
 }
 
-// FunÁ„o obsoleta (removida do WinMain, mas mantida para compatibilidade se necess·ria)
+// Fun√ß√£o obsoleta (removida do WinMain, mas mantida para compatibilidade se necess√°ria)
 BOOL InitPetsRead(HINSTANCE hInstance)
 {
     WNDCLASSW wc = { 0 };
