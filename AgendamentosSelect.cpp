@@ -1,4 +1,4 @@
-#include "MenuUniversal.h"
+ï»¿#include "MenuUniversal.h"
 #include <windows.h>
 #include <sal.h>
 #include <format>
@@ -8,30 +8,30 @@
 #include <cmath>
 #include "AgendamentosFuncoes.h"
 
-// ADICIONE estas linhas para usar as variáveis externas:
+// ADICIONE estas linhas para usar as variÃ¡veis externas:
 extern int AgendamentosSelect_g_scrollY;
 extern int AgendamentosSelect_g_clientHeight;
 extern int AgendamentosSelect_g_contentHeight;
 
-bool AgendamentosSelect_g_wasInactive = false; // Inicialização
-HWND AgendamentosSelect_g_hWndMain = NULL;     // Inicialização
+bool AgendamentosSelect_g_wasInactive = false; // InicializaÃ§Ã£o
+HWND AgendamentosSelect_g_hWndMain = NULL;     // InicializaÃ§Ã£o
 
 std::vector<int> AgendamentosSelect_naoDesenhar;
 
-// Declaração do procedimento da janela
+// DeclaraÃ§Ã£o do procedimento da janela
 LRESULT CALLBACK WndProcAgendamentosSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
-// Função auxiliar para converter de UTF-8 (char*) para std::wstring (UTF-16)
+// FunÃ§Ã£o auxiliar para converter de UTF-8 (char*) para std::wstring (UTF-16)
 std::wstring AgendamentosSelect_utf8_to_wstring(const char* str) {
     if (!str) return L"NULL";
     int size_needed = MultiByteToWideChar(CP_UTF8, 0, str, -1, nullptr, 0);
     if (size_needed <= 0) return L"";
-    std::wstring wstr(size_needed - 1, 0); // -1 para não incluir o caractere nulo
+    std::wstring wstr(size_needed - 1, 0); // -1 para nÃ£o incluir o caractere nulo
     MultiByteToWideChar(CP_UTF8, 0, str, -1, &wstr[0], size_needed);
     return wstr;
 }
 
-// Função para registrar a classe da janela (pode ser chamada de outro lugar, como Pet.cpp)
+// FunÃ§Ã£o para registrar a classe da janela (pode ser chamada de outro lugar, como Pet.cpp)
 BOOL RegisterAgendamentosSelectClass(HINSTANCE hInstance)
 {
     WNDCLASSEXW wcex = { 0 };
@@ -41,7 +41,7 @@ BOOL RegisterAgendamentosSelectClass(HINSTANCE hInstance)
     wcex.hInstance = hInstance;
     wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
     wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-    wcex.lpszMenuName = NULL;  // Menu será definido dinamicamente
+    wcex.lpszMenuName = NULL;  // Menu serÃ¡ definido dinamicamente
     wcex.lpszClassName = L"JanelaAgendamentosSelectClasse";
     wcex.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_PET));
     wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
@@ -52,14 +52,14 @@ BOOL RegisterAgendamentosSelectClass(HINSTANCE hInstance)
 // Procedimento da janela Select
 LRESULT CALLBACK WndProcAgendamentosSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    // Processar o menu APENAS para mensagens específicas
+    // Processar o menu APENAS para mensagens especÃ­ficas
     if (message == WM_COMMAND || message == WM_INITMENU || message == WM_MENUSELECT) {
         if (AgendamentosSelect_ProcessarMenu(hWnd, message, wParam, lParam)) {
-            return 0; // Mensagem já processada pelo menu
+            return 0; // Mensagem jÃ¡ processada pelo menu
         }
     }
 
-    // Depois processa as mensagens específicas da janela
+    // Depois processa as mensagens especÃ­ficas da janela
     switch (message)
     {
     case WM_CREATE:
@@ -73,7 +73,7 @@ LRESULT CALLBACK WndProcAgendamentosSelect(HWND hWnd, UINT message, WPARAM wPara
             SetWindowLongPtr(hWnd, GWL_STYLE, style | WS_VSCROLL);
         }
 
-        // Abrir ou criar o banco de dados (código original mantido)
+        // Abrir ou criar o banco de dados (cÃ³digo original mantido)
         sqlite3* db;
         char* errMsg = 0;
         int rc = sqlite3_open("pet.db", &db);
@@ -82,17 +82,17 @@ LRESULT CALLBACK WndProcAgendamentosSelect(HWND hWnd, UINT message, WPARAM wPara
             sqlite3_free(errMsg);
         }
         else {
-            // Código de criação de tabela e inserção (mantido como está)
-            //const char* sqlDrop = "DROP TABLE IF EXISTS Pets;";
-            //rc = sqlite3_exec(db, sqlDrop, 0, 0, &errMsg);
-            //if (rc != SQLITE_OK) {
-                //MessageBox(hWnd, L"Erro ao dropar tabela!", L"Erro", MB_OK | MB_ICONERROR);
-                //sqlite3_free(errMsg);
-            //}
-            const char* sqlCreate = "CREATE TABLE IF NOT EXISTS Pets (ID INTEGER PRIMARY KEY AUTOINCREMENT, Nome_do_Pet TEXT, Raca TEXT, Nome_do_Tutor TEXT, CEP TEXT, Cor TEXT, Idade TEXT, Peso TEXT, Sexo TEXT, Castrado TEXT, Endereco TEXT, Ponto_de_referencia TEXT, Banho TEXT, Tosa TEXT, Obs_Tosa TEXT, Parasitas TEXT, Lesoes TEXT, Obs_Lesoes TEXT, Telefone TEXT, CPF TEXT, Appointment_Date TEXT, Appointment_Hour TEXT, Date TEXT, Hour TEXT);";
+            // CÃ³digo de criaÃ§Ã£o de tabela e inserÃ§Ã£o (mantido como estÃ¡)
+            const char* sqlDrop = "DROP TABLE IF EXISTS Agendamentos;";
+            rc = sqlite3_exec(db, sqlDrop, 0, 0, &errMsg);
+            if (rc != SQLITE_OK) {
+                MessageBox(hWnd, L"Erro ao dropar tabela!", L"Erro", MB_OK | MB_ICONERROR);
+                sqlite3_free(errMsg);
+            }
+            const char* sqlCreate = "CREATE TABLE IF NOT EXISTS Agendamentos (ID INTEGER PRIMARY KEY AUTOINCREMENT, Banho TEXT, Tosa TEXT, Obs_Tosa TEXT, Parasitas TEXT, Lesoes TEXT, Obs_Lesoes TEXT, Appointment_Date TEXT, Appointment_Hour TEXT, Date TEXT, Hour TEXT, ID_Pet_FK INTEGER, FOREIGN KEY (ID_Pet_FK) REFERENCES Pets(ID) ON DELETE CASCADE ON UPDATE CASCADE);";
             rc = sqlite3_exec(db, sqlCreate, 0, 0, &errMsg);
             if (rc != SQLITE_OK) {
-                wchar_t fullMsg[512] = L"Erro ao criar tabela! Código: ";
+                wchar_t fullMsg[512] = L"Erro ao criar tabela! CÃ³digo: ";
                 wchar_t codeStr[32];
                 swprintf_s(codeStr, L"%d", rc);
                 wcscat_s(fullMsg, codeStr);
@@ -106,22 +106,22 @@ LRESULT CALLBACK WndProcAgendamentosSelect(HWND hWnd, UINT message, WPARAM wPara
                 MessageBox(hWnd, fullMsg, L"Erro", MB_OK | MB_ICONERROR);
                 sqlite3_free(errMsg);
             }
-            //else {
-                // Inserções (código original mantido)
-                //std::wstring currentDate = GetCurrentDate();
-                //std::wstring currentHour = GetCurrentHour();
-                //for (int i = 1; i <= 100; i++) {
-                   //std::wstring sqlInsertW = L"INSERT INTO Pets (Nome_do_Pet, Raca, Nome_do_Tutor, CEP, Cor, Idade, Peso, Sexo, Castrado, Endereco, Ponto_de_referencia, Banho, Tosa, Obs_Tosa, Parasitas, Lesoes, Obs_Lesoes, Telefone, CPF, Appointment_Date, Appointment_Hour, Date, Hour) VALUES ('Fido', 'Bulldog', 'Laís', '36309016', 'Preto', 5, 25, 'Masculino', 'Sim', 'Rua das flores - Guarda Mor - São João del Rei', 'Perto da pizzaria Agostinho', 'Padrão', 'Tesoura', 'ir qpiofj adfjs kçjf dkfjeif çsdaf jkasdjf iejf sdçf aksdfjis fdfj çaklsfjaksdfj kdsjfçaejf idsjfkasdf jaies', 'Carrapatos', 'Pele', 'asdf façldj fçkalsdj fdaskljf dsçkf jçklasdf jkaldsfj çkldsa fjaçklds jfakdls fjkalsdjf klasdjf çasdfj çasfj çadsklfjklf ', '32998360862', '09813426632', '04/07/2025', '15:00', '" + currentDate + L"', '" + currentHour + L"');";
-                    //int required = WideCharToMultiByte(CP_UTF8, 0, sqlInsertW.c_str(), -1, nullptr, 0, nullptr, nullptr);
-                    //if (required > 0) {
-                        //std::string sqlInsertUtf8(required, '\0');
-                        //WideCharToMultiByte(CP_UTF8, 0, sqlInsertW.c_str(), -1, &sqlInsertUtf8[0], required, nullptr, nullptr);
-                        //char* errMsg = nullptr;
-                        //int rc = sqlite3_exec(db, sqlInsertUtf8.c_str(), nullptr, nullptr, &errMsg);
-                        //if (rc != SQLITE_OK) sqlite3_free(errMsg);
-                    //}
-                //}
-                //std::wstring sqlInsertW2 = L"INSERT INTO Pets (Nome_do_Pet, Raca, Nome_do_Tutor, CEP, Cor, Idade, Peso, Sexo, Castrado, Endereco, Ponto_de_referencia, Banho, Tosa, Obs_Tosa, Parasitas, Lesoes, Obs_Lesoes, Telefone, CPF, Date, Hour) VALUES ('Astralis', 'Viralata', 'Débora', '36309022', 'Preto', 6, 18, 'Feminino', 'Não', 'Rua Ricador Geraldo dos Santos - Alto das Mercês - nº12', 'Perto da igreja das Mercês', 'Padrão', 'Tesoura', 'aa ksfj asldfj açlksdj fkasjd fçklasdjf aksdlfjkalçsdfj kçalsdjf kçlasjd çfkasdj fklçaj sdçlfkjakslfj çlasdjf çasd jfçaskdjfsdf', 'Carrapatos', 'Pele', ' asdfj açlsjf akçslj fkçlasdj fkçlasdjf lçkasjdf kasdjfkiujriwejfç dfkmdnfçnvçaidsjfçkdsfjaçksdjfkaçsjdfkasdjfkçlasjdçfaksdjf', '32998365552', '09813426789', '" + currentDate + L"', '" + currentHour + L"');";
+            else {
+                // InserÃ§Ãµes (cÃ³digo original mantido)
+                std::wstring currentDate = AgendamentosSelect_GetCurrentDate();
+                std::wstring currentHour = AgendamentosSelect_GetCurrentHour();
+                for (int i = 1; i <= 100; i++) {
+                   std::wstring sqlInsertW = L"INSERT INTO Agendamentos (Banho, Tosa, Obs_Tosa, Parasitas, Lesoes, Obs_Lesoes, Appointment_Date, Appointment_Hour, Date, Hour, ID_Pet_FK) VALUES ('PadrÃ£o', 'Tesoura', 'ir qpiofj adfjs kÃ§jf dkfjeif Ã§sdaf jkasdjf iejf sdÃ§f aksdfjis fdfj Ã§aklsfjaksdfj kdsjfÃ§aejf idsjfkasdf jaies', 'Carrapatos', 'Pele', 'asdf faÃ§ldj fÃ§kalsdj fdaskljf dsÃ§kf jÃ§klasdf jkaldsfj Ã§kldsa fjaÃ§klds jfakdls fjkalsdjf klasdjf Ã§asdfj Ã§asfj Ã§adsklfjklf ', '04/07/2025', '15:00', '" + currentDate + L"', '" + currentHour + L"', 1);";
+                    int required = WideCharToMultiByte(CP_UTF8, 0, sqlInsertW.c_str(), -1, nullptr, 0, nullptr, nullptr);
+                    if (required > 0) {
+                        std::string sqlInsertUtf8(required, '\0');
+                        WideCharToMultiByte(CP_UTF8, 0, sqlInsertW.c_str(), -1, &sqlInsertUtf8[0], required, nullptr, nullptr);
+                        char* errMsg = nullptr;
+                        int rc = sqlite3_exec(db, sqlInsertUtf8.c_str(), nullptr, nullptr, &errMsg);
+                        if (rc != SQLITE_OK) sqlite3_free(errMsg);
+                    }
+                }
+                //std::wstring sqlInsertW2 = L"INSERT INTO Pets (Nome_do_Pet, Raca, Nome_do_Tutor, CEP, Cor, Idade, Peso, Sexo, Castrado, Endereco, Ponto_de_referencia, Banho, Tosa, Obs_Tosa, Parasitas, Lesoes, Obs_Lesoes, Telefone, CPF, Date, Hour) VALUES ('Astralis', 'Viralata', 'DÃ©bora', '36309022', 'Preto', 6, 18, 'Feminino', 'NÃ£o', 'Rua Ricador Geraldo dos Santos - Alto das MercÃªs - nÂº12', 'Perto da igreja das MercÃªs', 'PadrÃ£o', 'Tesoura', 'aa ksfj asldfj aÃ§lksdj fkasjd fÃ§klasdjf aksdlfjkalÃ§sdfj kÃ§alsdjf kÃ§lasjd Ã§fkasdj fklÃ§aj sdÃ§lfkjakslfj Ã§lasdjf Ã§asd jfÃ§askdjfsdf', 'Carrapatos', 'Pele', ' asdfj aÃ§lsjf akÃ§slj fkÃ§lasdj fkÃ§lasdjf lÃ§kasjdf kasdjfkiujriwejfÃ§ dfkmdnfÃ§nvÃ§aidsjfÃ§kdsfjaÃ§ksdjfkaÃ§sjdfkasdjfkÃ§lasjdÃ§faksdjf', '32998365552', '09813426789', '" + currentDate + L"', '" + currentHour + L"');";
                 //int required2 = WideCharToMultiByte(CP_UTF8, 0, sqlInsertW2.c_str(), -1, nullptr, 0, nullptr, nullptr);
                 //if (required2 > 0) {
                     //std::string sqlInsertUtf8(required2, '\0');
@@ -139,7 +139,7 @@ LRESULT CALLBACK WndProcAgendamentosSelect(HWND hWnd, UINT message, WPARAM wPara
                     //MessageBoxW(hWnd, fullMsg, L"Erro", MB_OK | MB_ICONERROR);
                     //sqlite3_free(errMsg);
                 //}
-            //}
+            }
             sqlite3_close(db);
 
             AgendamentosSelect_RecarregarDadosTabela(hWnd);
@@ -151,20 +151,20 @@ LRESULT CALLBACK WndProcAgendamentosSelect(HWND hWnd, UINT message, WPARAM wPara
     case WM_COMMAND:
     {
         int wmId = LOWORD(wParam);
-        HWND hButton = (HWND)lParam; // Handle do botão que disparou o evento
+        HWND hButton = (HWND)lParam; // Handle do botÃ£o que disparou o evento
         LONG_PTR id = GetWindowLongPtr(hButton, GWLP_USERDATA); // Recuperar o id do registro
 
-        if (wmId == AgendamentosSelect_CONSULTAR) // Botões "Consultar"
+        if (wmId == AgendamentosSelect_CONSULTAR) // BotÃµes "Consultar"
         {
             //wchar_t msg[50];
-            //swprintf_s(msg, L"Botão %s%d clicado! Id: %d", L"Consultar", (int)id, (int)id);
+            //swprintf_s(msg, L"BotÃ£o %s%d clicado! Id: %d", L"Consultar", (int)id, (int)id);
             //MessageBoxW(hWnd, msg, L"Info", MB_OK);
 
             AgendamentosSelect_idRecord = id;
 
             if (!AgendamentosSelect_CreateNewWindow(hWnd, hInst, L"JanelaAgendamentosReadClasse", L"CONSULTAR AGENDAMENTO"))
             {
-                // O erro já é tratado dentro da função
+                // O erro jÃ¡ Ã© tratado dentro da funÃ§Ã£o
                 break;
             }
             else {
@@ -176,17 +176,17 @@ LRESULT CALLBACK WndProcAgendamentosSelect(HWND hWnd, UINT message, WPARAM wPara
                 }
             }
         }
-        else if (wmId == AgendamentosSelect_EDITAR) // Botões "Editar"
+        else if (wmId == AgendamentosSelect_EDITAR) // BotÃµes "Editar"
         {
             //wchar_t msg[50];
-            //swprintf_s(msg, L"Botão %s%d clicado! Id: %d", L"Editar", (int)id, (int)id);
+            //swprintf_s(msg, L"BotÃ£o %s%d clicado! Id: %d", L"Editar", (int)id, (int)id);
             //MessageBoxW(hWnd, msg, L"Info", MB_OK);
 
             AgendamentosSelect_idRecord = id;
 
             if (!AgendamentosSelect_CreateNewWindow(hWnd, hInst, L"JanelaAgendamentosEditClasse", L"EDITAR AGENDAMENTO"))
             {
-                // O erro já é tratado dentro da função
+                // O erro jÃ¡ Ã© tratado dentro da funÃ§Ã£o
                 break;
             }
             else {
@@ -198,10 +198,10 @@ LRESULT CALLBACK WndProcAgendamentosSelect(HWND hWnd, UINT message, WPARAM wPara
                 }
             }
         }
-        else if (wmId == AgendamentosSelect_DELETAR) // Botões "Deletar"
+        else if (wmId == AgendamentosSelect_DELETAR) // BotÃµes "Deletar"
         {
             //wchar_t msg[50];
-            //swprintf_s(msg, L"Botão %s%d clicado! Id: %d", L"Deletar", (int)id, (int)id);
+            //swprintf_s(msg, L"BotÃ£o %s%d clicado! Id: %d", L"Deletar", (int)id, (int)id);
             //MessageBoxW(hWnd, msg, L"Info", MB_OK);
 
             AgendamentosSelect_idRecord = id;
@@ -214,14 +214,14 @@ LRESULT CALLBACK WndProcAgendamentosSelect(HWND hWnd, UINT message, WPARAM wPara
         else if (wmId == AgendamentosSelect_FILTRAR)
         {
             //wchar_t msg[50];
-            //swprintf_s(msg, L"Botão %s%d clicado!", L"Filtrar", (int)id, (int)id);
+            //swprintf_s(msg, L"BotÃ£o %s%d clicado!", L"Filtrar", (int)id, (int)id);
             //MessageBoxW(hWnd, msg, L"Info", MB_OK);
 
-            for (int i = 0; i <= 25; i++) {
+            for (int i = 0; i <= 33; i++) {
                 std::wstring controlIDStr = std::to_wstring(i);
                 HWND input = GetDlgItem(hWnd, i + 20);
-                if (i == 9 || i == 12 || i == 13 || i == 15 || i == 16) { // Se o comando veio do nosso ComboBox
-                    // 1. Obter o índice do item selecionado
+                if (i == 1 || i == 2 || i == 4 || i == 5 || i == 19 || i == 20) { // Se o comando veio do nosso ComboBox
+                    // 1. Obter o Ã­ndice do item selecionado
                     int indiceSelecionado = (int)SendMessageW(
                         input, CB_GETCURSEL, 0, 0
                     );
@@ -230,7 +230,7 @@ LRESULT CALLBACK WndProcAgendamentosSelect(HWND hWnd, UINT message, WPARAM wPara
                     if (indiceSelecionado != CB_ERR) {
                         wchar_t buffer[256];
 
-                        // Obter o texto do índice
+                        // Obter o texto do Ã­ndice
                         SendMessageW(
                             input,
                             CB_GETLBTEXT,
@@ -239,8 +239,8 @@ LRESULT CALLBACK WndProcAgendamentosSelect(HWND hWnd, UINT message, WPARAM wPara
                         );
                         AgendamentosSelect_dados[i] = std::wstring(buffer);
 
-                        // O valor selecionado está em 'buffer' (ex: L"Opção B")
-                        // Faça algo com o valor, como atualizar o filtro:
+                        // O valor selecionado estÃ¡ em 'buffer' (ex: L"OpÃ§Ã£o B")
+                        // FaÃ§a algo com o valor, como atualizar o filtro:
                         // std::wstring valorFiltro = buffer;
                         // aplicarFiltro(valorFiltro);
                     }
@@ -252,21 +252,12 @@ LRESULT CALLBACK WndProcAgendamentosSelect(HWND hWnd, UINT message, WPARAM wPara
                 }
             }
 
-            HWND input = GetDlgItem(hWnd, 20 + 2 * 20);
-            wchar_t buffer[256];
-            GetWindowText(input, buffer, 256);
-            AgendamentosSelect_dataAte = std::wstring(buffer);
-
-            input = GetDlgItem(hWnd, 22 + 2 * 20);
-            GetWindowText(input, buffer, 256);
-            AgendamentosSelect_dataRegistroAte = std::wstring(buffer);
-
             AgendamentosSelect_idNumeroUltimo = 1;
             AgendamentosSelect_offsetTableRow = 1;
 
             AgendamentosSelect_RecarregarDadosTabela(hWnd);
         }
-        else if (wmId == AgendamentosSelect_ORDENAR) // Botões "Ordenar"
+        else if (wmId == AgendamentosSelect_ORDENAR) // BotÃµes "Ordenar"
         {
             AgendamentosSelect_btnClicado = L"ORDENAR";
             AgendamentosSelect_idBtnGlobal = id;
@@ -275,27 +266,27 @@ LRESULT CALLBACK WndProcAgendamentosSelect(HWND hWnd, UINT message, WPARAM wPara
         // Verifica se a mensagem veio do seu ComboBox LIMITAR
         else if (wmId == AgendamentosSelect_LIMITAR) {
 
-            // HIWORD(wParam) é o código de notificação específico do controle
+            // HIWORD(wParam) Ã© o cÃ³digo de notificaÃ§Ã£o especÃ­fico do controle
             int notificationCode = HIWORD(wParam);
 
-            // 1. VERIFICA A MUDANÇA DE SELEÇÃO
+            // 1. VERIFICA A MUDANÃ‡A DE SELEÃ‡ÃƒO
             if (notificationCode == CBN_SELCHANGE) {
 
-                // A SELEÇÃO MUDOU! É AQUI QUE VOCÊ CHAMA SUA FUNÇÃO.
+                // A SELEÃ‡ÃƒO MUDOU! Ã‰ AQUI QUE VOCÃŠ CHAMA SUA FUNÃ‡ÃƒO.
 
-                // Obtém o Handle do ComboBox (opcional, mas bom para clareza)
+                // ObtÃ©m o Handle do ComboBox (opcional, mas bom para clareza)
                 HWND hComboBox = (HWND)lParam;
 
                 if (!IsWindow(hComboBox)) {
                     return 0;
                 }
 
-                // CHAMAR FUNÇÃO DE AÇÃO
+                // CHAMAR FUNÃ‡ÃƒO DE AÃ‡ÃƒO
                 AgendamentosSelect_handleLimitChange(hComboBox);
 
                 AgendamentosSelect_RecarregarDadosTabela(hWnd);
 
-                // Certifique-se de retornar 0 após tratar a mensagem
+                // Certifique-se de retornar 0 apÃ³s tratar a mensagem
                 return 0;
             }
         }
@@ -313,7 +304,7 @@ LRESULT CALLBACK WndProcAgendamentosSelect(HWND hWnd, UINT message, WPARAM wPara
 
         AgendamentosSelect_fonte(L"Font", RGB(0, 0, 0), hdc);
 
-        // Obter dimensões da janela
+        // Obter dimensÃµes da janela
         RECT rect;
         GetClientRect(hWnd, &rect);
         int width = (rect.right - rect.left) - 44;
@@ -323,11 +314,11 @@ LRESULT CALLBACK WndProcAgendamentosSelect(HWND hWnd, UINT message, WPARAM wPara
         int columnNumber = 7;
         int cellHeight = 32;
         int numColumns = AgendamentosSelect_g_tableData.empty() ? 0 : 7;
-        int cellWidth = width / (numColumns > 0 ? numColumns + 3 : 1); // +3 para os botões
-        int startY = 350 - AgendamentosSelect_g_scrollY;  // Posição Y com scroll
-        int startX = 22 - AgendamentosSelect_g_scrollX;  // Posição X com scroll
+        int cellWidth = width / (numColumns > 0 ? numColumns + 3 : 1); // +3 para os botÃµes
+        int startY = 350 - AgendamentosSelect_g_scrollY;  // PosiÃ§Ã£o Y com scroll
+        int startX = 22 - AgendamentosSelect_g_scrollX;  // PosiÃ§Ã£o X com scroll
 
-        // LIMPAR a área de desenho primeiro
+        // LIMPAR a Ã¡rea de desenho primeiro
         HBRUSH hBgBrush = CreateSolidBrush(GetSysColor(COLOR_WINDOW));
         FillRect(hdc, &rect, hBgBrush);
         DeleteObject(hBgBrush);
@@ -337,10 +328,10 @@ LRESULT CALLBACK WndProcAgendamentosSelect(HWND hWnd, UINT message, WPARAM wPara
         HBRUSH hBrushWhite = CreateSolidBrush(RGB(255, 255, 255));
         HBRUSH hBrushGray = CreateSolidBrush(RGB(240, 240, 240));
 
-        // Desenhar o texto nas células
+        // Desenhar o texto nas cÃ©lulas
         SetBkMode(hdc, TRANSPARENT);
 
-        //Título
+        //TÃ­tulo
         AgendamentosSelect_windowsTitle(hdc, startX, startY - 330, L"AGENDAMENTOS", 12);
 
         // Desenhar filtros
@@ -352,7 +343,7 @@ LRESULT CALLBACK WndProcAgendamentosSelect(HWND hWnd, UINT message, WPARAM wPara
         int linha = 1;
         int counter = 0;
 
-        // CORREÇÃO: Cálculo seguro do limite
+        // CORREÃ‡ÃƒO: CÃ¡lculo seguro do limite
         int limit;
         if (AgendamentosSelect_rowsNumber == 0) {
             limit = 0;
@@ -361,7 +352,7 @@ LRESULT CALLBACK WndProcAgendamentosSelect(HWND hWnd, UINT message, WPARAM wPara
             limit = min(AgendamentosSelect_offsetTableRow + AgendamentosSelect_limitTableRow, AgendamentosSelect_rowsNumber);
         }
 
-        // DESENHAR APENAS UMA VEZ - REMOVER loops desnecessários
+        // DESENHAR APENAS UMA VEZ - REMOVER loops desnecessÃ¡rios
         for (size_t row = AgendamentosSelect_offsetTableRow; row < limit && row < AgendamentosSelect_g_tableData.size(); row++) {
             if (row < AgendamentosSelect_g_tableData.size()) {
                 HBRUSH hCurrentBrush = (linha % 2 == 0) ? hBrushGray : hBrushWhite;
@@ -384,11 +375,11 @@ LRESULT CALLBACK WndProcAgendamentosSelect(HWND hWnd, UINT message, WPARAM wPara
                 FillRect(hdc, &rowRect, hCurrentBrush);
 
                 counter = 0;
-                // Desenhar as células de dados
+                // Desenhar as cÃ©lulas de dados
                 for (size_t col = 0; col < AgendamentosSelect_g_tableData[row].size(); col++) {
                     std::wstring displayText = AgendamentosSelect_g_tableData[row][col];
 
-                    if (col == 0 || col == 1 || col == 3 || col == 12 || col == 13 || col == 20 || col == 21) {
+                    if (col == 0 || col == 1 || col == 2 || col == 3 || col == 4 || col == 5 || col == 6) {
                         int xPos = startX + counter * cellWidth + 10;
                         int yPos = startY + linha * cellHeight + 7;
 
@@ -411,7 +402,7 @@ LRESULT CALLBACK WndProcAgendamentosSelect(HWND hWnd, UINT message, WPARAM wPara
             }
         }
 
-        // DESENHAR CABEÇALHOS DOS BOTÕES APENAS UMA VEZ - fora do loop principal
+        // DESENHAR CABEÃ‡ALHOS DOS BOTÃ•ES APENAS UMA VEZ - fora do loop principal
         if (!AgendamentosSelect_g_tableData.empty()) {
             AgendamentosSelect_fonte(L"Font", RGB(255, 255, 255), hdc);
 
@@ -462,7 +453,7 @@ LRESULT CALLBACK WndProcAgendamentosSelect(HWND hWnd, UINT message, WPARAM wPara
         else if (LOWORD(wParam) != WA_INACTIVE && AgendamentosSelect_g_wasInactive) {
             //RecarregarDadosTabela(hWnd);
             //MessageBoxW(hWnd, L"A janela ganhou foco novamente!", L"Aviso", MB_OK | MB_ICONINFORMATION);
-            AgendamentosSelect_g_wasInactive = false; // Resetar após exibir o popup
+            AgendamentosSelect_g_wasInactive = false; // Resetar apÃ³s exibir o popup
         }
         return 0;
     }
@@ -556,11 +547,11 @@ LRESULT CALLBACK WndProcAgendamentosSelect(HWND hWnd, UINT message, WPARAM wPara
             }
             DrawFrameControl(pDraw->hDC, &rcButton, DFC_BUTTON, uState);
 
-            // 2. REDUZIR a área interna para não sobrepor a borda
+            // 2. REDUZIR a Ã¡rea interna para nÃ£o sobrepor a borda
             InflateRect(&rcButton, -2, -2);  // Reduz para dentro
 
             if (idBotao == AgendamentosSelect_idNumeroUltimo) {
-                // Botão especial (vermelho)
+                // BotÃ£o especial (vermelho)
                 HBRUSH hBrush = CreateSolidBrush(RGB(150, 150, 150));
                 FillRect(pDraw->hDC, &rcButton, hBrush);
                 DeleteObject(hBrush);
@@ -568,7 +559,7 @@ LRESULT CALLBACK WndProcAgendamentosSelect(HWND hWnd, UINT message, WPARAM wPara
                 SetTextColor(pDraw->hDC, RGB(255, 255, 255));
             }
             else {
-                // Botão normal
+                // BotÃ£o normal
                 COLORREF bgColor = GetSysColor(COLOR_BTNFACE);
                 HBRUSH hBrush = CreateSolidBrush(bgColor);
                 FillRect(pDraw->hDC, &rcButton, hBrush);
@@ -594,7 +585,7 @@ LRESULT CALLBACK WndProcAgendamentosSelect(HWND hWnd, UINT message, WPARAM wPara
     return 0;
 }
 
-// Função obsoleta (removida do WinMain, mas mantida para compatibilidade se necessária)
+// FunÃ§Ã£o obsoleta (removida do WinMain, mas mantida para compatibilidade se necessÃ¡ria)
 LRESULT CALLBACK WndProcSelectAgendamentos(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message)
@@ -603,7 +594,7 @@ LRESULT CALLBACK WndProcSelectAgendamentos(HWND hWnd, UINT message, WPARAM wPara
     {
         PAINTSTRUCT ps;
         HDC hdc = BeginPaint(hWnd, &ps);
-        TextOut(hdc, 10, 10, L"Esta é a nova janela!", 21);
+        TextOut(hdc, 10, 10, L"Esta Ã© a nova janela!", 21);
         EndPaint(hWnd, &ps);
     }
     break;
@@ -616,7 +607,7 @@ LRESULT CALLBACK WndProcSelectAgendamentos(HWND hWnd, UINT message, WPARAM wPara
     return 0;
 }
 
-// Função obsoleta (removida do WinMain, mas mantida para compatibilidade se necessária)
+// FunÃ§Ã£o obsoleta (removida do WinMain, mas mantida para compatibilidade se necessÃ¡ria)
 BOOL InitAgendamentosSelect(HINSTANCE hInstance)
 {
     WNDCLASSW wc = { 0 };

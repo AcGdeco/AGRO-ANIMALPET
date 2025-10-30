@@ -1,4 +1,4 @@
-#include "MenuUniversal.h"
+Ôªø#include "MenuUniversal.h"
 #include <windows.h>
 #include <sal.h>
 #include <format>
@@ -8,30 +8,30 @@
 #include <cmath>
 #include "PetsFuncoes.h"
 
-// ADICIONE estas linhas para usar as vari·veis externas:
+// ADICIONE estas linhas para usar as vari√°veis externas:
 extern int PetsSelect_g_scrollY;
 extern int PetsSelect_g_clientHeight;
 extern int PetsSelect_g_contentHeight;
 
-bool PetsSelect_g_wasInactive = false; // InicializaÁ„o
-HWND PetsSelect_g_hWndMain = NULL;     // InicializaÁ„o
+bool PetsSelect_g_wasInactive = false; // Inicializa√ß√£o
+HWND PetsSelect_g_hWndMain = NULL;     // Inicializa√ß√£o
 
 std::vector<int> PetsSelect_naoDesenhar;
 
-// DeclaraÁ„o do procedimento da janela
+// Declara√ß√£o do procedimento da janela
 LRESULT CALLBACK WndProcPetsSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
-// FunÁ„o auxiliar para converter de UTF-8 (char*) para std::wstring (UTF-16)
+// Fun√ß√£o auxiliar para converter de UTF-8 (char*) para std::wstring (UTF-16)
 std::wstring PetsSelect_utf8_to_wstring(const char* str) {
     if (!str) return L"NULL";
     int size_needed = MultiByteToWideChar(CP_UTF8, 0, str, -1, nullptr, 0);
     if (size_needed <= 0) return L"";
-    std::wstring wstr(size_needed - 1, 0); // -1 para n„o incluir o caractere nulo
+    std::wstring wstr(size_needed - 1, 0); // -1 para n√£o incluir o caractere nulo
     MultiByteToWideChar(CP_UTF8, 0, str, -1, &wstr[0], size_needed);
     return wstr;
 }
 
-// FunÁ„o para registrar a classe da janela (pode ser chamada de outro lugar, como Pet.cpp)
+// Fun√ß√£o para registrar a classe da janela (pode ser chamada de outro lugar, como Pet.cpp)
 BOOL RegisterPetsSelectClass(HINSTANCE hInstance)
 {
     WNDCLASSEXW wcex = { 0 };
@@ -41,7 +41,7 @@ BOOL RegisterPetsSelectClass(HINSTANCE hInstance)
     wcex.hInstance = hInstance;
     wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
     wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-    wcex.lpszMenuName = NULL;  // Menu ser· definido dinamicamente
+    wcex.lpszMenuName = NULL;  // Menu ser√° definido dinamicamente
     wcex.lpszClassName = L"JanelaPetsSelectClasse";
     wcex.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_PET));
     wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
@@ -52,14 +52,14 @@ BOOL RegisterPetsSelectClass(HINSTANCE hInstance)
 // Procedimento da janela Select
 LRESULT CALLBACK WndProcPetsSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    // Processar o menu APENAS para mensagens especÌficas
+    // Processar o menu APENAS para mensagens espec√≠ficas
     if (message == WM_COMMAND || message == WM_INITMENU || message == WM_MENUSELECT) {
         if (PetsSelect_ProcessarMenu(hWnd, message, wParam, lParam)) {
-            return 0; // Mensagem j· processada pelo menu
+            return 0; // Mensagem j√° processada pelo menu
         }
     }
 
-    // Depois processa as mensagens especÌficas da janela
+    // Depois processa as mensagens espec√≠ficas da janela
     switch (message)
     {
     case WM_CREATE:
@@ -73,7 +73,7 @@ LRESULT CALLBACK WndProcPetsSelect(HWND hWnd, UINT message, WPARAM wParam, LPARA
             SetWindowLongPtr(hWnd, GWL_STYLE, style | WS_VSCROLL);
         }
 
-        // Abrir ou criar o banco de dados (cÛdigo original mantido)
+        // Abrir ou criar o banco de dados (c√≥digo original mantido)
         sqlite3* db;
         char* errMsg = 0;
         int rc = sqlite3_open("pet.db", &db);
@@ -82,7 +82,7 @@ LRESULT CALLBACK WndProcPetsSelect(HWND hWnd, UINT message, WPARAM wParam, LPARA
             sqlite3_free(errMsg);
         }
         else {
-            // CÛdigo de criaÁ„o de tabela e inserÁ„o (mantido como est·)
+            // C√≥digo de cria√ß√£o de tabela e inser√ß√£o (mantido como est√°)
             const char* sqlDrop = "DROP TABLE IF EXISTS Pets;";
             rc = sqlite3_exec(db, sqlDrop, 0, 0, &errMsg);
             if (rc != SQLITE_OK) {
@@ -92,7 +92,7 @@ LRESULT CALLBACK WndProcPetsSelect(HWND hWnd, UINT message, WPARAM wParam, LPARA
             const char* sqlCreate = "CREATE TABLE IF NOT EXISTS Pets (ID INTEGER PRIMARY KEY AUTOINCREMENT, Nome_do_Pet TEXT, Raca TEXT, Cor TEXT, Idade TEXT, Peso TEXT, Sexo TEXT, Castrado TEXT, Date TEXT, Hour TEXT, ID_Tutor_FK INTEGER, FOREIGN KEY (ID_Tutor_FK) REFERENCES Tutores(ID) ON DELETE CASCADE ON UPDATE CASCADE);";
             rc = sqlite3_exec(db, sqlCreate, 0, 0, &errMsg);
             if (rc != SQLITE_OK) {
-                wchar_t fullMsg[512] = L"Erro ao criar tabela! CÛdigo: ";
+                wchar_t fullMsg[512] = L"Erro ao criar tabela! C√≥digo: ";
                 wchar_t codeStr[32];
                 swprintf_s(codeStr, L"%d", rc);
                 wcscat_s(fullMsg, codeStr);
@@ -107,7 +107,7 @@ LRESULT CALLBACK WndProcPetsSelect(HWND hWnd, UINT message, WPARAM wParam, LPARA
                 sqlite3_free(errMsg);
             }
             else {
-                // InserÁıes (cÛdigo original mantido)
+                // Inser√ß√µes (c√≥digo original mantido)
                 std::wstring currentDate = PetsSelect_GetCurrentDate();
                 std::wstring currentHour = PetsSelect_GetCurrentHour();
                 for (int i = 1; i <= 100; i++) {
@@ -121,7 +121,7 @@ LRESULT CALLBACK WndProcPetsSelect(HWND hWnd, UINT message, WPARAM wParam, LPARA
                         if (rc != SQLITE_OK) sqlite3_free(errMsg);
                     }
                 }
-                //std::wstring sqlInsertW2 = L"INSERT INTO Pets (Nome_do_Pet, Raca, Nome_do_Tutor, CEP, Cor, Idade, Peso, Sexo, Castrado, Endereco, Ponto_de_referencia, Banho, Tosa, Obs_Tosa, Parasitas, Lesoes, Obs_Lesoes, Telefone, CPF, Date, Hour) VALUES ('Astralis', 'Viralata', 'DÈbora', '36309022', 'Preto', 6, 18, 'Feminino', 'N„o', 'Rua Ricador Geraldo dos Santos - Alto das MercÍs - n∫12', 'Perto da igreja das MercÍs', 'Padr„o', 'Tesoura', 'aa ksfj asldfj aÁlksdj fkasjd fÁklasdjf aksdlfjkalÁsdfj kÁalsdjf kÁlasjd Áfkasdj fklÁaj sdÁlfkjakslfj Álasdjf Áasd jfÁaskdjfsdf', 'Carrapatos', 'Pele', ' asdfj aÁlsjf akÁslj fkÁlasdj fkÁlasdjf lÁkasjdf kasdjfkiujriwejfÁ dfkmdnfÁnvÁaidsjfÁkdsfjaÁksdjfkaÁsjdfkasdjfkÁlasjdÁfaksdjf', '32998365552', '09813426789', '" + currentDate + L"', '" + currentHour + L"');";
+                //std::wstring sqlInsertW2 = L"INSERT INTO Pets (Nome_do_Pet, Raca, Nome_do_Tutor, CEP, Cor, Idade, Peso, Sexo, Castrado, Endereco, Ponto_de_referencia, Banho, Tosa, Obs_Tosa, Parasitas, Lesoes, Obs_Lesoes, Telefone, CPF, Date, Hour) VALUES ('Astralis', 'Viralata', 'D√©bora', '36309022', 'Preto', 6, 18, 'Feminino', 'N√£o', 'Rua Ricador Geraldo dos Santos - Alto das Merc√™s - n¬∫12', 'Perto da igreja das Merc√™s', 'Padr√£o', 'Tesoura', 'aa ksfj asldfj a√ßlksdj fkasjd f√ßklasdjf aksdlfjkal√ßsdfj k√ßalsdjf k√ßlasjd √ßfkasdj fkl√ßaj sd√ßlfkjakslfj √ßlasdjf √ßasd jf√ßaskdjfsdf', 'Carrapatos', 'Pele', ' asdfj a√ßlsjf ak√ßslj fk√ßlasdj fk√ßlasdjf l√ßkasjdf kasdjfkiujriwejf√ß dfkmdnf√ßnv√ßaidsjf√ßkdsfja√ßksdjfka√ßsjdfkasdjfk√ßlasjd√ßfaksdjf', '32998365552', '09813426789', '" + currentDate + L"', '" + currentHour + L"');";
                 //int required2 = WideCharToMultiByte(CP_UTF8, 0, sqlInsertW2.c_str(), -1, nullptr, 0, nullptr, nullptr);
                 //if (required2 > 0) {
                     //std::string sqlInsertUtf8(required2, '\0');
@@ -151,20 +151,20 @@ LRESULT CALLBACK WndProcPetsSelect(HWND hWnd, UINT message, WPARAM wParam, LPARA
     case WM_COMMAND:
     {
         int wmId = LOWORD(wParam);
-        HWND hButton = (HWND)lParam; // Handle do bot„o que disparou o evento
+        HWND hButton = (HWND)lParam; // Handle do bot√£o que disparou o evento
         LONG_PTR id = GetWindowLongPtr(hButton, GWLP_USERDATA); // Recuperar o id do registro
 
-        if (wmId == PetsSelect_CONSULTAR) // Botıes "Consultar"
+        if (wmId == PetsSelect_CONSULTAR) // Bot√µes "Consultar"
         {
             //wchar_t msg[50];
-            //swprintf_s(msg, L"Bot„o %s%d clicado! Id: %d", L"Consultar", (int)id, (int)id);
+            //swprintf_s(msg, L"Bot√£o %s%d clicado! Id: %d", L"Consultar", (int)id, (int)id);
             //MessageBoxW(hWnd, msg, L"Info", MB_OK);
 
             PetsSelect_idRecord = id;
 
             if (!PetsSelect_CreateNewWindow(hWnd, hInst, L"JanelaPetsReadClasse", L"CONSULTAR PET"))
             {
-                // O erro j· È tratado dentro da funÁ„o
+                // O erro j√° √© tratado dentro da fun√ß√£o
                 break;
             }
             else {
@@ -176,17 +176,17 @@ LRESULT CALLBACK WndProcPetsSelect(HWND hWnd, UINT message, WPARAM wParam, LPARA
                 }
             }
         }
-        else if (wmId == PetsSelect_EDITAR) // Botıes "Editar"
+        else if (wmId == PetsSelect_EDITAR) // Bot√µes "Editar"
         {
             //wchar_t msg[50];
-            //swprintf_s(msg, L"Bot„o %s%d clicado! Id: %d", L"Editar", (int)id, (int)id);
+            //swprintf_s(msg, L"Bot√£o %s%d clicado! Id: %d", L"Editar", (int)id, (int)id);
             //MessageBoxW(hWnd, msg, L"Info", MB_OK);
 
             PetsSelect_idRecord = id;
 
             if (!PetsSelect_CreateNewWindow(hWnd, hInst, L"JanelaPetsEditClasse", L"EDITAR PET"))
             {
-                // O erro j· È tratado dentro da funÁ„o
+                // O erro j√° √© tratado dentro da fun√ß√£o
                 break;
             }
             else {
@@ -198,10 +198,10 @@ LRESULT CALLBACK WndProcPetsSelect(HWND hWnd, UINT message, WPARAM wParam, LPARA
                 }
             }
         }
-        else if (wmId == PetsSelect_DELETAR) // Botıes "Deletar"
+        else if (wmId == PetsSelect_DELETAR) // Bot√µes "Deletar"
         {
             //wchar_t msg[50];
-            //swprintf_s(msg, L"Bot„o %s%d clicado! Id: %d", L"Deletar", (int)id, (int)id);
+            //swprintf_s(msg, L"Bot√£o %s%d clicado! Id: %d", L"Deletar", (int)id, (int)id);
             //MessageBoxW(hWnd, msg, L"Info", MB_OK);
 
             PetsSelect_idRecord = id;
@@ -214,14 +214,14 @@ LRESULT CALLBACK WndProcPetsSelect(HWND hWnd, UINT message, WPARAM wParam, LPARA
         else if (wmId == PetsSelect_FILTRAR)
         {
             //wchar_t msg[50];
-            //swprintf_s(msg, L"Bot„o %s%d clicado!", L"Filtrar", (int)id, (int)id);
+            //swprintf_s(msg, L"Bot√£o %s%d clicado!", L"Filtrar", (int)id, (int)id);
             //MessageBoxW(hWnd, msg, L"Info", MB_OK);
 
             for (int i = 0; i <= 20; i++) {
                 std::wstring controlIDStr = std::to_wstring(i);
                 HWND input = GetDlgItem(hWnd, i + 20);
                 if (i == 7) { // Se o comando veio do nosso ComboBox
-                    // 1. Obter o Ìndice do item selecionado
+                    // 1. Obter o √≠ndice do item selecionado
                     int indiceSelecionado = (int)SendMessageW(
                         input, CB_GETCURSEL, 0, 0
                     );
@@ -230,7 +230,7 @@ LRESULT CALLBACK WndProcPetsSelect(HWND hWnd, UINT message, WPARAM wParam, LPARA
                     if (indiceSelecionado != CB_ERR) {
                         wchar_t buffer[256];
 
-                        // Obter o texto do Ìndice
+                        // Obter o texto do √≠ndice
                         SendMessageW(
                             input,
                             CB_GETLBTEXT,
@@ -239,8 +239,8 @@ LRESULT CALLBACK WndProcPetsSelect(HWND hWnd, UINT message, WPARAM wParam, LPARA
                         );
                         PetsSelect_dados[i] = std::wstring(buffer);
 
-                        // O valor selecionado est· em 'buffer' (ex: L"OpÁ„o B")
-                        // FaÁa algo com o valor, como atualizar o filtro:
+                        // O valor selecionado est√° em 'buffer' (ex: L"Op√ß√£o B")
+                        // Fa√ßa algo com o valor, como atualizar o filtro:
                         // std::wstring valorFiltro = buffer;
                         // aplicarFiltro(valorFiltro);
                     }
@@ -249,7 +249,7 @@ LRESULT CALLBACK WndProcPetsSelect(HWND hWnd, UINT message, WPARAM wParam, LPARA
                     if (input) {
                         LRESULT selectedIndex = 0;
 
-                        // 1. Envia a mensagem CB_GETCURSEL (Get Current Selection) para obter o Ìndice.
+                        // 1. Envia a mensagem CB_GETCURSEL (Get Current Selection) para obter o √≠ndice.
                         selectedIndex = SendMessage(
                             input,
                             CB_GETCURSEL,
@@ -257,21 +257,21 @@ LRESULT CALLBACK WndProcPetsSelect(HWND hWnd, UINT message, WPARAM wParam, LPARA
                             0
                         );
 
-                        // Verifica se a seleÁ„o È v·lida (Ìndice 0 ou maior)
-                        if (selectedIndex == CB_ERR) // CB_ERR (-1) È retornado se n„o houver seleÁ„o ou erro.
+                        // Verifica se a sele√ß√£o √© v√°lida (√≠ndice 0 ou maior)
+                        if (selectedIndex == CB_ERR) // CB_ERR (-1) √© retornado se n√£o houver sele√ß√£o ou erro.
                         {
-                            // Se a seleÁ„o for inv·lida ou inexistente, armazena string vazia.
+                            // Se a sele√ß√£o for inv√°lida ou inexistente, armazena string vazia.
                             PetsSelect_dados[i] = L"";
                             continue;
                         }
 
                         // 2. Envia a mensagem CB_GETLBTEXTLEN (Get ListBox Text Length) para obter o tamanho do texto.
-                        // O resultado È o tamanho da string em caracteres (sem incluir o terminador NULL).
+                        // O resultado √© o tamanho da string em caracteres (sem incluir o terminador NULL).
                         LRESULT textLength = SendMessage(
                             input,
                             CB_GETLBTEXTLEN,
-                            (WPARAM)selectedIndex, // wParam: o Ìndice do item
-                            0                      // lParam: N„o usado
+                            (WPARAM)selectedIndex, // wParam: o √≠ndice do item
+                            0                      // lParam: N√£o usado
                         );
 
                         if (textLength == CB_ERR)
@@ -287,11 +287,11 @@ LRESULT CALLBACK WndProcPetsSelect(HWND hWnd, UINT message, WPARAM wParam, LPARA
                         selectedText.resize(textLength + 1); // +1 para o terminador NULL
 
                         // 4. Envia a mensagem CB_GETLBTEXT (Get ListBox Text) para copiar o texto.
-                        // O LPARAM È o ponteiro para o buffer (wchar_t*).
+                        // O LPARAM √© o ponteiro para o buffer (wchar_t*).
                         LRESULT result = SendMessage(
                             input,
                             CB_GETLBTEXT,
-                            (WPARAM)selectedIndex,           // wParam: o Ìndice do item
+                            (WPARAM)selectedIndex,           // wParam: o √≠ndice do item
                             (LPARAM)selectedText.data()      // lParam: Ponteiro para o buffer de caracteres (wchar_t*)
                         );
 
@@ -302,9 +302,9 @@ LRESULT CALLBACK WndProcPetsSelect(HWND hWnd, UINT message, WPARAM wParam, LPARA
                             continue;
                         }
 
-                        // 5. FinalizaÁ„o: O texto real copiado exclui o terminador NULL, 
-                        // ent„o È necess·rio ajustar o tamanho da wstring.
-                        // O 'result' de CB_GETLBTEXT È o n˙mero de caracteres copiados (textLength).
+                        // 5. Finaliza√ß√£o: O texto real copiado exclui o terminador NULL, 
+                        // ent√£o √© necess√°rio ajustar o tamanho da wstring.
+                        // O 'result' de CB_GETLBTEXT √© o n√∫mero de caracteres copiados (textLength).
                         selectedText.resize(result);
 
                         // 6. Armazena o texto no seu vetor de dados.
@@ -323,7 +323,7 @@ LRESULT CALLBACK WndProcPetsSelect(HWND hWnd, UINT message, WPARAM wParam, LPARA
 
             PetsSelect_RecarregarDadosTabela(hWnd);
         }
-        else if (wmId == PetsSelect_ORDENAR) // Botıes "Ordenar"
+        else if (wmId == PetsSelect_ORDENAR) // Bot√µes "Ordenar"
         {
             PetsSelect_btnClicado = L"ORDENAR";
             PetsSelect_idBtnGlobal = id;
@@ -332,27 +332,27 @@ LRESULT CALLBACK WndProcPetsSelect(HWND hWnd, UINT message, WPARAM wParam, LPARA
         // Verifica se a mensagem veio do seu ComboBox LIMITAR
         else if (wmId == PetsSelect_LIMITAR) {
 
-            // HIWORD(wParam) È o cÛdigo de notificaÁ„o especÌfico do controle
+            // HIWORD(wParam) √© o c√≥digo de notifica√ß√£o espec√≠fico do controle
             int notificationCode = HIWORD(wParam);
 
-            // 1. VERIFICA A MUDAN«A DE SELE«√O
+            // 1. VERIFICA A MUDAN√áA DE SELE√á√ÉO
             if (notificationCode == CBN_SELCHANGE) {
 
-                // A SELE«√O MUDOU! … AQUI QUE VOC  CHAMA SUA FUN«√O.
+                // A SELE√á√ÉO MUDOU! √â AQUI QUE VOC√ä CHAMA SUA FUN√á√ÉO.
 
-                // ObtÈm o Handle do ComboBox (opcional, mas bom para clareza)
+                // Obt√©m o Handle do ComboBox (opcional, mas bom para clareza)
                 HWND hComboBox = (HWND)lParam;
 
                 if (!IsWindow(hComboBox)) {
                     return 0;
                 }
 
-                // CHAMAR FUN«√O DE A«√O
+                // CHAMAR FUN√á√ÉO DE A√á√ÉO
                 PetsSelect_handleLimitChange(hComboBox);
 
                 PetsSelect_RecarregarDadosTabela(hWnd);
 
-                // Certifique-se de retornar 0 apÛs tratar a mensagem
+                // Certifique-se de retornar 0 ap√≥s tratar a mensagem
                 return 0;
             }
         }
@@ -370,7 +370,7 @@ LRESULT CALLBACK WndProcPetsSelect(HWND hWnd, UINT message, WPARAM wParam, LPARA
 
         PetsSelect_fonte(L"Font", RGB(0, 0, 0), hdc);
 
-        // Obter dimensıes da janela
+        // Obter dimens√µes da janela
         RECT rect;
         GetClientRect(hWnd, &rect);
         int width = (rect.right - rect.left) - 44;
@@ -380,11 +380,11 @@ LRESULT CALLBACK WndProcPetsSelect(HWND hWnd, UINT message, WPARAM wParam, LPARA
         int columnNumber = 7;
         int cellHeight = 32;
         int numColumns = PetsSelect_g_tableData.empty() ? 0 : 7;
-        int cellWidth = width / (numColumns > 0 ? numColumns + 3 : 1); // +3 para os botıes
-        int startY = 350 - PetsSelect_g_scrollY;  // PosiÁ„o Y com scroll
-        int startX = 22 - PetsSelect_g_scrollX;  // PosiÁ„o X com scroll
+        int cellWidth = width / (numColumns > 0 ? numColumns + 3 : 1); // +3 para os bot√µes
+        int startY = 350 - PetsSelect_g_scrollY;  // Posi√ß√£o Y com scroll
+        int startX = 22 - PetsSelect_g_scrollX;  // Posi√ß√£o X com scroll
 
-        // LIMPAR a ·rea de desenho primeiro
+        // LIMPAR a √°rea de desenho primeiro
         HBRUSH hBgBrush = CreateSolidBrush(GetSysColor(COLOR_WINDOW));
         FillRect(hdc, &rect, hBgBrush);
         DeleteObject(hBgBrush);
@@ -394,10 +394,10 @@ LRESULT CALLBACK WndProcPetsSelect(HWND hWnd, UINT message, WPARAM wParam, LPARA
         HBRUSH hBrushWhite = CreateSolidBrush(RGB(255, 255, 255));
         HBRUSH hBrushGray = CreateSolidBrush(RGB(240, 240, 240));
 
-        // Desenhar o texto nas cÈlulas
+        // Desenhar o texto nas c√©lulas
         SetBkMode(hdc, TRANSPARENT);
 
-        //TÌtulo
+        //T√≠tulo
         PetsSelect_windowsTitle(hdc, startX, startY - 330, L"PETS", 4);
 
         // Desenhar filtros
@@ -409,7 +409,7 @@ LRESULT CALLBACK WndProcPetsSelect(HWND hWnd, UINT message, WPARAM wParam, LPARA
         int linha = 1;
         int counter = 0;
 
-        // CORRE«√O: C·lculo seguro do limite
+        // CORRE√á√ÉO: C√°lculo seguro do limite
         int limit;
         if (PetsSelect_rowsNumber == 0) {
             limit = 0;
@@ -418,7 +418,7 @@ LRESULT CALLBACK WndProcPetsSelect(HWND hWnd, UINT message, WPARAM wParam, LPARA
             limit = min(PetsSelect_offsetTableRow + PetsSelect_limitTableRow, PetsSelect_rowsNumber);
         }
 
-        // DESENHAR APENAS UMA VEZ - REMOVER loops desnecess·rios
+        // DESENHAR APENAS UMA VEZ - REMOVER loops desnecess√°rios
         for (size_t row = PetsSelect_offsetTableRow; row < limit && row < PetsSelect_g_tableData.size(); row++) {
             if (row < PetsSelect_g_tableData.size()) {
                 HBRUSH hCurrentBrush = (linha % 2 == 0) ? hBrushGray : hBrushWhite;
@@ -441,7 +441,7 @@ LRESULT CALLBACK WndProcPetsSelect(HWND hWnd, UINT message, WPARAM wParam, LPARA
                 FillRect(hdc, &rowRect, hCurrentBrush);
 
                 counter = 0;
-                // Desenhar as cÈlulas de dados
+                // Desenhar as c√©lulas de dados
                 for (size_t col = 0; col < PetsSelect_g_tableData[row].size(); col++) {
                     if (col == 0 || col == 1 || col == 2 || col == 3 || col == 4 || col == 5 || col == 12) {
                         std::wstring displayText = PetsSelect_g_tableData[row][col];
@@ -468,7 +468,7 @@ LRESULT CALLBACK WndProcPetsSelect(HWND hWnd, UINT message, WPARAM wParam, LPARA
             }
         }
 
-        // DESENHAR CABE«ALHOS DOS BOT’ES APENAS UMA VEZ - fora do loop principal
+        // DESENHAR CABE√áALHOS DOS BOT√ïES APENAS UMA VEZ - fora do loop principal
         if (!PetsSelect_g_tableData.empty()) {
             PetsSelect_fonte(L"Font", RGB(255, 255, 255), hdc);
 
@@ -519,7 +519,7 @@ LRESULT CALLBACK WndProcPetsSelect(HWND hWnd, UINT message, WPARAM wParam, LPARA
         else if (LOWORD(wParam) != WA_INACTIVE && PetsSelect_g_wasInactive) {
             //RecarregarDadosTabela(hWnd);
             //MessageBoxW(hWnd, L"A janela ganhou foco novamente!", L"Aviso", MB_OK | MB_ICONINFORMATION);
-            PetsSelect_g_wasInactive = false; // Resetar apÛs exibir o popup
+            PetsSelect_g_wasInactive = false; // Resetar ap√≥s exibir o popup
         }
         return 0;
     }
@@ -613,11 +613,11 @@ LRESULT CALLBACK WndProcPetsSelect(HWND hWnd, UINT message, WPARAM wParam, LPARA
             }
             DrawFrameControl(pDraw->hDC, &rcButton, DFC_BUTTON, uState);
 
-            // 2. REDUZIR a ·rea interna para n„o sobrepor a borda
+            // 2. REDUZIR a √°rea interna para n√£o sobrepor a borda
             InflateRect(&rcButton, -2, -2);  // Reduz para dentro
 
             if (idBotao == PetsSelect_idNumeroUltimo) {
-                // Bot„o especial (vermelho)
+                // Bot√£o especial (vermelho)
                 HBRUSH hBrush = CreateSolidBrush(RGB(150, 150, 150));
                 FillRect(pDraw->hDC, &rcButton, hBrush);
                 DeleteObject(hBrush);
@@ -625,7 +625,7 @@ LRESULT CALLBACK WndProcPetsSelect(HWND hWnd, UINT message, WPARAM wParam, LPARA
                 SetTextColor(pDraw->hDC, RGB(255, 255, 255));
             }
             else {
-                // Bot„o normal
+                // Bot√£o normal
                 COLORREF bgColor = GetSysColor(COLOR_BTNFACE);
                 HBRUSH hBrush = CreateSolidBrush(bgColor);
                 FillRect(pDraw->hDC, &rcButton, hBrush);
@@ -651,7 +651,7 @@ LRESULT CALLBACK WndProcPetsSelect(HWND hWnd, UINT message, WPARAM wParam, LPARA
     return 0;
 }
 
-// FunÁ„o obsoleta (removida do WinMain, mas mantida para compatibilidade se necess·ria)
+// Fun√ß√£o obsoleta (removida do WinMain, mas mantida para compatibilidade se necess√°ria)
 LRESULT CALLBACK WndProcSelectPets(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message)
@@ -660,7 +660,7 @@ LRESULT CALLBACK WndProcSelectPets(HWND hWnd, UINT message, WPARAM wParam, LPARA
     {
         PAINTSTRUCT ps;
         HDC hdc = BeginPaint(hWnd, &ps);
-        TextOut(hdc, 10, 10, L"Esta È a nova janela!", 21);
+        TextOut(hdc, 10, 10, L"Esta √© a nova janela!", 21);
         EndPaint(hWnd, &ps);
     }
     break;
@@ -673,7 +673,7 @@ LRESULT CALLBACK WndProcSelectPets(HWND hWnd, UINT message, WPARAM wParam, LPARA
     return 0;
 }
 
-// FunÁ„o obsoleta (removida do WinMain, mas mantida para compatibilidade se necess·ria)
+// Fun√ß√£o obsoleta (removida do WinMain, mas mantida para compatibilidade se necess√°ria)
 BOOL InitPetSelect(HINSTANCE hInstance)
 {
     WNDCLASSW wc = { 0 };

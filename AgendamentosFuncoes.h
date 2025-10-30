@@ -103,6 +103,7 @@ void AgendamentosSelect_SetFilterValues(const std::vector<std::wstring>& dados);
 void AgendamentosSelect_ordenarDefinicoesValores(HWND hWnd);
 void AgendamentosSelect_ordenarMudarIcone(HWND hWnd);
 BOOL AgendamentosSelect_CreateNewWindow(HWND hWndParent, HINSTANCE hInst, LPCWSTR className, LPCWSTR windowTittle);
+int AgendamentosSelect_columnValue(int col);
 
 // Definição da estrutura
 struct AgendamentosSelect_Data {
