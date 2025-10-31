@@ -50,6 +50,8 @@ extern bool AgendamentosSelect_g_isRedrawing;
 extern int AgendamentosSelect_rowsNumberSemCabecalho;
 extern LONG_PTR AgendamentosSelect_idBtnGlobal;
 extern std::wstring AgendamentosSelect_btnClicado;
+extern HWND AgendamentosSelect_g_hButton_consultar;
+extern HWND AgendamentosSelect_g_hButton_consultar_Pet;
 
 std::wstring AgendamentosSelect_GetCurrentDate();
 std::wstring AgendamentosSelect_GetCurrentHour();

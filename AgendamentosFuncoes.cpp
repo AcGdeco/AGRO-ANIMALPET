@@ -33,6 +33,8 @@ int AgendamentosSelect_rowsNumberSemCabecalho = 0;
 LONG_PTR AgendamentosSelect_idBtnGlobal = 0;
 std::wstring AgendamentosSelect_btnClicado;
 int AgendamentosSelect_numberRowsTable = 26;
+HWND AgendamentosSelect_g_hButton_consultar;
+HWND AgendamentosSelect_g_hButton_consultar_Pet;
 
 bool AgendamentosSelect_g_isRedrawing = false;
 
@@ -2463,78 +2465,91 @@ void AgendamentosSelect_AtualizarPosicoesControlesAgendamento(HWND hWnd)
     for (size_t i = 0; i < AgendamentosSelect_g_editControls.size(); i++) {
         colNumber = countRow + 1;
 
-        if (i == 11) {
+        if (i == 0) {
+            xPos = startX + cellWidth + 10;
+            yPos = startY + colNumber * cellHeight + 3;
+            SetWindowPos(AgendamentosSelect_g_editControls[i], NULL, xPos, yPos, 610, 200,
+                SWP_NOZORDER | SWP_NOACTIVATE);
+
+            // Atualizar posição do botão
+            if (AgendamentosSelect_g_hButton_consultar) {
+                SetWindowPos(AgendamentosSelect_g_hButton_consultar, NULL, xPos + 615, yPos, 40, 25,
+                    SWP_NOZORDER | SWP_NOACTIVATE);
+            }
+
+            // Atualizar posição do botão
+            if (AgendamentosSelect_g_hButton_consultar_Pet) {
+                SetWindowPos(AgendamentosSelect_g_hButton_consultar_Pet, NULL, xPos + 620 + 40, yPos, 40, 25,
+                    SWP_NOZORDER | SWP_NOACTIVATE);
+            }
+
+            countRow++;
+        }
+        else if (i == 1) {
             xPos = startX + cellWidth + 10;
             yPos = startY + colNumber * cellHeight + 3;
             SetWindowPos(AgendamentosSelect_g_editControls[i], NULL, xPos, yPos, 110, 25,
                 SWP_NOZORDER | SWP_NOACTIVATE);
             countRow++;
         }
-        else if (i == 12) {
+        else if (i == 2) {
             SetWindowPos(AgendamentosSelect_g_editControls[i], NULL, xPos + 150, yPos, 110, 25,
                 SWP_NOZORDER | SWP_NOACTIVATE);
         }
-        else if (i == 13) {
+        else if (i == 3) {
             SetWindowPos(AgendamentosSelect_g_editControls[i], NULL, xPos + 300, yPos, 110, 25,
                 SWP_NOZORDER | SWP_NOACTIVATE);
         }
-        else if (i == 14) {
+        else if (i == 4) {
             xPos = startX + cellWidth + 10;
             yPos = startY + colNumber * cellHeight + 3;
             SetWindowPos(AgendamentosSelect_g_editControls[i], NULL, xPos, yPos, 110, 25,
                 SWP_NOZORDER | SWP_NOACTIVATE);
             countRow++;
         }
-        else if (i == 15) {
+        else if (i == 5) {
             SetWindowPos(AgendamentosSelect_g_editControls[i], NULL, xPos + 150, yPos, 110, 25,
                 SWP_NOZORDER | SWP_NOACTIVATE);
         }
-        else if (i == 16) {
+        else if (i == 6) {
             SetWindowPos(AgendamentosSelect_g_editControls[i], NULL, xPos + 300, yPos, 110, 25,
                 SWP_NOZORDER | SWP_NOACTIVATE);
         }
-        else if (i == 17) {
+        else if (i == 7) {
             SetWindowPos(AgendamentosSelect_g_editControls[i], NULL, xPos + 450, yPos, 110, 25,
                 SWP_NOZORDER | SWP_NOACTIVATE);
         }
-        else if (i == 18) {
+        else if (i == 8) {
             SetWindowPos(AgendamentosSelect_g_editControls[i], NULL, xPos + 600, yPos, 110, 25,
                 SWP_NOZORDER | SWP_NOACTIVATE);
         }
-        else if (i == 8) {
-            xPos = startX + cellWidth + 10;
-            yPos = startY + colNumber * cellHeight + 3;
-            SetWindowPos(AgendamentosSelect_g_editControls[i], NULL, xPos, yPos, 25, 25, // Ajustado para checkbox
-                SWP_NOZORDER | SWP_NOACTIVATE);
-            countRow++;
-        }
-        else if (i == 20) {
+        else if (i == 10) {
             xPos = startX + cellWidth + 10;
             yPos = startY + colNumber * cellHeight + 3;
             SetWindowPos(AgendamentosSelect_g_editControls[i], NULL, xPos, yPos, 110, 25, // Ajustado para checkbox
                 SWP_NOZORDER | SWP_NOACTIVATE);
             countRow++;
         }
-        else if (i == 21) {
+        else if (i == 11) {
             SetWindowPos(AgendamentosSelect_g_editControls[i], NULL, xPos + 150, yPos, 110, 25,
                 SWP_NOZORDER | SWP_NOACTIVATE);
         }
-        else if (i == 22) {
+        else if (i == 12) {
             xPos = startX + cellWidth + 10;
             yPos = startY + colNumber * cellHeight + 3;
             SetWindowPos(AgendamentosSelect_g_editControls[i], NULL, xPos, yPos, 110, 25, // Ajustado para checkbox
                 SWP_NOZORDER | SWP_NOACTIVATE);
             countRow++;
         }
-        else if (i == 23) {
+        else if (i == 13) {
             SetWindowPos(AgendamentosSelect_g_editControls[i], NULL, xPos + 150, yPos, 110, 25,
                 SWP_NOZORDER | SWP_NOACTIVATE);
         }
-        else if (i == 24) {
+        else if (i == 14) {
             SetWindowPos(AgendamentosSelect_g_editControls[i], NULL, xPos + 300, yPos, 110, 25,
                 SWP_NOZORDER | SWP_NOACTIVATE);
         }
-        else if (i == 25) {
+        else if (i == 15) {
             SetWindowPos(AgendamentosSelect_g_editControls[i], NULL, xPos + 450, yPos, 110, 25,
                 SWP_NOZORDER | SWP_NOACTIVATE);
         }
@@ -2549,7 +2564,7 @@ void AgendamentosSelect_AtualizarPosicoesControlesAgendamento(HWND hWnd)
 
     // Atualizar posição do botão
     if (AgendamentosSelect_g_hButton) {
-        int buttonY = startY + 22 * cellHeight + 3;
+        int buttonY = startY + 10 * cellHeight + 3;
         SetWindowPos(AgendamentosSelect_g_hButton, NULL, startX, buttonY, 150, 30,
             SWP_NOZORDER | SWP_NOACTIVATE);
     }
@@ -2707,21 +2722,17 @@ std::wstring AgendamentosSelect_treatDataAppointment(std::wstring dado, int numb
 
     if (number == 2 && dado.empty()) {
         AgendamentosSelect_error = L"1";
-        AgendamentosSelect_mensagem = L"Insira: 'Nome do Pet'.\n" + AgendamentosSelect_mensagem;
+        AgendamentosSelect_mensagem = L"Insira: 'Nome do Tutor e do Pet'.\n" + AgendamentosSelect_mensagem;
     }
-    else if (number == 4 && dado.empty()) {
-        AgendamentosSelect_error = L"1";
-        AgendamentosSelect_mensagem = L"Insira: 'Nome do Tutor'.\n" + AgendamentosSelect_mensagem;
-    }
-    else if (number == 13 && dado.empty()) {
+    else if (number == 3 && dado.empty()) {
         AgendamentosSelect_error = L"1";
         AgendamentosSelect_mensagem = L"Insira: 'Banho'.\n" + AgendamentosSelect_mensagem;
     }
-    else if (number == 14 && dado.empty()) {
+    else if (number == 4 && dado.empty()) {
         AgendamentosSelect_error = L"1";
         AgendamentosSelect_mensagem = L"Insira: 'Tosa'.\n" + AgendamentosSelect_mensagem;
     }
-    else if (number == 21) {
+    else if (number == 9) {
         if (dado.empty()) {
             AgendamentosSelect_error = L"1";
             AgendamentosSelect_mensagem = L"Insira: 'Data'.\n" + AgendamentosSelect_mensagem;
@@ -2731,7 +2742,7 @@ std::wstring AgendamentosSelect_treatDataAppointment(std::wstring dado, int numb
             AgendamentosSelect_mensagem = L"Insira: 'Data' no formato: dd/mm/aaaa.\n" + AgendamentosSelect_mensagem;
         }
     }
-    else if (number == 22) {
+    else if (number == 10) {
         if (dado.empty()) {
             AgendamentosSelect_error = L"1";
             AgendamentosSelect_mensagem = L"Insira: 'Hora'.\n" + AgendamentosSelect_mensagem;
@@ -2739,36 +2750,6 @@ std::wstring AgendamentosSelect_treatDataAppointment(std::wstring dado, int numb
         else if (!AgendamentosSelect_isValidTime(dado)) {
             AgendamentosSelect_error = L"1";
             AgendamentosSelect_mensagem = L"Insira: 'Hora' no formato: hh:mm.\n" + AgendamentosSelect_mensagem;
-        }
-    }
-    else if (number == 5 && !dado.empty()) {
-        if (!AgendamentosSelect_isNumber(dado)) {
-            AgendamentosSelect_error = L"1";
-            AgendamentosSelect_mensagem = L"Insira: Apenas números em 'CEP'.\n" + AgendamentosSelect_mensagem;
-        }
-    }
-    else if (number == 7 && !dado.empty()) {
-        if (!AgendamentosSelect_isNumber(dado)) {
-            AgendamentosSelect_error = L"1";
-            AgendamentosSelect_mensagem = L"Insira: Apenas números em 'Idade'.\n" + AgendamentosSelect_mensagem;
-        }
-    }
-    else if (number == 19 && !dado.empty()) {
-        if (!AgendamentosSelect_isNumber(dado)) {
-            AgendamentosSelect_error = L"1";
-            AgendamentosSelect_mensagem = L"Insira: Apenas números em 'Telefone'.\n" + AgendamentosSelect_mensagem;
-        }
-    }
-    else if (number == 20 && !dado.empty()) {
-        if (!AgendamentosSelect_isNumber(dado)) {
-            AgendamentosSelect_error = L"1";
-            AgendamentosSelect_mensagem = L"Insira: Apenas números em 'CPF'.\n" + AgendamentosSelect_mensagem;
-        }
-    }
-    else if (number == 8 && !dado.empty()) {
-        if (!AgendamentosSelect_isDecimalNumber(dado)) {
-            AgendamentosSelect_error = L"1";
-            AgendamentosSelect_mensagem = L"Insira: Apenas números decimais ou inteiros em 'Peso'.\n" + AgendamentosSelect_mensagem;
         }
     }
     else if (dado.empty()) {

@@ -456,6 +456,13 @@ LRESULT CALLBACK WndProcPetsAdd(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
                             PetsSelect_RecarregarDadosTabela(hwndSelect);
                         }
 
+                        HWND hWndRead = FindWindowW(L"JanelaAgendamentosAddClasse", NULL);
+                        if (hWndRead != NULL)
+                        {
+                            PetsSelect_invalidateDrawing(hWndRead);
+                            UpdateWindow(hWndRead);
+                        }
+
                         MessageBox(hWnd, L"Dados inseridos com sucesso!", L"Sucesso", MB_OK);
                     }
                 }
@@ -482,7 +489,7 @@ LRESULT CALLBACK WndProcPetsAdd(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 
             TutoresSelect_idRecord = id;
 
-            if (!PetsSelect_CreateNewWindow(hWnd, hInst, L"JanelaTutoresReadClasse", L"AGRO ANIMAL PET - CONSULTAR AGENDAMENTO"))
+            if (!PetsSelect_CreateNewWindow(hWnd, hInst, L"JanelaTutoresReadClasse", L"CONSULTAR TUTOR"))
             {
                 // O erro já é tratado dentro da função
                 break;

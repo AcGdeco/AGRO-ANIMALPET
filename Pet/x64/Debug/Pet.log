@@ -1,47 +1,17 @@
-﻿  AgendamentosFuncoes.cpp
-C:\Users\Andre\source\repos\Pet\resource.h(1,1): warning C4828: O arquivo contém um caractere começando com o deslocamento 0x2b que é inválido no conjunto de caracteres de origem atual (página de código 65001).
-  (compilando o arquivo fonte 'AgendamentosFuncoes.cpp')
-  
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.h(34,13): warning C4091: 'extern ': ignorado à esquerda de 'AgendamentosSelect_ButtonAction' quando nenhuma variável é declarada
-  (compilando o arquivo fonte 'AgendamentosFuncoes.cpp')
+﻿  AgendamentosAdd.cpp
+C:\Users\Andre\source\repos\Pet\AgendamentosAdd.h(1,1): warning C4828: O arquivo contém um caractere começando com o deslocamento 0x12a que é inválido no conjunto de caracteres de origem atual (página de código 65001).
+  (compilando o arquivo fonte 'AgendamentosAdd.cpp')
   
 C:\Users\Andre\source\repos\Pet\MenuUniversal.h(1,1): warning C4828: O arquivo contém um caractere começando com o deslocamento 0x206 que é inválido no conjunto de caracteres de origem atual (página de código 65001).
-  (compilando o arquivo fonte 'AgendamentosFuncoes.cpp')
+  (compilando o arquivo fonte 'AgendamentosAdd.cpp')
   
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(19,9): warning C4005: 'min': redefinição de macro
-      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\shared\minwindef.h(197,9):
-      ver a definição anterior de "min"
+C:\Users\Andre\source\repos\Pet\resource.h(1,1): warning C4828: O arquivo contém um caractere começando com o deslocamento 0x2b que é inválido no conjunto de caracteres de origem atual (página de código 65001).
+  (compilando o arquivo fonte 'AgendamentosAdd.cpp')
   
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1080,17): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1104,17): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1135,17): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1170,17): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1222,55): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1231,72): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1240,55): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1249,72): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1258,51): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1266,51): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1291,17): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1313,17): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1331,55): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1340,72): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1349,51): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1371,55): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1380,72): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1389,51): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1462,54): warning C4267: '=': conversão de 'size_t' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1463,71): warning C4267: '=': conversão de 'size_t' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1580,30): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1686,64): warning C4267: '=': conversão de 'size_t' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1721,18): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(2038,53): warning C4267: 'argumento': conversão de 'size_t' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(2200,20): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(2226,18): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(3034,16): warning C4244: 'return': conversão de 'LRESULT' para 'BOOL', possível perda de dados
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(3040,16): warning C4244: 'return': conversão de 'LRESULT' para 'BOOL', possível perda de dados
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(3046,16): warning C4244: 'return': conversão de 'LRESULT' para 'BOOL', possível perda de dados
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(3178,9): warning C4065: instrução switch contém rótulo 'default', mas nenhum 'case'
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(3048,1): warning C4715: 'AgendamentosSelect_ProcessarMenu': nem todos os caminhos de controle retornam um valor
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(3147,1): warning C4715: 'AgendamentosSelect_CreateNewWindow': nem todos os caminhos de controle retornam um valor
+C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.h(34,13): warning C4091: 'extern ': ignorado à esquerda de 'AgendamentosSelect_ButtonAction' quando nenhuma variável é declarada
+  (compilando o arquivo fonte 'AgendamentosAdd.cpp')
+  
+C:\Users\Andre\source\repos\Pet\AgendamentosAdd.cpp(102,34): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
+C:\Users\Andre\source\repos\Pet\AgendamentosAdd.cpp(346,48): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
+C:\Users\Andre\source\repos\Pet\AgendamentosAdd.cpp(837,74): warning C4267: 'argumento': conversão de 'size_t' para 'int', possível perda de dados
   Pet.vcxproj -> C:\Users\Andre\source\repos\Pet\x64\Debug\Pet.exe

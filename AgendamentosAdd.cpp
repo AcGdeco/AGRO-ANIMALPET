@@ -30,6 +30,11 @@
 #define ID_CHECKBOX_SECRECAO 20013
 #define ID_CHECKBOX_OUVIDO 20014
 
+struct ComboBoxItemData {
+    long long idPet;
+    long long idTutor;
+};
+
 // Declaração do procedimento da janela
 LRESULT CALLBACK WndProcAgendamentosAdd(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
@@ -87,27 +92,46 @@ LRESULT CALLBACK WndProcAgendamentosAdd(HWND hWnd, UINT message, WPARAM wParam, 
         int startX = 22 - AgendamentosSelect_g_scrollX;
 
         // Criar campos de entrada
-        for (int col = 0; col < 21; col++) {
+        for (int col = 0; col < 9; col++) {
             int colNumber = col + 1;
             int controlID = col + 2; // IDs de 2 a 22
             int xPos = startX + cellWidth + 10;
             int yPos = startY + colNumber * cellHeight + 3;
 
-            if (col == 8) {
-                HWND hCheckbox = CreateWindowW(
-                    L"BUTTON",                       // Classe do controle
-                    NULL,    // Texto da checkbox
-                    WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX | WS_TABSTOP,  // Estilos IMPORTANTES
-                    xPos, yPos,                      // Posição X, Y
-                    20, 20,                         // Largura, Altura  
-                    hWnd,                            // Janela pai
-                    (HMENU)(controlID),              // ID único
-                    NULL,                       // Instância
+            if (col == 0) {
+                HWND hComboBox = CreateWindowW(
+                    L"COMBOBOX",                         // Classe do controle: MUDAR de "BUTTON" para "COMBOBOX"
+                    NULL,                                // Texto: NULL para ComboBox
+                    WS_VISIBLE | WS_CHILD | CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP, // Estilos IMPORTANTES
+                    xPos, yPos,                          // Posição X, Y
+                    200, 200,                            // Largura, Altura (A altura precisa ser maior para exibir a lista)
+                    hWnd,                                // Janela pai
+                    (HMENU)(controlID),                  // ID único
+                    NULL,                                // Instância
                     NULL
                 );
-                AgendamentosSelect_g_editControls.push_back(hCheckbox);
+
+                AgendamentosSelect_g_editControls.push_back(hComboBox);
+
+                // Criar botão consultar
+                AgendamentosSelect_g_hButton_consultar = CreateWindowW(
+                    L"BUTTON", L"Tutor",
+                    WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON | WS_TABSTOP,
+                    xPos + 700, yPos, 40, 25,
+                    hWnd, (HMENU)(0),
+                    (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL
+                );
+
+                // Criar botão consultar Pet
+                AgendamentosSelect_g_hButton_consultar_Pet = CreateWindowW(
+                    L"BUTTON", L"Pet",
+                    WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON | WS_TABSTOP,
+                    xPos + 740, yPos, 40, 25,
+                    hWnd, (HMENU)(21),
+                    (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL
+                );
             }
-            else if (col == 11) {
+            else if (col == 1) {
                 HWND hRadio;
 
                 // Criar radio button 1
@@ -155,7 +179,7 @@ LRESULT CALLBACK WndProcAgendamentosAdd(HWND hWnd, UINT message, WPARAM wParam, 
                 SetWindowTheme(hRadio, L"", L""); // Desativar tema para fundo transparente
                 AgendamentosSelect_g_editControls.push_back(hRadio);
             }
-            else if (col == 12) {
+            else if (col == 2) {
                 HWND hRadio;
 
                 // Criar radio button 1
@@ -233,7 +257,7 @@ LRESULT CALLBACK WndProcAgendamentosAdd(HWND hWnd, UINT message, WPARAM wParam, 
                 SetWindowTheme(hRadio, L"", L""); // Desativar tema para fundo transparente
                 AgendamentosSelect_g_editControls.push_back(hRadio);
             }
-            else if (col == 14) {
+            else if (col == 4) {
                 HWND hCheckbox;
                 hCheckbox = CreateWindowW(
                     L"BUTTON",                       // Classe do controle
@@ -261,7 +285,7 @@ LRESULT CALLBACK WndProcAgendamentosAdd(HWND hWnd, UINT message, WPARAM wParam, 
                 );
                 AgendamentosSelect_g_editControls.push_back(hCheckbox);
             }
-            else if (col == 15) {
+            else if (col == 5) {
                 HWND hCheckbox;
                 hCheckbox = CreateWindowW(
                     L"BUTTON",                       // Classe do controle
@@ -479,24 +503,12 @@ LRESULT CALLBACK WndProcAgendamentosAdd(HWND hWnd, UINT message, WPARAM wParam, 
 
         if (wmId == 1) // Botão "Salvar Registro"
         {
-            std::wstring dados[23];
-            for (int i = 2; i <= 22; i++) {
+            std::wstring dados[11];
+            for (int i = 2; i <= 11; i++) {
                 std::wstring controlIDStr = std::to_wstring(i);
                 HWND input = GetDlgItem(hWnd, i);
 
-                if (i == 10) {
-                    if (input) {
-                        std::wstring resposta;
-                        if (SendMessage(input, BM_GETCHECK, 0, 0) == BST_CHECKED) {
-                            resposta = L"Sim";
-                        }
-                        else {
-                            resposta = L"Não";
-                        }
-                        dados[i] = std::wstring(resposta);
-                    }
-                }
-                else if (i == 13) { // Banho (radio buttons)
+                if (i == 3) { // Banho (radio buttons)
                     HWND hRadio1 = GetDlgItem(hWnd, ID_RADIO_PADRAO);
                     HWND hRadio2 = GetDlgItem(hWnd, ID_RADIO_HIDRATACAO);
                     HWND hRadio3 = GetDlgItem(hWnd, ID_RADIO_BANHO_NENHUM);
@@ -510,7 +522,7 @@ LRESULT CALLBACK WndProcAgendamentosAdd(HWND hWnd, UINT message, WPARAM wParam, 
                         dados[i] = L"Nenhum";
                     }
                 }
-                else if (i == 14) { // Tosa (radio buttons)
+                else if (i == 4) { // Tosa (radio buttons)
                     HWND hRadio1 = GetDlgItem(hWnd, ID_RADIO_TESOURA);
                     HWND hRadio2 = GetDlgItem(hWnd, ID_RADIO_MAQUINA);
                     HWND hRadio3 = GetDlgItem(hWnd, ID_RADIO_HIGIENICA);
@@ -532,7 +544,7 @@ LRESULT CALLBACK WndProcAgendamentosAdd(HWND hWnd, UINT message, WPARAM wParam, 
                         dados[i] = L"Nenhum";
                     }
                 }
-                else if (i == 16) { // Parasitas (radio buttons)
+                else if (i == 6) { // Parasitas (radio buttons)
                     HWND hCheckbox1 = GetDlgItem(hWnd, ID_CHECKBOX_PULGAS);
                     HWND hCheckbox2 = GetDlgItem(hWnd, ID_CHECKBOX_CARRAPATOS);
 
@@ -546,7 +558,7 @@ LRESULT CALLBACK WndProcAgendamentosAdd(HWND hWnd, UINT message, WPARAM wParam, 
                         dados[i] = L"Carrapatos";
                     }
                 }
-                else if (i == 17) { // Lesões (checkbox buttons)
+                else if (i == 7) { // Lesões (checkbox buttons)
                     HWND hCheckboxPele = GetDlgItem(hWnd, ID_CHECKBOX_PELE);
                     HWND hCheckboxOlhos = GetDlgItem(hWnd, ID_CHECKBOX_OLHOS);
                     HWND hCheckboxSecrecao = GetDlgItem(hWnd, ID_CHECKBOX_SECRECAO);
@@ -590,6 +602,33 @@ LRESULT CALLBACK WndProcAgendamentosAdd(HWND hWnd, UINT message, WPARAM wParam, 
                         else dados[i] = L"Ouvido";
                     }
                 }
+                else if (i == 2) {
+                    if (input) {
+                        LRESULT selectedIndex = SendMessage(input, CB_GETCURSEL, 0, 0);
+
+                        // 2. Recuperar o ponteiro armazenado
+                        LPARAM itemData = SendMessage(input, CB_GETITEMDATA, selectedIndex, 0);
+
+                        // 3. Converter o LPARAM de volta para o tipo de ponteiro da sua estrutura
+                        ComboBoxItemData* data = reinterpret_cast<ComboBoxItemData*>(itemData);
+
+                        long long petId = 0;
+                        long long tutorId = 0;
+                        if (data != nullptr && selectedIndex != -1) {
+                            // 4. Acessar os valores
+                            petId = data->idPet;
+                            tutorId = data->idTutor;
+                        }
+
+                        if (petId == 0) {
+                            dados[i] = L"";
+                        }
+                        else {
+                            // 6. Armazena o texto no seu vetor de dados.
+                            dados[i] = std::to_wstring(petId);
+                        }
+                    }
+                }
                 else {
                     if (input) {
                         wchar_t buffer[256];
@@ -609,7 +648,7 @@ LRESULT CALLBACK WndProcAgendamentosAdd(HWND hWnd, UINT message, WPARAM wParam, 
                 std::wstring currentDate = AgendamentosSelect_GetCurrentDate();
                 std::wstring currentHour = AgendamentosSelect_GetCurrentHour();
 
-                std::wstring sqlInsertW = L"INSERT INTO Pets (Nome_do_Pet, Raca, Nome_do_Tutor, CEP, Cor, Idade, Peso, Sexo, Castrado, Endereco, Ponto_de_referencia, Banho, Tosa, Obs_Tosa, Parasitas, Lesoes, Obs_Lesoes, Telefone, CPF, Appointment_Date, Appointment_Hour, Date, Hour) VALUES ('" + AgendamentosSelect_treatDataAppointment(dados[2], 2) + L"', '" + AgendamentosSelect_treatDataAppointment(dados[3], 3) + L"', '" + AgendamentosSelect_treatDataAppointment(dados[4], 4) + L"', '" + AgendamentosSelect_treatDataAppointment(dados[5], 5) + L"', '" + AgendamentosSelect_treatDataAppointment(dados[6], 6) + L"', '" + AgendamentosSelect_treatDataAppointment(dados[7], 7) + L"', '" + AgendamentosSelect_treatDataAppointment(dados[8], 8) + L"', '" + AgendamentosSelect_treatDataAppointment(dados[9], 9) + L"', '" + AgendamentosSelect_treatDataAppointment(dados[10], 10) + L"', '" + AgendamentosSelect_treatDataAppointment(dados[11], 11) + L"', '" + AgendamentosSelect_treatDataAppointment(dados[12], 12) + L"', '" + AgendamentosSelect_treatDataAppointment(dados[13], 13) + L"', '" + AgendamentosSelect_treatDataAppointment(dados[14], 14) + L"', '" + AgendamentosSelect_treatDataAppointment(dados[15], 15) + L"', '" + AgendamentosSelect_treatDataAppointment(dados[16], 16) + L"', '" + AgendamentosSelect_treatDataAppointment(dados[17], 17) + L"', '" + AgendamentosSelect_treatDataAppointment(dados[18], 18) + L"', '" + AgendamentosSelect_treatDataAppointment(dados[19], 19) + L"', '" + AgendamentosSelect_treatDataAppointment(dados[20], 20) + L"', '" + AgendamentosSelect_treatDataAppointment(dados[21], 21) + L"', '" + AgendamentosSelect_treatDataAppointment(dados[22], 22) + L"', '" + currentDate + L"', '" + currentHour + L"');";
+                std::wstring sqlInsertW = L"INSERT INTO Agendamentos (ID_Pet_FK, Banho, Tosa, Obs_Tosa, Parasitas, Lesoes, Obs_Lesoes, Appointment_Date, Appointment_Hour, Date, Hour) VALUES ('" + AgendamentosSelect_treatDataAppointment(dados[2], 2) + L"', '" + AgendamentosSelect_treatDataAppointment(dados[3], 3) + L"', '" + AgendamentosSelect_treatDataAppointment(dados[4], 4) + L"', '" + AgendamentosSelect_treatDataAppointment(dados[5], 5) + L"', '" + AgendamentosSelect_treatDataAppointment(dados[6], 6) + L"', '" + AgendamentosSelect_treatDataAppointment(dados[7], 7) + L"', '" + AgendamentosSelect_treatDataAppointment(dados[8], 8) + L"', '" + AgendamentosSelect_treatDataAppointment(dados[9], 9) + L"', '" + AgendamentosSelect_treatDataAppointment(dados[10], 10) + L"', '" + currentDate + L"', '" + currentHour + L"');";
 
                 if (AgendamentosSelect_error == L"1") {
                     MessageBox(hWnd, AgendamentosSelect_msg, L"Erro", MB_OK | MB_ICONERROR);
@@ -640,12 +679,96 @@ LRESULT CALLBACK WndProcAgendamentosAdd(HWND hWnd, UINT message, WPARAM wParam, 
                 sqlite3_close(db);
             }
         }
+        else if (wmId == 0) { //CONSULTAR TUTOR
+            HWND input = GetDlgItem(hWnd, 2);
+            LRESULT selectedIndex = SendMessage(input, CB_GETCURSEL, 0, 0);
+
+            // 2. Recuperar o ponteiro armazenado
+            LPARAM itemData = SendMessage(input, CB_GETITEMDATA, selectedIndex, 0);
+
+            // 3. Converter o LPARAM de volta para o tipo de ponteiro da sua estrutura
+            ComboBoxItemData* data = reinterpret_cast<ComboBoxItemData*>(itemData);
+
+            long long petId = 0;
+            long long tutorId = 0;
+            if (data != nullptr && selectedIndex != -1) {
+                // 4. Acessar os valores
+                petId = data->idPet;
+                tutorId = data->idTutor;
+            }
+
+            if (tutorId == 0) {
+                MessageBox(hWnd, L"Selecione o Tutor!", L"Erro", MB_OK | MB_ICONERROR);
+                break;
+            }
+
+            TutoresSelect_idRecord = tutorId;
+
+            if (!AgendamentosSelect_CreateNewWindow(hWnd, hInst, L"JanelaTutoresReadClasse", L"CONSULTAR TUTOR"))
+            {
+                // O erro já é tratado dentro da função
+                break;
+            }
+            else {
+                HWND hWndRead = FindWindowW(L"JanelaTutoresReadClasse", NULL);
+                if (hWndRead != NULL)
+                {
+                    ShowWindow(hWndRead, SW_MAXIMIZE);
+                    SetForegroundWindow(hWndRead);
+                }
+            }
+        }
+        else if (wmId == 21) { //CONSULTAR PET
+            HWND input = GetDlgItem(hWnd, 2);
+            LRESULT selectedIndex = SendMessage(input, CB_GETCURSEL, 0, 0);
+
+            // 2. Recuperar o ponteiro armazenado
+            LPARAM itemData = SendMessage(input, CB_GETITEMDATA, selectedIndex, 0);
+
+            // 3. Converter o LPARAM de volta para o tipo de ponteiro da sua estrutura
+            ComboBoxItemData* data = reinterpret_cast<ComboBoxItemData*>(itemData);
+
+            long long petId = 0;
+            long long tutorId = 0;
+            if (data != nullptr && selectedIndex != -1) {
+                // 4. Acessar os valores
+                petId = data->idPet;
+                tutorId = data->idTutor;
+            }
+
+            if (petId == 0) {
+                MessageBox(hWnd, L"Selecione o Pet!", L"Erro", MB_OK | MB_ICONERROR);
+                break;
+            }
+
+            PetsSelect_idRecord = petId;
+
+            if (!AgendamentosSelect_CreateNewWindow(hWnd, hInst, L"JanelaPetsReadClasse", L"CONSULTAR PET"))
+            {
+                // O erro já é tratado dentro da função
+                break;
+            }
+            else {
+                HWND hWndRead = FindWindowW(L"JanelaPetsReadClasse", NULL);
+                if (hWndRead != NULL)
+                {
+                    ShowWindow(hWndRead, SW_MAXIMIZE);
+                    SetForegroundWindow(hWndRead);
+                }
+            }
+        }
         break;
     }
 
     case WM_PAINT:
     {
-        PAINTSTRUCT ps;
+        TutoresPetsSelect_Global_selectDB();
+
+        HWND hComboBox = AgendamentosSelect_g_editControls[0];
+        SendMessage(hComboBox, CB_RESETCONTENT, 0, 0);
+        TutoresPetsSelect_Global_preencherComboBox(hComboBox);
+
+                PAINTSTRUCT ps;
         HDC hdc = BeginPaint(hWnd, &ps);
 
         // Double buffering
@@ -672,7 +795,7 @@ LRESULT CALLBACK WndProcAgendamentosAdd(HWND hWnd, UINT message, WPARAM wParam, 
 
         // Desenhar linhas visíveis
         int firstVisibleRow = max(0, (AgendamentosSelect_g_scrollY - 40) / cellHeight);
-        int lastVisibleRow = min(20, firstVisibleRow + (AgendamentosSelect_g_clientHeight / cellHeight) + 2);
+        int lastVisibleRow = min(8, firstVisibleRow + (AgendamentosSelect_g_clientHeight / cellHeight) + 2);
 
         HBRUSH hBrushWhite = CreateSolidBrush(RGB(255, 255, 255));
         HBRUSH hBrushGray = CreateSolidBrush(RGB(240, 240, 240));
@@ -681,7 +804,7 @@ LRESULT CALLBACK WndProcAgendamentosAdd(HWND hWnd, UINT message, WPARAM wParam, 
         SetBkMode(hdcMem, OPAQUE);
 
         for (int row = firstVisibleRow; row <= lastVisibleRow; row++) {
-            if (row >= 21) break;
+            if (row >= 9) break;
 
             HBRUSH hCurrentBrush = (row % 2 == 0) ? hBrushGray : hBrushWhite;
             COLORREF bgColor = (row % 2 == 0) ? RGB(240, 240, 240) : RGB(255, 255, 255);
@@ -706,14 +829,11 @@ LRESULT CALLBACK WndProcAgendamentosAdd(HWND hWnd, UINT message, WPARAM wParam, 
 
             // Desenhar labels
             const wchar_t* labels[] = {
-                L"Nome do Pet:", L"Raça:", L"Nome do Tutor:", L"CEP:", L"Cor:",
-                L"Idade:", L"Peso:", L"Sexo:", L"Castrado:", L"Endereço:",
-                L"Ponto de Referência:", L"Banho:", L"Tosa:", L"Observação:",
-                L"Parasitas:", L"Lesões:", L"Observação:", L"Telefone:", L"CPF:",
-                L"Data:", L"Hora:"
+                L"Nome do Tutor e do Pet:", L"Banho:", L"Tosa:", L"Observação:",
+                L"Parasitas:", L"Lesões:", L"Observação:", L"Data:", L"Hora:"
             };
 
-            if (row < 21) {
+            if (row < 9) {
                 TextOut(hdcMem, xPosLabel, yPosLabel, labels[row], wcslen(labels[row]));
             }
         }
