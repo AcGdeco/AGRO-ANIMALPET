@@ -334,16 +334,50 @@ LRESULT CALLBACK WndProcPetsAdd(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
                 else if (i == 4) {
                     if (input) {
                         LRESULT selectedIndex = 0;
+                        LRESULT idTutorSelecionado = 0; // Armazenará o ID do Tutor
 
-                        // 2. Envia a mensagem CB_GETCURSEL (Get Current Selection) para o ComboBox.
-                        //    O resultado (o índice do item selecionado) é retornado no LRESULT.
+                        // 1. OBTÉM O ÍNDICE DO ITEM SELECIONADO
                         selectedIndex = SendMessage(
-                            input,          // HWND do ComboBox
-                            CB_GETCURSEL,   // Mensagem para obter o índice do item selecionado
-                            0,              // wParam: Não usado (deve ser 0)
-                            0               // lParam: Não usado (deve ser 0)
+                            input,              // HWND do ComboBox
+                            CB_GETCURSEL,       // Mensagem para obter o índice do item selecionado
+                            0, 0
                         );
-                        dados[i] = selectedIndex != 0 ? std::to_wstring(selectedIndex) : L"";
+
+                        // 2. VERIFICA SE ALGO FOI SELECIONADO
+                        if (selectedIndex != CB_ERR) {
+
+                            // 3. USA O ÍNDICE PARA OBTER OS DADOS ANEXADOS (O ID do Tutor)
+                            idTutorSelecionado = SendMessage(
+                                input,                  // HWND do ComboBox
+                                CB_GETITEMDATA,         // Mensagem para obter os dados (LPARAM) anexados
+                                (WPARAM)selectedIndex,  // wParam: O índice do item
+                                0
+                            );
+
+                            // 4. VERIFICA SE O DADO (ID) É VÁLIDO
+                            if (idTutorSelecionado != CB_ERR) {
+
+                                // Verifica se o ID é 0 (que geralmente é seu item 'vazio' no índice 0)
+                                if (idTutorSelecionado != 0) {
+                                    // Converte o ID (LRESULT) para wstring e armazena em dados[i]
+                                    // Note: Fazendo cast para long long para garantir a conversão segura.
+                                    dados[i] = std::to_wstring((long long)idTutorSelecionado);
+                                }
+                                else {
+                                    // O item selecionado é o item 'vazio' (ID=0), então armazena string vazia.
+                                    dados[i] = L"";
+                                }
+                            }
+                            else {
+                                // O item selecionado (por algum erro) não tinha dados anexados
+                                dados[i] = L"";
+                            }
+
+                        }
+                        else {
+                            // Nada está selecionado no ComboBox
+                            dados[i] = L"";
+                        }
                     }
                 }
                 else if (i == 8) {
@@ -449,20 +483,7 @@ LRESULT CALLBACK WndProcPetsAdd(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
                         sqlite3_free(errMsg);
                     }
                     else {
-
-                        HWND hwndSelect = FindWindow(TEXT("JanelaPetsSelectClasse"), NULL);
-                        if (hwndSelect != NULL) {
-                            //std::cout << "Janela encontrada! HWND: " << hwnd << std::endl;
-                            PetsSelect_RecarregarDadosTabela(hwndSelect);
-                        }
-
-                        HWND hWndRead = FindWindowW(L"JanelaAgendamentosAddClasse", NULL);
-                        if (hWndRead != NULL)
-                        {
-                            PetsSelect_invalidateDrawing(hWndRead);
-                            UpdateWindow(hWndRead);
-                        }
-
+                        AtualizarJanelas();
                         MessageBox(hWnd, L"Dados inseridos com sucesso!", L"Sucesso", MB_OK);
                     }
                 }

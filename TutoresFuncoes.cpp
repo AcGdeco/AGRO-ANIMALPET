@@ -1571,7 +1571,7 @@ void TutoresSelect_CriarBotoesTabela(HWND hWnd)
     int limit;
     limit = TutoresSelect_offsetTableRow + TutoresSelect_limitTableRow;
 
-    if (limit < TutoresSelect_rowsNumberSemCabecalho) {
+    if (limit <= TutoresSelect_rowsNumberSemCabecalho) {
         limit = TutoresSelect_offsetTableRow + TutoresSelect_limitTableRow;
     }
     else {
@@ -1650,10 +1650,6 @@ void TutoresSelect_ConfigurarScrollBars(HWND hWnd)
 
     limit = TutoresSelect_offsetTableRow + TutoresSelect_limitTableRow;
 
-    if (limit > TutoresSelect_rowsNumberSemCabecalho) {
-        numeroDeLinhas = TutoresSelect_rowsNumber - TutoresSelect_offsetTableRow;
-    }
-
     TutoresSelect_g_contentHeight = static_cast<int>(numeroDeLinhas) * cellHeight + 160 + filtersHeight;
 
     SCROLLINFO si = {};
@@ -1715,11 +1711,11 @@ void TutoresSelect_RecarregarDadosTabela(HWND hWnd) {
     //Verificar filtros
     TutoresSelect_verificarFiltro(TutoresSelect_dados, TutoresSelect_naoDesenhar);
 
-    // Criar botões após carregar os dados
-    TutoresSelect_CriarBotoesTabela(hWnd);
-
     // Criar botões de paginação
     TutoresSelect_createBtnPageLimit(hWnd);
+
+    // Criar botões após carregar os dados
+    TutoresSelect_CriarBotoesTabela(hWnd);
 
     // Criar inputs de filtros
     TutoresSelect_criarInputsFilters(hWnd);
@@ -2383,11 +2379,6 @@ BOOL TutoresSelect_Shortcuts(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
         case VK_W: SendMessage(hWnd, WM_COMMAND, IDM_TUTORES_CONSULTAR, 0); break;
         case VK_E: SendMessage(hWnd, WM_COMMAND, IDM_TUTORES_CONSULTAR, 0); break;
         case VK_R: SendMessage(hWnd, WM_COMMAND, IDM_TUTORES_CONSULTAR, 0); break;
-
-        case VK_T: SendMessage(hWnd, WM_COMMAND, IDM_ARQUIVO_NOVO, 0); break;
-        case VK_Y: SendMessage(hWnd, WM_COMMAND, IDM_ARQUIVO_CONSULTAR, 0); break;
-        case VK_U: SendMessage(hWnd, WM_COMMAND, IDM_ARQUIVO_CONSULTAR, 0); break;
-        case VK_I: SendMessage(hWnd, WM_COMMAND, IDM_ARQUIVO_CONSULTAR, 0); break;
 
             // --- NOVAS TECLAS (ASDF) ---
         case VK_A: SendMessage(hWnd, WM_COMMAND, IDM_PETS_NOVO, 0); break;

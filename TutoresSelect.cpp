@@ -83,12 +83,12 @@ LRESULT CALLBACK WndProcTutoresSelect(HWND hWnd, UINT message, WPARAM wParam, LP
         }
         else {
             // Código de criação de tabela e inserção (mantido como está)
-            const char* sqlDrop = "DROP TABLE IF EXISTS Tutores;";
-            rc = sqlite3_exec(db, sqlDrop, 0, 0, &errMsg);
-            if (rc != SQLITE_OK) {
-                MessageBox(hWnd, L"Erro ao dropar tabela!", L"Erro", MB_OK | MB_ICONERROR);
-                sqlite3_free(errMsg);
-            }
+            //const char* sqlDrop = "DROP TABLE IF EXISTS Tutores;";
+            //rc = sqlite3_exec(db, sqlDrop, 0, 0, &errMsg);
+            //if (rc != SQLITE_OK) {
+                //MessageBox(hWnd, L"Erro ao dropar tabela!", L"Erro", MB_OK | MB_ICONERROR);
+                //sqlite3_free(errMsg);
+            //}
             const char* sqlCreate = "CREATE TABLE IF NOT EXISTS Tutores (ID INTEGER PRIMARY KEY AUTOINCREMENT, Nome_do_Tutor TEXT, CEP TEXT, Endereco TEXT, Ponto_de_referencia TEXT, Telefone TEXT, CPF TEXT, Date TEXT, Hour TEXT);";
             rc = sqlite3_exec(db, sqlCreate, 0, 0, &errMsg);
             if (rc != SQLITE_OK) {
@@ -108,19 +108,19 @@ LRESULT CALLBACK WndProcTutoresSelect(HWND hWnd, UINT message, WPARAM wParam, LP
             }
             else {
                 // Inserções (código original mantido)
-                std::wstring currentDate = TutoresSelect_GetCurrentDate();
-                std::wstring currentHour = TutoresSelect_GetCurrentHour();
-                for (int i = 1; i <= 100; i++) {
-                   std::wstring sqlInsertW = L"INSERT INTO Tutores (Nome_do_Tutor, CEP, Endereco, Ponto_de_referencia, Telefone, CPF, Date, Hour) VALUES ('Laís', '36309016', 'Rua das flores - Guarda Mor - São João del Rei', 'Perto da pizzaria Agostinho', '32998360862', '09813426632', '" + currentDate + L"', '" + currentHour + L"');";
-                    int required = WideCharToMultiByte(CP_UTF8, 0, sqlInsertW.c_str(), -1, nullptr, 0, nullptr, nullptr);
-                    if (required > 0) {
-                        std::string sqlInsertUtf8(required, '\0');
-                        WideCharToMultiByte(CP_UTF8, 0, sqlInsertW.c_str(), -1, &sqlInsertUtf8[0], required, nullptr, nullptr);
-                        char* errMsg = nullptr;
-                        int rc = sqlite3_exec(db, sqlInsertUtf8.c_str(), nullptr, nullptr, &errMsg);
-                        if (rc != SQLITE_OK) sqlite3_free(errMsg);
-                    }
-                }
+                 //std::wstring currentDate = TutoresSelect_GetCurrentDate();
+                //std::wstring currentHour = TutoresSelect_GetCurrentHour();
+                //for (int i = 1; i <= 100; i++) {
+                   //std::wstring sqlInsertW = L"INSERT INTO Tutores (Nome_do_Tutor, CEP, Endereco, Ponto_de_referencia, Telefone, CPF, Date, Hour) VALUES ('Laís', '36309016', 'Rua das flores - Guarda Mor - São João del Rei', 'Perto da pizzaria Agostinho', '32998360862', '09813426632', '" + currentDate + L"', '" + currentHour + L"');";
+                    //int required = WideCharToMultiByte(CP_UTF8, 0, sqlInsertW.c_str(), -1, nullptr, 0, nullptr, nullptr);
+                    //if (required > 0) {
+                        //std::string sqlInsertUtf8(required, '\0');
+                        //WideCharToMultiByte(CP_UTF8, 0, sqlInsertW.c_str(), -1, &sqlInsertUtf8[0], required, nullptr, nullptr);
+                        //char* errMsg = nullptr;
+                        //int rc = sqlite3_exec(db, sqlInsertUtf8.c_str(), nullptr, nullptr, &errMsg);
+                        //if (rc != SQLITE_OK) sqlite3_free(errMsg);
+                    //}
+                //}
                 //std::wstring sqlInsertW2 = L"INSERT INTO Pets (Nome_do_Pet, Raca, Nome_do_Tutor, CEP, Cor, Idade, Peso, Sexo, Castrado, Endereco, Ponto_de_referencia, Banho, Tosa, Obs_Tosa, Parasitas, Lesoes, Obs_Lesoes, Telefone, CPF, Date, Hour) VALUES ('Astralis', 'Viralata', 'Débora', '36309022', 'Preto', 6, 18, 'Feminino', 'Não', 'Rua Ricador Geraldo dos Santos - Alto das Mercês - nº12', 'Perto da igreja das Mercês', 'Padrão', 'Tesoura', 'aa ksfj asldfj açlksdj fkasjd fçklasdjf aksdlfjkalçsdfj kçalsdjf kçlasjd çfkasdj fklçaj sdçlfkjakslfj çlasdjf çasd jfçaskdjfsdf', 'Carrapatos', 'Pele', ' asdfj açlsjf akçslj fkçlasdj fkçlasdjf lçkasjdf kasdjfkiujriwejfç dfkmdnfçnvçaidsjfçkdsfjaçksdjfkaçsjdfkasdjfkçlasjdçfaksdjf', '32998365552', '09813426789', '" + currentDate + L"', '" + currentHour + L"');";
                 //int required2 = WideCharToMultiByte(CP_UTF8, 0, sqlInsertW2.c_str(), -1, nullptr, 0, nullptr, nullptr);
                 //if (required2 > 0) {
@@ -171,8 +171,9 @@ LRESULT CALLBACK WndProcTutoresSelect(HWND hWnd, UINT message, WPARAM wParam, LP
                 HWND hWndRead = FindWindowW(L"JanelaTutoresReadClasse", NULL);
                 if (hWndRead != NULL)
                 {
+                    TutoresSelect_invalidateDrawing(hWndRead);
+                    UpdateWindow(hWndRead);
                     ShowWindow(hWndRead, SW_MAXIMIZE);
-                    SetForegroundWindow(hWndRead);
                 }
             }
         }
@@ -194,8 +195,8 @@ LRESULT CALLBACK WndProcTutoresSelect(HWND hWnd, UINT message, WPARAM wParam, LP
                 if (hWndRead != NULL)
                 {
                     TutoresSelect_invalidateDrawing(hWndRead);
+                    UpdateWindow(hWndRead);
                     ShowWindow(hWndRead, SW_MAXIMIZE);
-                    SetForegroundWindow(hWndRead);
                 }
             }
         }
@@ -205,17 +206,11 @@ LRESULT CALLBACK WndProcTutoresSelect(HWND hWnd, UINT message, WPARAM wParam, LP
             //swprintf_s(msg, L"Botão %s%d clicado! Id: %d", L"Deletar", (int)id, (int)id);
             //MessageBoxW(hWnd, msg, L"Info", MB_OK);
 
-            TutoresSelect_idRecord = id;
-            std::wstring msg = L"Deletar registro ID " + std::to_wstring(TutoresSelect_idRecord) + L"?\nPets e Agendamentos cadastrados com esse Tutor serão deletados.";
+            // TutoresSelect_idRecord = id;
+            std::wstring msg = L"Deletar registro ID " + std::to_wstring(id) + L"?\nPets e Agendamentos cadastrados com esse Tutor serão deletados.";
             if (MessageBoxW(hWnd, msg.c_str(), L"Confirmar", MB_YESNO | MB_ICONQUESTION) == IDYES) {
-                TutoresSelect_deleteRecordById("pet.db", TutoresSelect_idRecord, hWnd);
-                TutoresSelect_RecarregarDadosTabela(hWnd);
-            }
-
-            HWND hwndSelect = FindWindow(TEXT("JanelaPetsSelectClasse"), NULL);
-            if (hwndSelect != NULL) {
-                //std::cout << "Janela encontrada! HWND: " << hwnd << std::endl;
-                PetsSelect_RecarregarDadosTabela(hwndSelect);
+                TutoresSelect_deleteRecordById("pet.db", id, hWnd);
+                AtualizarJanelas();
             }
         }
         else if (wmId == TutoresSelect_FILTRAR)
@@ -356,7 +351,7 @@ LRESULT CALLBACK WndProcTutoresSelect(HWND hWnd, UINT message, WPARAM wParam, LP
 
                 counter = 0;
                 // Desenhar as células de dados
-                for (size_t col = 0; col < TutoresSelect_g_tableData[row].size(); col++) {
+                for (size_t col = 0; col < 7; col++) {
                     std::wstring displayText = TutoresSelect_g_tableData[row][col];
 
                     int xPos = startX + counter * cellWidth + 10;

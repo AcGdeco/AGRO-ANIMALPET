@@ -31,13 +31,43 @@
 #define ID_CHECKBOX_EDIT_OUVIDO 2028
 
 std::vector<std::vector<std::wstring>> PetsSelect_g_tableDataEditar;
+std::vector<HWND> PetsSelect_g_editControls_edit;
+
+int SelecionarComboBoxPorIDSimples(HWND hComboBox, long long idTutorAchecar) {
+    // 1. Obter o número total de itens no ComboBox
+    int count = (int)SendMessage(hComboBox, CB_GETCOUNT, 0, 0);
+
+    // 2. Converter o ID alvo para LRESULT (o tipo de retorno/armazenamento)
+    // Garantir que o tipo seja o mesmo que foi armazenado.
+    LRESULT targetID_LRESULT = (LRESULT)idTutorAchecar;
+
+    // 3. Iterar por todos os itens
+    for (int i = 0; i < count; ++i) {
+        // 4. Obter o valor de CB_ITEMDATA
+        LRESULT itemDataLParam = SendMessage(hComboBox, CB_GETITEMDATA, (WPARAM)i, 0);
+
+        // O valor CB_ERR (-1) é retornado se o item não tiver dados.
+        if (itemDataLParam != CB_ERR) {
+
+            // 5. Comparar o valor armazenado (o ID) com o ID alvo
+            if (itemDataLParam == targetID_LRESULT) {
+                // Encontrado! Selecionar o item
+                SendMessage(hComboBox, CB_SETCURSEL, (WPARAM)i, 0);
+                return i;
+            }
+        }
+    }
+
+    // 6. Não encontrado
+    return CB_ERR;
+}
 
 void PetsSelect_PreencherControlesEdicao(HWND hWnd) {
     // 1. Busca os Dados no Banco de Dados
     PetsSelect_selectBD();
 
-    // Se não houver dados, retorna
-    if (PetsSelect_g_tableDataEditar.size() <= 1) {
+    if (PetsSelect_g_tableDataEditar.empty()) {
+        PostMessage(hWnd, WM_CLOSE, 0, 0);
         return;
     }
 
@@ -64,23 +94,15 @@ void PetsSelect_PreencherControlesEdicao(HWND hWnd) {
             PetsSelect_checarInput(hControl, col, L"Sim", displayText);
         }
         else if (col == 2) {
-            // Variável HWND para o seu ComboBox (obtida com GetDlgItem, por exemplo)
+            // 1. Obtém o HWND do ComboBox
             HWND hComboBox = GetDlgItem(hWnd, 4);
-            LPARAM indexToSelect = 0;
 
-            long long numericIndex = std::stoll(PetsSelect_g_tableDataEditar[1][11]);
+            // 2. Extrai o ID do Tutor da sua tabela de dados (PetsSelect_g_tableDataEditar[1][11])
+            // Lembre-se de tratar a exceção se std::stoll falhar
+            long long numericIDToSelect = std::stoll(PetsSelect_g_tableDataEditar[1][11]);
 
-            // 3. Atribua o valor numérico (com cast, se necessário) ao LPARAM
-            indexToSelect = (LPARAM)numericIndex;
-
-            // Envia a mensagem CB_SETCURSEL (Set Current Selection) para o ComboBox
-            // O valor de 'indexToSelect' é passado no parâmetro wParam.
-            LRESULT result = SendMessage(
-                hComboBox,          // HWND do ComboBox
-                CB_SETCURSEL,       // Mensagem para definir o índice do item selecionado
-                (WPARAM)indexToSelect, // wParam: O índice a ser selecionado (baseado em zero)
-                0                   // lParam: Não usado (deve ser 0)
-            );
+            // 3. CHAMA A NOVA FUNÇÃO DE SELEÇÃO
+            int selectedIndex = SelecionarComboBoxPorIDSimples(hComboBox, numericIDToSelect);
         }
         else if (col == 6) {
             // Variável HWND para o seu ComboBox (obtida com GetDlgItem, por exemplo)
@@ -132,7 +154,7 @@ void PetsSelect_CriarControlesEdicao(HWND hWnd) {
     // para evitar vazamento de recursos.
     // Assumindo que você tem uma função para isso:
     // PetsSelect_DestroyAllControls(); 
-    PetsSelect_g_editControls.clear();
+    PetsSelect_g_editControls_edit.clear();
 
     PetsSelect_ConfigurarScrollBarsAgendamento(hWnd);
 
@@ -166,7 +188,7 @@ void PetsSelect_CriarControlesEdicao(HWND hWnd) {
                 xPos, yPos, 20, 20,
                 hWnd, (HMENU)(controlID), NULL, NULL
             );
-            PetsSelect_g_editControls.push_back(hCheckbox);
+            PetsSelect_g_editControls_edit.push_back(hCheckbox);
         }
         else if (col == 2) {
             HWND hComboBox = CreateWindowW(
@@ -181,7 +203,7 @@ void PetsSelect_CriarControlesEdicao(HWND hWnd) {
                 NULL
             );
 
-            PetsSelect_g_editControls.push_back(hComboBox);
+            PetsSelect_g_editControls_edit.push_back(hComboBox);
 
             // Criar botão consultar
             PetsSelect_g_hButton_consultar = CreateWindowW(
@@ -209,7 +231,7 @@ void PetsSelect_CriarControlesEdicao(HWND hWnd) {
             SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Masculino");
             SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Feminino");
 
-            PetsSelect_g_editControls.push_back(hComboBox);
+            PetsSelect_g_editControls_edit.push_back(hComboBox);
         }
         else { // Campos de Edição Padrão (EDIT)
             HWND hEdit = CreateWindowEx(
@@ -217,7 +239,7 @@ void PetsSelect_CriarControlesEdicao(HWND hWnd) {
                 WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP,
                 xPos, yPos, 200, 25, hWnd, (HMENU)(controlID), NULL, NULL
             );
-            PetsSelect_g_editControls.push_back(hEdit);
+            PetsSelect_g_editControls_edit.push_back(hEdit);
         }
     }
 
@@ -266,7 +288,7 @@ void PetsSelect_selectBD() {
         else {
             // Sucesso - talvez adicionar uma mensagem de confirmação
             if (PetsSelect_g_tableDataEditar.empty()) {
-                PetsSelect_g_tableDataEditar.push_back({ L"Info", L"Nenhum registro encontrado com ID: " + std::to_wstring(PetsSelect_idRecord) });
+                // PetsSelect_g_tableDataEditar.push_back({ L"Info", L"Nenhum registro encontrado com ID: " + std::to_wstring(PetsSelect_idRecord) });
             }
         }
 
@@ -347,7 +369,7 @@ LRESULT CALLBACK WndProcPetsEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
             PetsSelect_g_scrollY = si.nPos;
             SendMessage(hWnd, WM_SETREDRAW, FALSE, 0);
             // Atualizar posições dos controles ANTES do redraw
-            PetsSelect_AtualizarPosicoesControlesAgendamento(hWnd);
+            PetsSelect_AtualizarPosicoesControlesAgendamentoEdit(hWnd);
             SendMessage(hWnd, WM_SETREDRAW, TRUE, 0);
             PetsSelect_invalidateDrawing(hWnd);
             UpdateWindow(hWnd);
@@ -382,7 +404,7 @@ LRESULT CALLBACK WndProcPetsEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
             PetsSelect_g_scrollX = si.nPos;
             SendMessage(hWnd, WM_SETREDRAW, FALSE, 0);
             // Atualizar posições dos controles ANTES do redraw
-            PetsSelect_AtualizarPosicoesControlesAgendamento(hWnd);
+            PetsSelect_AtualizarPosicoesControlesAgendamentoEdit(hWnd);
             SendMessage(hWnd, WM_SETREDRAW, TRUE, 0);
             PetsSelect_invalidateDrawing(hWnd);
             UpdateWindow(hWnd);
@@ -400,7 +422,7 @@ LRESULT CALLBACK WndProcPetsEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
         SendMessage(hWnd, WM_SETREDRAW, FALSE, 0);
         PetsSelect_ConfigurarScrollBarsAgendamento(hWnd);
         // Atualizar posições dos controles após redimensionamento
-        PetsSelect_AtualizarPosicoesControlesAgendamento(hWnd);
+        PetsSelect_AtualizarPosicoesControlesAgendamentoEdit(hWnd);
         SendMessage(hWnd, WM_SETREDRAW, TRUE, 0);
         PetsSelect_invalidateDrawing(hWnd);
         UpdateWindow(hWnd);
@@ -429,7 +451,7 @@ LRESULT CALLBACK WndProcPetsEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
             PetsSelect_g_scrollY = si.nPos;
             SendMessage(hWnd, WM_SETREDRAW, FALSE, 0);
             // Atualizar posições dos controles ANTES do redraw
-            PetsSelect_AtualizarPosicoesControlesAgendamento(hWnd);
+            PetsSelect_AtualizarPosicoesControlesAgendamentoEdit(hWnd);
             SendMessage(hWnd, WM_SETREDRAW, TRUE, 0);
             PetsSelect_invalidateDrawing(hWnd);
             UpdateWindow(hWnd);
@@ -493,16 +515,41 @@ LRESULT CALLBACK WndProcPetsEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
                 else if (i == 4) {
                     if (input) {
                         LRESULT selectedIndex = 0;
+                        LRESULT idTutorSelecionado = 0; // Variável para armazenar o ID do Tutor
 
-                        // 2. Envia a mensagem CB_GETCURSEL (Get Current Selection) para o ComboBox.
-                        //    O resultado (o índice do item selecionado) é retornado no LRESULT.
+                        // 1. OBTÉM O ÍNDICE DO ITEM SELECIONADO
                         selectedIndex = SendMessage(
-                            input,          // HWND do ComboBox
-                            CB_GETCURSEL,   // Mensagem para obter o índice do item selecionado
-                            0,              // wParam: Não usado (deve ser 0)
-                            0               // lParam: Não usado (deve ser 0)
+                            input,              // HWND do ComboBox
+                            CB_GETCURSEL,       // Mensagem para obter o índice do item selecionado
+                            0, 0
                         );
-                        dados[i] = selectedIndex != 0 ? std::to_wstring(selectedIndex) : L"";
+
+                        // Verifica se algo foi selecionado (selectedIndex deve ser >= 0)
+                        if (selectedIndex != CB_ERR) {
+
+                            // 2. USA O ÍNDICE PARA OBTER OS DADOS ANEXADOS (O ID do Tutor)
+                            idTutorSelecionado = SendMessage(
+                                input,                  // HWND do ComboBox
+                                CB_GETITEMDATA,         // Mensagem para obter os dados (LPARAM) anexados
+                                (WPARAM)selectedIndex,  // wParam: O índice obtido acima
+                                0
+                            );
+
+                            // 3. ATRIBUIÇÃO CORRIGIDA: Usa idTutorSelecionado, não selectedIndex
+                            if (idTutorSelecionado != CB_ERR && idTutorSelecionado != 0) {
+                                // Converte o ID (LRESULT) para wstring e armazena.
+                                // O cast para long long é importante para to_wstring.
+                                dados[i] = std::to_wstring((long long)idTutorSelecionado);
+                            }
+                            else {
+                                // Se for o item 'vazio' (ID=0) ou CB_ERR, armazena string vazia.
+                                dados[i] = L"";
+                            }
+                        }
+                        else {
+                            // Nada está selecionado
+                            dados[i] = L"";
+                        }
                     }
                 }
                 else if (i == 8) {
@@ -619,17 +666,7 @@ LRESULT CALLBACK WndProcPetsEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
                         sqlite3_free(errMsg);
                     }
                     else {
-                        HWND hwndSelect = FindWindow(TEXT("JanelaPetsSelectClasse"), NULL);
-                        if (hwndSelect != NULL) {
-                            //std::cout << "Janela encontrada! HWND: " << hwnd << std::endl;
-                            PetsSelect_RecarregarDadosTabela(hwndSelect);
-                        }
-                        hwndSelect = FindWindow(TEXT("JanelaPetsReadClasse"), NULL);
-                        if (hwndSelect != NULL) {
-                            //std::cout << "Janela encontrada! HWND: " << hwnd << std::endl;
-                            PetsSelect_invalidateDrawing(hwndSelect);
-                            UpdateWindow(hwndSelect);
-                        }
+                        AtualizarJanelas();
                         MessageBox(hWnd, L"Dados inseridos com sucesso!", L"Sucesso", MB_OK);
                     }
                 }
@@ -638,17 +675,34 @@ LRESULT CALLBACK WndProcPetsEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
         }
         else if (wmId == 0) { //CONSULTAR
             HWND input = GetDlgItem(hWnd, 4);
-            LRESULT selectedIndex = 0;
-
-            // 2. Envia a mensagem CB_GETCURSEL (Get Current Selection) para o ComboBox.
-            //    O resultado (o índice do item selecionado) é retornado no LRESULT.
-            selectedIndex = SendMessage(
-                input,          // HWND do ComboBox
-                CB_GETCURSEL,   // Mensagem para obter o índice do item selecionado
-                0,              // wParam: Não usado (deve ser 0)
-                0               // lParam: Não usado (deve ser 0)
+            // 1. OBTÉM O ÍNDICE DO ITEM SELECIONADO
+            LRESULT selectedIndex = SendMessage(
+                input,        // Supondo que 'hComboBox' é o HWND do seu ComboBox
+                CB_GETCURSEL,     // Mensagem para obter o índice (0, 1, 2, ...)
+                0, 0
             );
-            LONG_PTR id = (selectedIndex != -1 && selectedIndex != 0) ? selectedIndex : 0;
+
+            // Variável para armazenar o ID do Tutor, que é um LRESULT
+            LRESULT idTutorSelecionado = 0;
+
+            // 2. VERIFICA SE O ÍNDICE É VÁLIDO
+            if (selectedIndex != CB_ERR) {
+
+                // 3. USA O ÍNDICE PARA OBTER OS DADOS ANEXADOS (O ID do Tutor)
+                idTutorSelecionado = SendMessage(
+                    input,
+                    CB_GETITEMDATA,   // Mensagem para obter o valor armazenado no item
+                    (WPARAM)selectedIndex,
+                    0
+                );
+            }
+
+            // 4. ATRIBUIÇÃO CORRIGIDA
+            // LONG_PTR (ou LRESULT) deve ser o tipo de dado para o ID do Tutor.
+            // O valor é o idTutorSelecionado, SE for válido (diferente de CB_ERR) e diferente de 0 (o item "vazio").
+
+            // Verifica se a mensagem CB_GETITEMDATA retornou um ID válido (não CB_ERR) e não é o ID "vazio" (0)
+            LONG_PTR id = (idTutorSelecionado != CB_ERR && idTutorSelecionado != 0) ? (LONG_PTR)idTutorSelecionado : 0;
 
             if (id == 0) {
                 MessageBox(hWnd, L"Selecione o Tutor!", L"Erro", MB_OK | MB_ICONERROR);
@@ -657,7 +711,7 @@ LRESULT CALLBACK WndProcPetsEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 
             TutoresSelect_idRecord = id;
 
-            if (!PetsSelect_CreateNewWindow(hWnd, hInst, L"JanelaTutoresReadClasse", L"AGRO ANIMAL PET - CONSULTAR AGENDAMENTO"))
+            if (!PetsSelect_CreateNewWindow(hWnd, hInst, L"JanelaTutoresReadClasse", L"CONSULTAR TUTOR"))
             {
                 // O erro já é tratado dentro da função
                 break;
@@ -678,7 +732,7 @@ LRESULT CALLBACK WndProcPetsEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
     {
         TutoresSelect_Global_selectDB();
 
-        HWND hComboBox = PetsSelect_g_editControls[2];
+        HWND hComboBox = PetsSelect_g_editControls_edit[2];
         SendMessage(hComboBox, CB_RESETCONTENT, 0, 0);
         TutoresSelect_Global_preencherComboBox(hComboBox);
 
@@ -794,7 +848,7 @@ LRESULT CALLBACK WndProcPetsEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
     case WM_DESTROY:
     {
         // Limpar array de controles
-        PetsSelect_g_editControls.clear();
+        PetsSelect_g_editControls_edit.clear();
         PetsSelect_g_hButton = NULL;
         PetsSelect_windowClose(hWnd, message, wParam, lParam);
     }

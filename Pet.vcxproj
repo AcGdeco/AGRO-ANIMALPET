@@ -188,6 +188,12 @@
     <ResourceCompile Include="Pet.rc" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="..\..\..\OneDrive\Área de Trabalho\Icon.ico" />
+    <Image Include="..\..\..\OneDrive\Área de Trabalho\Icon.png" />
+    <Image Include="Images\animalpet.bmp" />
+    <Image Include="images\icon.ico" />
+    <Image Include="images\icon3.ico" />
+    <Image Include="images\icon4.ico" />
     <Image Include="Images\Seta-Cima.ico" />
     <Image Include="Images\Seta-Baixo.ico" />
     <Image Include="Images\Setas.ico" />

@@ -184,9 +184,10 @@ LRESULT CALLBACK WndProcPetsRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
         int wmId = LOWORD(wParam);
 
         if (wmId == 0) { //CONSULTAR
+            idTutor = PetsSelect_g_tableDataConsulta[1][11];
             TutoresSelect_idRecord = std::stoll(idTutor);
 
-            if (!PetsSelect_CreateNewWindow(hWnd, hInst, L"JanelaTutoresReadClasse", L"AGRO ANIMAL PET - CONSULTAR AGENDAMENTO"))
+            if (!PetsSelect_CreateNewWindow(hWnd, hInst, L"JanelaTutoresReadClasse", L"CONSULTAR TUTOR"))
             {
                 // O erro já é tratado dentro da função
                 break;
@@ -195,6 +196,7 @@ LRESULT CALLBACK WndProcPetsRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
                 HWND hWndRead = FindWindowW(L"JanelaTutoresReadClasse", NULL);
                 if (hWndRead != NULL)
                 {
+                    PetsSelect_invalidateDrawing(hWndRead);
                     ShowWindow(hWndRead, SW_MAXIMIZE);
                     SetForegroundWindow(hWndRead);
                 }
@@ -347,7 +349,17 @@ LRESULT CALLBACK WndProcPetsRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
         char* errMsg = 0;
         int rc = sqlite3_open("pet.db", &db);
         if (rc == SQLITE_OK) {
-            const char* sqlSelectConsulta = "SELECT *, P.ID AS ID_Pet, T.ID AS ID_Tutor FROM Pets AS P INNER JOIN Tutores AS T ON ID_Tutor_FK = ID_Tutor;";
+            std::string idRecordStr = std::to_string(PetsSelect_idRecord);
+
+            // Usando std::string para concatenação segura:
+            std::string sqlSelectConsulta_std =
+                "SELECT *, P.ID AS ID_Pet, T.ID AS ID_Tutor "
+                "FROM Pets AS P INNER JOIN Tutores AS T ON P.ID_Tutor_FK = T.ID " // Correção na junção
+                "WHERE P.ID = " + idRecordStr + "; ";
+
+            // Se a sua função de banco de dados exigir 'const char*', converta:
+            const char* sqlSelectConsulta = sqlSelectConsulta_std.c_str();
+
             rc = sqlite3_exec(db, sqlSelectConsulta, PetsSelect_sqlite_callback_consulta, &PetsSelect_g_tableDataConsulta, &errMsg);
             if (rc != SQLITE_OK) {
                 if (errMsg) {
@@ -368,6 +380,11 @@ LRESULT CALLBACK WndProcPetsRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
         }
         else {
             PetsSelect_g_tableDataConsulta.push_back({ L"Erro", L"Não foi possível abrir o banco" });
+        }
+
+        if (PetsSelect_g_tableDataConsulta.empty()) {
+            PostMessage(hWnd, WM_CLOSE, 0, 0);
+            break;
         }
 
         // Obter dimensões da janela
@@ -401,8 +418,6 @@ LRESULT CALLBACK WndProcPetsRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
         SetBkMode(hdc, TRANSPARENT);
         int colNumber = 0;
         int rowNumber = 0;
-
-        idTutor = PetsSelect_g_tableDataConsulta[1][11];
 
         for (size_t col = 0; col < 11; col++) {
             colNumber++;

@@ -17,6 +17,7 @@ extern LPCWSTR PetsSelect_error;
 extern std::wstring PetsSelect_mensagem;
 extern LPCWSTR PetsSelect_msg;
 extern std::vector<HWND> PetsSelect_g_editControls;
+extern std::vector<HWND> PetsSelect_g_editControls_edit;
 extern HWND PetsSelect_g_hButton;
 extern HBRUSH PetsSelect_hBrushTransparent;
 extern int PetsSelect_g_scrollY;
@@ -95,13 +96,13 @@ void PetsSelect_AtualizarPosicoesOffset(HWND hWnd);
 void PetsSelect_mudarPagina(int id);
 void PetsSelect_MudarIconeDoBotao(HWND hButton, int novoIconeID);
 std::wstring PetsSelect_toLower(std::wstring str);
-void PetsSelect_invalidateDrawing(HWND hWnd);
 void PetsSelect_DestroyAllControls();
 void PetsSelect_DestroyControlsFromVector(std::vector<HWND>& controls);
 void PetsSelect_SetFilterValues(const std::vector<std::wstring>& dados);
 void PetsSelect_ordenarDefinicoesValores(HWND hWnd);
 void PetsSelect_ordenarMudarIcone(HWND hWnd);
 BOOL PetsSelect_CreateNewWindow(HWND hWndParent, HINSTANCE hInst, LPCWSTR className, LPCWSTR windowTittle);
+void PetsSelect_AtualizarPosicoesControlesAgendamentoEdit(HWND hWnd);
 
 // Definição da estrutura
 struct PetsSelect_Data {

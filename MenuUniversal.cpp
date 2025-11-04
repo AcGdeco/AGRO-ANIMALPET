@@ -53,14 +53,14 @@ HMENU CriarMenu() {
     AppendMenuW(hMenu, MF_POPUP, (UINT_PTR)hFileMenuAgendamentos, L"&Agendamentos");
 
     // Menu Arquivo
-    HMENU hFileMenu = CreatePopupMenu();
-    AppendMenuW(hFileMenu, MF_STRING, IDM_ARQUIVO_NOVO, L"&Criar\tCtrl+T");
-    AppendMenuW(hFileMenu, MF_STRING, IDM_ARQUIVO_CONSULTAR, L"&Consultar\tCtrl+Y");
-    AppendMenuW(hFileMenu, MF_STRING, IDM_ARQUIVO_CONSULTAR, L"&Editar\tCtrl+U");
-    AppendMenuW(hFileMenu, MF_STRING, IDM_ARQUIVO_CONSULTAR, L"&Deletar\tCtrl+I");
+    //HMENU hFileMenu = CreatePopupMenu();
+    //AppendMenuW(hFileMenu, MF_STRING, IDM_ARQUIVO_NOVO, L"&Criar\tCtrl+T");
+    //AppendMenuW(hFileMenu, MF_STRING, IDM_ARQUIVO_CONSULTAR, L"&Consultar\tCtrl+Y");
+    //AppendMenuW(hFileMenu, MF_STRING, IDM_ARQUIVO_CONSULTAR, L"&Editar\tCtrl+U");
+    //AppendMenuW(hFileMenu, MF_STRING, IDM_ARQUIVO_CONSULTAR, L"&Deletar\tCtrl+I");
    
     // Adiciona o menu Arquivo ao menu principal
-    AppendMenuW(hMenu, MF_POPUP, (UINT_PTR)hFileMenu, L"&Tudo");
+    //AppendMenuW(hMenu, MF_POPUP, (UINT_PTR)hFileMenu, L"&Tudo");
 
     // Menu Ajuda
     HMENU hFileMenuAjuda = CreatePopupMenu();

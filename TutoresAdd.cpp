@@ -295,20 +295,7 @@ LRESULT CALLBACK WndProcTutoresAdd(HWND hWnd, UINT message, WPARAM wParam, LPARA
                         sqlite3_free(errMsg);
                     }
                     else {
-
-                        HWND hwndSelect = FindWindow(TEXT("JanelaTutoresSelectClasse"), NULL);
-                        if (hwndSelect != NULL) {
-                            //std::cout << "Janela encontrada! HWND: " << hwnd << std::endl;
-                            TutoresSelect_RecarregarDadosTabela(hwndSelect);
-                        }
-
-                        hwndSelect = FindWindow(TEXT("JanelaPetsAddClasse"), NULL);
-                        if (hwndSelect != NULL) {
-                            //std::cout << "Janela encontrada! HWND: " << hwnd << std::endl;
-                            TutoresSelect_invalidateDrawing(hwndSelect);
-                            UpdateWindow(hwndSelect);
-                        }
-                        
+                        AtualizarJanelas();
                         MessageBox(hWnd, L"Dados inseridos com sucesso!", L"Sucesso", MB_OK);
                     }
                 }

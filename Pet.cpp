@@ -48,6 +48,8 @@ int numberRowsTable = 26;
 
 bool g_isRedrawing = false;
 
+static HBITMAP hBitmap;
+
 std::vector<HWND> g_editControls; // Array global para armazenar handles dos controles de edição
 std::vector<HWND> g_editControlsFilters;
 std::vector<HWND> g_editControlsOrder;
@@ -2769,11 +2771,6 @@ BOOL Shortcuts(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             case VK_E: SendMessage(hWnd, WM_COMMAND, IDM_TUTORES_CONSULTAR, 0); break;
             case VK_R: SendMessage(hWnd, WM_COMMAND, IDM_TUTORES_CONSULTAR, 0); break;
 
-            case VK_T: SendMessage(hWnd, WM_COMMAND, IDM_ARQUIVO_NOVO, 0); break;
-            case VK_Y: SendMessage(hWnd, WM_COMMAND, IDM_ARQUIVO_CONSULTAR, 0); break;
-            case VK_U: SendMessage(hWnd, WM_COMMAND, IDM_ARQUIVO_CONSULTAR, 0); break;
-            case VK_I: SendMessage(hWnd, WM_COMMAND, IDM_ARQUIVO_CONSULTAR, 0); break;
-
                 // --- NOVAS TECLAS (ASDF) ---
             case VK_A: SendMessage(hWnd, WM_COMMAND, IDM_PETS_NOVO, 0); break;
             case VK_S: SendMessage(hWnd, WM_COMMAND, IDM_PETS_CONSULTAR, 0); break;
@@ -3090,6 +3087,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     
     switch (message)
     {
+    case WM_CREATE:
+        // Carrega imagem BMP do arquivo
+        hBitmap = (HBITMAP)LoadImage(NULL, L"Images\\animalpet.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+        break;
     case WM_COMMAND:
         {
             int wmId = LOWORD(wParam);
@@ -3142,15 +3143,43 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             // Configurar texto sem fundo
             SetBkMode(hdc, TRANSPARENT);
 
-            // Calcular posição central para o texto
-            const wchar_t* text = L"AGRO ANIMALPET";
-            SIZE textSize;
-            GetTextExtentPoint32W(hdc, text, wcslen(text), &textSize);
-            int x = (width - textSize.cx) / 2;  // Centralizar horizontalmente
-            int y = (height - textSize.cy) / 2; // Centralizar verticalmente
+            // Define margens superior e inferior
+            int margemTop = 50;     // margem superior (em pixels)
+            int margemBottom = 50;  // margem inferior (em pixels)
 
-            // Desenhar o texto
-            TextOutW(hdc, x, y, text, wcslen(text));
+            // Pega as dimensões originais do bitmap
+            BITMAP bm;
+            GetObject(hBitmap, sizeof(bm), &bm);
+
+            // Calcula a área útil (sem margens)
+            int alturaUtil = height - (margemTop + margemBottom);
+
+            // Calcula a proporção da imagem para não distorcer
+            float proporcaoOriginal = (float)bm.bmWidth / (float)bm.bmHeight;
+            int novaLargura = width;
+            int novaAltura = (int)(width / proporcaoOriginal);
+
+            // Se a altura estourar a área útil, ajusta
+            if (novaAltura > alturaUtil) {
+                novaAltura = alturaUtil;
+                novaLargura = (int)(alturaUtil * proporcaoOriginal);
+            }
+
+            // Centraliza horizontalmente e aplica margens verticais
+            int x = (width - novaLargura) / 2;
+            int y = margemTop + ((alturaUtil - novaAltura) / 2);
+
+            HDC hdcMem = CreateCompatibleDC(hdc);
+            SelectObject(hdcMem, hBitmap);
+
+            // Desenha redimensionando dentro da área com margens
+            StretchBlt(
+                hdc, x, y, novaLargura, novaAltura, // destino (ajustado à janela com margens)
+                hdcMem, 0, 0, bm.bmWidth, bm.bmHeight, // origem (tamanho real)
+                SRCCOPY
+            );
+
+            DeleteDC(hdcMem);
 
             // Restaurar a fonte antiga e liberar recursos
             SelectObject(hdc, hOldFont);

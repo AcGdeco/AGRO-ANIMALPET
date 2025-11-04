@@ -1297,12 +1297,22 @@ void PetsSelect_createHeaderTable(HWND hWnd, HDC hdc) {
     FillRect(hdc, &rowRect, hCurrentBrush);
 
     int counter = 0;
+    std::wstring displayText;
     for (size_t col = 0; col < PetsSelect_g_tableDataFull[0].size(); col++) {
-        std::wstring displayText = PetsSelect_g_tableDataFull[0][col];
+        if (col == 1) {
+            displayText = PetsSelect_g_tableDataFull[0][12];
+        }
+        else if (col == 0){
+            displayText = PetsSelect_g_tableDataFull[0][col];
+        }
+        else {
+            displayText = PetsSelect_g_tableDataFull[0][col - 1];
+        }
+
         int xPos = startX + counter * cellWidth + 10;
         int yPos = startY + 0 * cellHeight + 7;
 
-        if (col == 0 || col == 1 || col == 2 || col == 3 || col == 4 || col == 5 || col == 12) {
+        if (col == 0 || col == 1 || col == 2 || col == 3 || col == 4 || col == 5 || col == 6) {
             // Traduzir cabeçalhos se necessário
             if (displayText == L"Nome_do_Pet") displayText = L"Nome do Pet";
             else if (displayText == L"Nome_do_Tutor") displayText = L"Nome do Tutor";
@@ -1512,19 +1522,19 @@ void PetsSelect_selectDB() {
                 // 2. Concatena com os minutos (incluindo o ':')
                 " || SUBSTR(Appointment_Hour, INSTR(Appointment_Hour, ':'))";
 
-            sqlSelect = "SELECT *, P.ID AS ID_Pet, T.ID AS ID_Tutor FROM Pets AS P INNER JOIN Tutores AS T ON ID_Tutor_FK = ID_Tutor ORDER BY " + hourSorting + " " + PetsSelect_orderAscDesc;
+            sqlSelect = "SELECT *, P.ID AS ID_Pet, T.Nome_do_Tutor, T.ID AS ID_Tutor FROM Pets AS P INNER JOIN Tutores AS T ON ID_Tutor_FK = ID_Tutor ORDER BY " + hourSorting + " " + PetsSelect_orderAscDesc;
         }
         else if (PetsSelect_orderColumn == "Appointment_Date") {
 
             // Define a string de ordenação complexa para a data DD/MM/YYYY
             std::string dataSorting =
                 "SUBSTR(Appointment_Date, 7, 4) || SUBSTR(Appointment_Date, 4, 2) || SUBSTR(Appointment_Date, 1, 2)";
-            sqlSelect = "SELECT *, P.ID AS ID_Pet, T.ID AS ID_Tutor FROM Pets AS P INNER JOIN Tutores AS T ON ID_Tutor_FK = ID_Tutor ORDER BY " + dataSorting + " " + PetsSelect_orderAscDesc;
+            sqlSelect = "SELECT *, P.ID AS ID_Pet, T.Nome_do_Tutor, T.ID AS ID_Tutor FROM Pets AS P INNER JOIN Tutores AS T ON ID_Tutor_FK = ID_Tutor ORDER BY " + dataSorting + " " + PetsSelect_orderAscDesc;
 
         }
         else {
             //const char* sqlSelect = "SELECT ID, Nome_do_Pet, Nome_do_Tutor, Banho, Tosa, Appointment_Date, Appointment_Hour FROM Pets;";
-            sqlSelect = "SELECT *, P.ID AS ID_Pet, T.ID AS ID_Tutor FROM Pets AS P INNER JOIN Tutores AS T ON ID_Tutor_FK = ID_Tutor ORDER BY " + PetsSelect_orderColumn + " COLLATE NOCASE " + PetsSelect_orderAscDesc;
+            sqlSelect = "SELECT *, P.ID AS ID_Pet, T.Nome_do_Tutor, T.ID AS ID_Tutor FROM Pets AS P INNER JOIN Tutores AS T ON ID_Tutor_FK = ID_Tutor ORDER BY " + PetsSelect_orderColumn + " COLLATE NOCASE " + PetsSelect_orderAscDesc;
         }
 
         //std::string limitClause = " LIMIT " + std::to_string(limitTableRow) + " OFFSET " + std::to_string(offsetTableRow);
@@ -1615,7 +1625,7 @@ void PetsSelect_verificarFiltro(const std::vector<std::wstring>& dados, std::vec
 
             std::wstring displayText = dadoTable;
 
-            if (!dados[col].empty() && (col == 0 || col == 4 || col == 5 || col == 7)) {
+            if (!dados[col].empty() && (col == 0 || col == 4 || col == 5 || col == 7 || col == 11)) {
                 filtro = dados[col];
                 if (filtro != dadoTable) {
                     naoDesenharIntern[row] = 1;
@@ -1768,7 +1778,7 @@ void PetsSelect_CriarBotoesTabela(HWND hWnd)
     int limit;
     limit = PetsSelect_offsetTableRow + PetsSelect_limitTableRow;
 
-    if (limit < PetsSelect_rowsNumberSemCabecalho) {
+    if (limit <= PetsSelect_rowsNumberSemCabecalho) {
         limit = PetsSelect_offsetTableRow + PetsSelect_limitTableRow;
     }
     else {
@@ -1847,10 +1857,6 @@ void PetsSelect_ConfigurarScrollBars(HWND hWnd)
 
     limit = PetsSelect_offsetTableRow + PetsSelect_limitTableRow;
 
-    if (limit > PetsSelect_rowsNumberSemCabecalho) {
-        numeroDeLinhas = PetsSelect_rowsNumber - PetsSelect_offsetTableRow;
-    }
-
     PetsSelect_g_contentHeight = static_cast<int>(numeroDeLinhas) * cellHeight + 160 + filtersHeight;
 
     SCROLLINFO si = {};
@@ -1912,11 +1918,11 @@ void PetsSelect_RecarregarDadosTabela(HWND hWnd) {
     //Verificar filtros
     PetsSelect_verificarFiltro(PetsSelect_dados, PetsSelect_naoDesenhar);
 
+        // Criar botões de paginação
+    PetsSelect_createBtnPageLimit(hWnd);
+
     // Criar botões após carregar os dados
     PetsSelect_CriarBotoesTabela(hWnd);
-
-    // Criar botões de paginação
-    PetsSelect_createBtnPageLimit(hWnd);
 
     // Criar inputs de filtros
     PetsSelect_criarInputsFilters(hWnd);
@@ -1981,6 +1987,9 @@ void PetsSelect_checarInput(HWND hinput, int col, std::wstring word, std::wstrin
     if (displayText.find(word) != std::wstring::npos) {
         SendMessage(hinput, BM_SETCHECK, BST_CHECKED, 0);
     }
+    else {
+        SendMessage(hinput, BM_SETCHECK, BST_UNCHECKED, 0);
+    }
 }
 
 int PetsSelect_sqlite_callback(void* data, int argc, char** argv, char** azColName) {
@@ -2002,6 +2011,134 @@ int PetsSelect_sqlite_callback(void* data, int argc, char** argv, char** azColNa
     table->push_back(row);
 
     return 0;
+}
+
+// Função para atualizar posição dos controles com scroll
+void PetsSelect_AtualizarPosicoesControlesAgendamentoEdit(HWND hWnd)
+{
+    RECT rect;
+    GetClientRect(hWnd, &rect);
+    int width = (rect.right - rect.left) - 44;
+
+    int cellHeight = 32;
+    int numColumns = 21;
+    int cellWidth = (width + 2000) / (numColumns > 0 ? numColumns : 1);
+    int startY = 40 - PetsSelect_g_scrollY;
+    int startX = 22 - PetsSelect_g_scrollX;
+    int xPos = 0;
+    int yPos = 0;
+    int colNumber;
+    int countRow = 0;
+
+    // Atualizar posição dos campos de entrada
+    for (size_t i = 0; i < PetsSelect_g_editControls_edit.size(); i++) {
+        colNumber = countRow + 1;
+
+        if (i == 2) {
+            xPos = startX + cellWidth + 10;
+            yPos = startY + colNumber * cellHeight + 3;
+            SetWindowPos(PetsSelect_g_editControls_edit[i], NULL, xPos, yPos, 610, 200,
+                SWP_NOZORDER | SWP_NOACTIVATE);
+
+            // Atualizar posição do botão
+            if (PetsSelect_g_hButton_consultar) {
+                SetWindowPos(PetsSelect_g_hButton_consultar, NULL, xPos + 620, yPos, 80, 25,
+                    SWP_NOZORDER | SWP_NOACTIVATE);
+            }
+
+            countRow++;
+        }
+        else if (i == 6) {
+            xPos = startX + cellWidth + 10;
+            yPos = startY + colNumber * cellHeight + 3;
+
+            SetWindowPos(PetsSelect_g_editControls_edit[i], NULL, xPos, yPos, 700, 200,
+                SWP_NOZORDER | SWP_NOACTIVATE);
+            countRow++;
+        }
+        else if (i == 12) {
+            SetWindowPos(PetsSelect_g_editControls_edit[i], NULL, xPos + 150, yPos, 110, 25,
+                SWP_NOZORDER | SWP_NOACTIVATE);
+        }
+        else if (i == 13) {
+            SetWindowPos(PetsSelect_g_editControls_edit[i], NULL, xPos + 300, yPos, 110, 25,
+                SWP_NOZORDER | SWP_NOACTIVATE);
+        }
+        else if (i == 14) {
+            xPos = startX + cellWidth + 10;
+            yPos = startY + colNumber * cellHeight + 3;
+            SetWindowPos(PetsSelect_g_editControls_edit[i], NULL, xPos, yPos, 110, 25,
+                SWP_NOZORDER | SWP_NOACTIVATE);
+            countRow++;
+        }
+        else if (i == 15) {
+            SetWindowPos(PetsSelect_g_editControls_edit[i], NULL, xPos + 150, yPos, 110, 25,
+                SWP_NOZORDER | SWP_NOACTIVATE);
+        }
+        else if (i == 16) {
+            SetWindowPos(PetsSelect_g_editControls_edit[i], NULL, xPos + 300, yPos, 110, 25,
+                SWP_NOZORDER | SWP_NOACTIVATE);
+        }
+        else if (i == 17) {
+            SetWindowPos(PetsSelect_g_editControls_edit[i], NULL, xPos + 450, yPos, 110, 25,
+                SWP_NOZORDER | SWP_NOACTIVATE);
+        }
+        else if (i == 18) {
+            SetWindowPos(PetsSelect_g_editControls_edit[i], NULL, xPos + 600, yPos, 110, 25,
+                SWP_NOZORDER | SWP_NOACTIVATE);
+        }
+        else if (i == 8) {
+            xPos = startX + cellWidth + 10;
+            yPos = startY + colNumber * cellHeight + 3;
+            SetWindowPos(PetsSelect_g_editControls_edit[i], NULL, xPos, yPos, 25, 25, // Ajustado para checkbox
+                SWP_NOZORDER | SWP_NOACTIVATE);
+            countRow++;
+        }
+        else if (i == 20) {
+            xPos = startX + cellWidth + 10;
+            yPos = startY + colNumber * cellHeight + 3;
+            SetWindowPos(PetsSelect_g_editControls_edit[i], NULL, xPos, yPos, 110, 25, // Ajustado para checkbox
+                SWP_NOZORDER | SWP_NOACTIVATE);
+            countRow++;
+        }
+        else if (i == 21) {
+            SetWindowPos(PetsSelect_g_editControls_edit[i], NULL, xPos + 150, yPos, 110, 25,
+                SWP_NOZORDER | SWP_NOACTIVATE);
+        }
+        else if (i == 22) {
+            xPos = startX + cellWidth + 10;
+            yPos = startY + colNumber * cellHeight + 3;
+            SetWindowPos(PetsSelect_g_editControls_edit[i], NULL, xPos, yPos, 110, 25, // Ajustado para checkbox
+                SWP_NOZORDER | SWP_NOACTIVATE);
+            countRow++;
+        }
+        else if (i == 23) {
+            SetWindowPos(PetsSelect_g_editControls_edit[i], NULL, xPos + 150, yPos, 110, 25,
+                SWP_NOZORDER | SWP_NOACTIVATE);
+        }
+        else if (i == 24) {
+            SetWindowPos(PetsSelect_g_editControls_edit[i], NULL, xPos + 300, yPos, 110, 25,
+                SWP_NOZORDER | SWP_NOACTIVATE);
+        }
+        else if (i == 25) {
+            SetWindowPos(PetsSelect_g_editControls_edit[i], NULL, xPos + 450, yPos, 110, 25,
+                SWP_NOZORDER | SWP_NOACTIVATE);
+        }
+        else {
+            xPos = startX + cellWidth + 10;
+            yPos = startY + colNumber * cellHeight + 3;
+            SetWindowPos(PetsSelect_g_editControls_edit[i], NULL, xPos, yPos, 700, 25,
+                SWP_NOZORDER | SWP_NOACTIVATE);
+            countRow++;
+        }
+    }
+
+    // Atualizar posição do botão
+    if (PetsSelect_g_hButton) {
+        int buttonY = startY + 9 * cellHeight + 3;
+        SetWindowPos(PetsSelect_g_hButton, NULL, startX, buttonY, 150, 30,
+            SWP_NOZORDER | SWP_NOACTIVATE);
+    }
 }
 
 // Função para atualizar posição dos controles com scroll
@@ -2533,11 +2670,6 @@ BOOL PetsSelect_Shortcuts(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         case VK_W: SendMessage(hWnd, WM_COMMAND, IDM_TUTORES_CONSULTAR, 0); break;
         case VK_E: SendMessage(hWnd, WM_COMMAND, IDM_TUTORES_CONSULTAR, 0); break;
         case VK_R: SendMessage(hWnd, WM_COMMAND, IDM_TUTORES_CONSULTAR, 0); break;
-
-        case VK_T: SendMessage(hWnd, WM_COMMAND, IDM_ARQUIVO_NOVO, 0); break;
-        case VK_Y: SendMessage(hWnd, WM_COMMAND, IDM_ARQUIVO_CONSULTAR, 0); break;
-        case VK_U: SendMessage(hWnd, WM_COMMAND, IDM_ARQUIVO_CONSULTAR, 0); break;
-        case VK_I: SendMessage(hWnd, WM_COMMAND, IDM_ARQUIVO_CONSULTAR, 0); break;
 
             // --- NOVAS TECLAS (ASDF) ---
         case VK_A: SendMessage(hWnd, WM_COMMAND, IDM_PETS_NOVO, 0); break;

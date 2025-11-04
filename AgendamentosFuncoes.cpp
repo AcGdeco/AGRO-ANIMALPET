@@ -47,7 +47,7 @@ std::vector<std::vector<std::wstring>> AgendamentosSelect_g_tableData;
 std::vector<std::vector<std::wstring>> AgendamentosSelect_g_tableDataFull;
 std::vector<std::vector<std::wstring>> AgendamentosSelect_g_tableDataRowsNumber;
 LONG_PTR AgendamentosSelect_idRecord;
-std::string AgendamentosSelect_orderColumn = "ID";
+std::string AgendamentosSelect_orderColumn = "A.ID";
 std::string AgendamentosSelect_orderAscDesc = "DESC";
 std::vector<int> AgendamentosSelect_naoDesenharInternRowsNumber;
 
@@ -597,25 +597,25 @@ void AgendamentosSelect_ordenarDefinicoesValores(HWND hWnd) {
         switch (AgendamentosSelect_idBtnGlobal)
         {
         case 0:
-            AgendamentosSelect_orderColumn = "ID";
+            AgendamentosSelect_orderColumn = "A.ID";
             break;
         case 1:
-            AgendamentosSelect_orderColumn = "Nome_do_Pet";
+            AgendamentosSelect_orderColumn = "T.Nome_do_Tutor";
             break;
         case 2:
-            AgendamentosSelect_orderColumn = "Nome_do_Tutor";
+            AgendamentosSelect_orderColumn = "P.Nome_do_Pet";
             break;
         case 3:
-            AgendamentosSelect_orderColumn = "Banho";
+            AgendamentosSelect_orderColumn = "A.Banho";
             break;
         case 4:
-            AgendamentosSelect_orderColumn = "Tosa";
+            AgendamentosSelect_orderColumn = "A.Tosa";
             break;
         case 5:
-            AgendamentosSelect_orderColumn = "Appointment_Date";
+            AgendamentosSelect_orderColumn = "A.Appointment_Date";
             break;
         case 6:
-            AgendamentosSelect_orderColumn = "Appointment_Hour";
+            AgendamentosSelect_orderColumn = "A.Appointment_Hour";
             break;
         default:
             break;
@@ -1753,7 +1753,7 @@ bool AgendamentosSelect_deleteRecordById(const std::string& databasePath, int id
     }
 
     // Preparar a query SQL
-    std::string sql = "DELETE FROM Pets WHERE ID = " + std::to_string(id) + ";";
+    std::string sql = "DELETE FROM Agendamentos WHERE ID = " + std::to_string(id) + ";";
 
     // Executar a query
     rc = sqlite3_exec(db, sql.c_str(), NULL, NULL, &errMsg);
@@ -1793,24 +1793,30 @@ void AgendamentosSelect_selectDB() {
     if (rc == SQLITE_OK) {
         std::string sqlSelect;
         std::string sqlSelectCount;
-        if (AgendamentosSelect_orderColumn == "Appointment_Hour") {
+        if (AgendamentosSelect_orderColumn == "A.Appointment_Hour") {
 
-            // Expressão para converter 'H:MM' ou 'HH:MM' para o formato ordenável 'HH:MM'
             std::string hourSorting =
-                // 1. Pega a hora (antes do ':'), converte para INT, e preenche com zero (ex: '4' -> '04')
-                "PRINTF('%02d', CAST(SUBSTR(Appointment_Hour, 1, INSTR(Appointment_Hour, ':') - 1) AS INTEGER))"
-                // 2. Concatena com os minutos (incluindo o ':')
-                " || SUBSTR(Appointment_Hour, INSTR(Appointment_Hour, ':'))";
+                "PRINTF('%02d', CAST(SUBSTR(A.Appointment_Hour, 1, INSTR(A.Appointment_Hour, ':') - 1) AS INTEGER))"
+                " || SUBSTR(A.Appointment_Hour, INSTR(A.Appointment_Hour, ':'))";
 
-            sqlSelect = "SELECT A.ID, T.Nome_do_Tutor, P.Nome_do_Pet, A.Banho, A.Tosa, A.Appointment_Date, A.Appointment_Hour , * FROM Tutores T INNER JOIN Pets P ON T.ID = P.ID_Tutor_FK INNER JOIN Agendamentos A ON P.ID = A.ID_Pet_FK INNER JOIN Agendamentos A ON P.ID = A.ID_Pet_FK ORDER BY " + hourSorting + " " + AgendamentosSelect_orderAscDesc;
+            sqlSelect =
+                "SELECT A.ID, T.Nome_do_Tutor, P.Nome_do_Pet, A.Banho, A.Tosa, A.Appointment_Date, A.Appointment_Hour, * " // Removido o ', *'
+                "FROM Tutores T INNER JOIN Pets P ON T.ID = P.ID_Tutor_FK "
+                "INNER JOIN Agendamentos A ON P.ID = A.ID_Pet_FK " // Apenas uma vez
+                "ORDER BY " + hourSorting + " " + AgendamentosSelect_orderAscDesc;
         }
-        else if (AgendamentosSelect_orderColumn == "Appointment_Date") {
+        else if (AgendamentosSelect_orderColumn == "A.Appointment_Date") {
 
-            // Define a string de ordenação complexa para a data DD/MM/YYYY
+            // Define a string de ordenação para converter 'DD/MM/YYYY' para 'YYYYMMDD' (correto para ordenação)
             std::string dataSorting =
-                "SUBSTR(Appointment_Date, 7, 4) || SUBSTR(Appointment_Date, 4, 2) || SUBSTR(Appointment_Date, 1, 2)";
-            sqlSelect = "SELECT SELECT A.ID, T.Nome_do_Tutor, P.Nome_do_Pet, A.Banho, A.Tosa, A.Appointment_Date, A.Appointment_Hour , * FROM Tutores T INNER JOIN Pets P ON T.ID = P.ID_Tutor_FK INNER JOIN Agendamentos A ON P.ID = A.ID_Pet_FK ORDER BY " + dataSorting + " " + AgendamentosSelect_orderAscDesc;
+                "SUBSTR(A.Appointment_Date, 7, 4) || SUBSTR(A.Appointment_Date, 4, 2) || SUBSTR(A.Appointment_Date, 1, 2)";
 
+            // SQL Corrigido: Removido 'SELECT' duplicado e o ', *'
+            sqlSelect =
+                "SELECT A.ID, T.Nome_do_Tutor, P.Nome_do_Pet, A.Banho, A.Tosa, A.Appointment_Date, A.Appointment_Hour, * "
+                "FROM Tutores T INNER JOIN Pets P ON T.ID = P.ID_Tutor_FK "
+                "INNER JOIN Agendamentos A ON P.ID = A.ID_Pet_FK "
+                "ORDER BY " + dataSorting + " " + AgendamentosSelect_orderAscDesc;
         }
         else {
             //const char* sqlSelect = "SELECT ID, Nome_do_Pet, Nome_do_Tutor, Banho, Tosa, Appointment_Date, Appointment_Hour FROM Pets;";
@@ -2208,7 +2214,7 @@ void AgendamentosSelect_CriarBotoesTabela(HWND hWnd)
     int limit;
     limit = AgendamentosSelect_offsetTableRow + AgendamentosSelect_limitTableRow;
 
-    if (limit < AgendamentosSelect_rowsNumberSemCabecalho) {
+    if (limit <= AgendamentosSelect_rowsNumberSemCabecalho) {
         limit = AgendamentosSelect_offsetTableRow + AgendamentosSelect_limitTableRow;
     }
     else {
@@ -2287,10 +2293,6 @@ void AgendamentosSelect_ConfigurarScrollBars(HWND hWnd)
 
     limit = AgendamentosSelect_offsetTableRow + AgendamentosSelect_limitTableRow;
 
-    if (limit > AgendamentosSelect_rowsNumberSemCabecalho) {
-        numeroDeLinhas = AgendamentosSelect_rowsNumber - AgendamentosSelect_offsetTableRow;
-    }
-
     AgendamentosSelect_g_contentHeight = static_cast<int>(numeroDeLinhas) * cellHeight + 160 + filtersHeight;
 
     SCROLLINFO si = {};
@@ -2352,11 +2354,11 @@ void AgendamentosSelect_RecarregarDadosTabela(HWND hWnd) {
     //Verificar filtros
     AgendamentosSelect_verificarFiltro(AgendamentosSelect_dados, AgendamentosSelect_naoDesenhar);
 
-    // Criar botões após carregar os dados
-    AgendamentosSelect_CriarBotoesTabela(hWnd);
-
     // Criar botões de paginação
     AgendamentosSelect_createBtnPageLimit(hWnd);
+
+    // Criar botões após carregar os dados
+    AgendamentosSelect_CriarBotoesTabela(hWnd);
 
     // Criar inputs de filtros
     AgendamentosSelect_criarInputsFilters(hWnd);
@@ -2421,6 +2423,9 @@ void AgendamentosSelect_checarInput(HWND hinput, int col, std::wstring word, std
     if (displayText.find(word) != std::wstring::npos) {
         SendMessage(hinput, BM_SETCHECK, BST_CHECKED, 0);
     }
+    else {
+        SendMessage(hinput, BM_SETCHECK, BST_UNCHECKED, 0);
+    }
 }
 
 int AgendamentosSelect_sqlite_callback(void* data, int argc, char** argv, char** azColName) {
@@ -2442,6 +2447,131 @@ int AgendamentosSelect_sqlite_callback(void* data, int argc, char** argv, char**
     table->push_back(row);
 
     return 0;
+}
+
+void AgendamentosSelect_AtualizarPosicoesControlesAgendamentoEdit(HWND hWnd)
+{
+    RECT rect;
+    GetClientRect(hWnd, &rect);
+    int width = (rect.right - rect.left) - 44;
+
+    int cellHeight = 32;
+    int numColumns = 21;
+    int cellWidth = (width + 2000) / (numColumns > 0 ? numColumns : 1);
+    int startY = 40 - AgendamentosSelect_g_scrollY;
+    int startX = 22 - AgendamentosSelect_g_scrollX;
+    int xPos = 0;
+    int yPos = 0;
+    int colNumber;
+    int countRow = 0;
+
+    // Atualizar posição dos campos de entrada
+    for (size_t i = 0; i < AgendamentosSelect_g_editControlsEdit.size(); i++) {
+        colNumber = countRow + 1;
+
+        if (i == 0) {
+            xPos = startX + cellWidth + 10;
+            yPos = startY + colNumber * cellHeight + 3;
+            SetWindowPos(AgendamentosSelect_g_editControlsEdit[i], NULL, xPos, yPos, 610, 200,
+                SWP_NOZORDER | SWP_NOACTIVATE);
+
+            // Atualizar posição do botão
+            if (AgendamentosSelect_g_hButton_consultar) {
+                SetWindowPos(AgendamentosSelect_g_hButton_consultar, NULL, xPos + 615, yPos, 40, 25,
+                    SWP_NOZORDER | SWP_NOACTIVATE);
+            }
+
+            // Atualizar posição do botão
+            if (AgendamentosSelect_g_hButton_consultar_Pet) {
+                SetWindowPos(AgendamentosSelect_g_hButton_consultar_Pet, NULL, xPos + 620 + 40, yPos, 40, 25,
+                    SWP_NOZORDER | SWP_NOACTIVATE);
+            }
+
+            countRow++;
+        }
+        else if (i == 1) {
+            xPos = startX + cellWidth + 10;
+            yPos = startY + colNumber * cellHeight + 3;
+            SetWindowPos(AgendamentosSelect_g_editControlsEdit[i], NULL, xPos, yPos, 110, 25,
+                SWP_NOZORDER | SWP_NOACTIVATE);
+            countRow++;
+        }
+        else if (i == 2) {
+            SetWindowPos(AgendamentosSelect_g_editControlsEdit[i], NULL, xPos + 150, yPos, 110, 25,
+                SWP_NOZORDER | SWP_NOACTIVATE);
+        }
+        else if (i == 3) {
+            SetWindowPos(AgendamentosSelect_g_editControlsEdit[i], NULL, xPos + 300, yPos, 110, 25,
+                SWP_NOZORDER | SWP_NOACTIVATE);
+        }
+        else if (i == 4) {
+            xPos = startX + cellWidth + 10;
+            yPos = startY + colNumber * cellHeight + 3;
+            SetWindowPos(AgendamentosSelect_g_editControlsEdit[i], NULL, xPos, yPos, 110, 25,
+                SWP_NOZORDER | SWP_NOACTIVATE);
+            countRow++;
+        }
+        else if (i == 5) {
+            SetWindowPos(AgendamentosSelect_g_editControlsEdit[i], NULL, xPos + 150, yPos, 110, 25,
+                SWP_NOZORDER | SWP_NOACTIVATE);
+        }
+        else if (i == 6) {
+            SetWindowPos(AgendamentosSelect_g_editControlsEdit[i], NULL, xPos + 300, yPos, 110, 25,
+                SWP_NOZORDER | SWP_NOACTIVATE);
+        }
+        else if (i == 7) {
+            SetWindowPos(AgendamentosSelect_g_editControlsEdit[i], NULL, xPos + 450, yPos, 110, 25,
+                SWP_NOZORDER | SWP_NOACTIVATE);
+        }
+        else if (i == 8) {
+            SetWindowPos(AgendamentosSelect_g_editControlsEdit[i], NULL, xPos + 600, yPos, 110, 25,
+                SWP_NOZORDER | SWP_NOACTIVATE);
+        }
+        else if (i == 10) {
+            xPos = startX + cellWidth + 10;
+            yPos = startY + colNumber * cellHeight + 3;
+            SetWindowPos(AgendamentosSelect_g_editControlsEdit[i], NULL, xPos, yPos, 110, 25, // Ajustado para checkbox
+                SWP_NOZORDER | SWP_NOACTIVATE);
+            countRow++;
+        }
+        else if (i == 11) {
+            SetWindowPos(AgendamentosSelect_g_editControlsEdit[i], NULL, xPos + 150, yPos, 110, 25,
+                SWP_NOZORDER | SWP_NOACTIVATE);
+        }
+        else if (i == 12) {
+            xPos = startX + cellWidth + 10;
+            yPos = startY + colNumber * cellHeight + 3;
+            SetWindowPos(AgendamentosSelect_g_editControlsEdit[i], NULL, xPos, yPos, 110, 25, // Ajustado para checkbox
+                SWP_NOZORDER | SWP_NOACTIVATE);
+            countRow++;
+        }
+        else if (i == 13) {
+            SetWindowPos(AgendamentosSelect_g_editControlsEdit[i], NULL, xPos + 150, yPos, 110, 25,
+                SWP_NOZORDER | SWP_NOACTIVATE);
+        }
+        else if (i == 14) {
+            SetWindowPos(AgendamentosSelect_g_editControlsEdit[i], NULL, xPos + 300, yPos, 110, 25,
+                SWP_NOZORDER | SWP_NOACTIVATE);
+        }
+        else if (i == 15) {
+            SetWindowPos(AgendamentosSelect_g_editControlsEdit[i], NULL, xPos + 450, yPos, 110, 25,
+                SWP_NOZORDER | SWP_NOACTIVATE);
+        }
+        else {
+            xPos = startX + cellWidth + 10;
+            yPos = startY + colNumber * cellHeight + 3;
+            SetWindowPos(AgendamentosSelect_g_editControlsEdit[i], NULL, xPos, yPos, 700, 25,
+                SWP_NOZORDER | SWP_NOACTIVATE);
+            countRow++;
+        }
+    }
+
+    // Atualizar posição do botão
+    if (AgendamentosSelect_g_hButton) {
+        int buttonY = startY + 10 * cellHeight + 3;
+        SetWindowPos(AgendamentosSelect_g_hButton, NULL, startX, buttonY, 150, 30,
+            SWP_NOZORDER | SWP_NOACTIVATE);
+    }
 }
 
 // Função para atualizar posição dos controles com scroll
@@ -2983,11 +3113,6 @@ BOOL AgendamentosSelect_Shortcuts(HWND hWnd, UINT message, WPARAM wParam, LPARAM
         case VK_W: SendMessage(hWnd, WM_COMMAND, IDM_TUTORES_CONSULTAR, 0); break;
         case VK_E: SendMessage(hWnd, WM_COMMAND, IDM_TUTORES_CONSULTAR, 0); break;
         case VK_R: SendMessage(hWnd, WM_COMMAND, IDM_TUTORES_CONSULTAR, 0); break;
-
-        case VK_T: SendMessage(hWnd, WM_COMMAND, IDM_ARQUIVO_NOVO, 0); break;
-        case VK_Y: SendMessage(hWnd, WM_COMMAND, IDM_ARQUIVO_CONSULTAR, 0); break;
-        case VK_U: SendMessage(hWnd, WM_COMMAND, IDM_ARQUIVO_CONSULTAR, 0); break;
-        case VK_I: SendMessage(hWnd, WM_COMMAND, IDM_ARQUIVO_CONSULTAR, 0); break;
 
             // --- NOVAS TECLAS (ASDF) ---
         case VK_A: SendMessage(hWnd, WM_COMMAND, IDM_PETS_NOVO, 0); break;

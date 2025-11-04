@@ -35,6 +35,12 @@ std::vector<std::vector<std::wstring>> TutoresSelect_g_tableDataEditar;
 void TutoresSelect_PreencherControlesEdicao(HWND hWnd) {
     // 1. Busca os Dados no Banco de Dados
     TutoresSelect_selectBD();
+
+    if (TutoresSelect_g_tableDataEditar.empty()) {
+        PostMessage(hWnd, WM_CLOSE, 0, 0);
+        return;
+    }
+
     TutoresSelect_cpf = TutoresSelect_g_tableDataEditar[1][6];
 
     // Se não houver dados, retorna
@@ -151,7 +157,7 @@ void TutoresSelect_selectBD() {
         else {
             // Sucesso - talvez adicionar uma mensagem de confirmação
             if (TutoresSelect_g_tableDataEditar.empty()) {
-                TutoresSelect_g_tableDataEditar.push_back({ L"Info", L"Nenhum registro encontrado com ID: " + std::to_wstring(TutoresSelect_idRecord) });
+                // TutoresSelect_g_tableDataEditar.push_back({ L"Info", L"Nenhum registro encontrado com ID: " + std::to_wstring(TutoresSelect_idRecord) });
             }
         }
 
@@ -407,22 +413,7 @@ LRESULT CALLBACK WndProcTutoresEdit(HWND hWnd, UINT message, WPARAM wParam, LPAR
                         sqlite3_free(errMsg);
                     }
                     else {
-                        HWND hwndSelect = FindWindow(TEXT("JanelaTutoresSelectClasse"), NULL);
-                        if (hwndSelect != NULL) {
-                            //std::cout << "Janela encontrada! HWND: " << hwnd << std::endl;
-                            TutoresSelect_RecarregarDadosTabela(hwndSelect);
-                        }
-                        hwndSelect = FindWindow(TEXT("JanelaTutoresReadClasse"), NULL);
-                        if (hwndSelect != NULL) {
-                            //std::cout << "Janela encontrada! HWND: " << hwnd << std::endl;
-                            TutoresSelect_invalidateDrawing(hwndSelect);
-                            UpdateWindow(hwndSelect);
-                        }
-                        hwndSelect = FindWindow(TEXT("JanelaPetsSelectClasse"), NULL);
-                        if (hwndSelect != NULL) {
-                            //std::cout << "Janela encontrada! HWND: " << hwnd << std::endl;
-                            PetsSelect_RecarregarDadosTabela(hwndSelect);
-                        }
+                        AtualizarJanelas();
                         MessageBox(hWnd, L"Dados inseridos com sucesso!", L"Sucesso", MB_OK);
                     }
                 }

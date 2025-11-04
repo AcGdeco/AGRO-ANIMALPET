@@ -2,6 +2,8 @@
 #include "sqlite3.h"
 #include <string>
 #include <windows.h>
+#include "Global.h"
+#include <iostream>
 
 int windowsNumber = 1;
 std::vector<std::vector<std::wstring>> TutoresSelect_Global_g_tableData;
@@ -9,6 +11,8 @@ std::vector<std::vector<std::wstring>> TutoresPetsSelect_Global_g_tableData;
 LONG_PTR TutoresSelect_idRecord;
 HWND PetsSelect_g_hButton_consultar;
 HWND PetsSelect_g_hButton_consultar_consultar;
+HWND AgendamentosSelect_g_hButton_consultar_tutor;
+HWND AgendamentosSelect_g_hButton_consultar_pet;
 
 struct ComboBoxItemData {
     long long idPet;
@@ -203,5 +207,179 @@ void TutoresPetsSelect_Global_preencherComboBox(HWND hComboBox) {
                 (LPARAM)data     // lParam: O VALOR NUMÉRICO (ID) a ser armazenado
             );
         }
+    }
+}
+
+int ChecarOpcaoComboBoxPorID(HWND hComboBox, const std::wstring& idPetAchecar) {
+    // 1. Converter o ID de string para o tipo numérico esperado (LRESULT/long long)
+    LRESULT targetID_long;
+    try {
+        // Usa std::stoll para converter wstring para long long (que é LRESULT em 64bit)
+        targetID_long = std::stoll(idPetAchecar);
+    }
+    catch (const std::exception& e) {
+        // Tratar erro de conversão (ex: string vazia ou não numérica)
+        // Poderia logar o erro ou apenas retornar erro.
+        // std::cerr << "Erro de conversão de ID: " << e.what() << std::endl;
+        return CB_ERR;
+    }
+
+    // 2. Obter o número total de itens no ComboBox
+    int count = (int)SendMessage(hComboBox, CB_GETCOUNT, 0, 0);
+
+    // 3. Iterar por todos os itens
+    for (int i = 0; i < count; ++i) {
+        // 4. Obter o valor de CB_ITEMDATA (que é o ponteiro para ComboBoxItemData)
+        LRESULT itemDataLParam = SendMessage(hComboBox, CB_GETITEMDATA, (WPARAM)i, 0);
+
+        // O valor CB_ERR (-1) é retornado se o item não tiver dados ou se for o item 0 que você configurou.
+        if (itemDataLParam != CB_ERR && itemDataLParam != 0) {
+            // Converter o LPARAM de volta para um ponteiro para a estrutura
+            ComboBoxItemData* data = reinterpret_cast<ComboBoxItemData*>(itemDataLParam);
+
+            // 5. Comparar o 'idPet' armazenado com o 'targetID'
+            if (data->idPet == targetID_long) {
+                // Encontrado! Selecionar o item e retornar o índice
+                SendMessage(hComboBox, CB_SETCURSEL, (WPARAM)i, 0);
+                return i;
+            }
+        }
+        // Se itemDataLParam for 0 (o primeiro item que você inicializou com idPet=0), 
+        // a comparação será feita no item 0, mas garantimos que não tentamos
+        // desreferenciar um ponteiro nulo se a API retornar 0 por algum motivo.
+        // Já que você usa o ID 0 para o item vazio, este bloco de 'else if' lida com isso.
+        else if (itemDataLParam != CB_ERR && i == 0) {
+            ComboBoxItemData* data = reinterpret_cast<ComboBoxItemData*>(itemDataLParam);
+            if (data->idPet == targetID_long) {
+                SendMessage(hComboBox, CB_SETCURSEL, (WPARAM)i, 0);
+                return i;
+            }
+        }
+    }
+
+    // 6. Não encontrado
+    return CB_ERR;
+}
+
+void AtualizarJanelas() {
+    std::wstring className = GetActiveClassWindowName();
+
+    // Agendamentos
+    HWND hWndAgendamentosAdd = FindWindowW(L"JanelaAgendamentosAddClasse", NULL);
+    if (hWndAgendamentosAdd != NULL && className != L"JanelaAgendamentosAddClasse")
+    {
+        AgendamentosSelect_invalidateDrawing(hWndAgendamentosAdd);
+        UpdateWindow(hWndAgendamentosAdd);
+    }
+
+    HWND hWndAgendamentosEdit = FindWindowW(L"JanelaAgendamentosEditClasse", NULL);
+    if (hWndAgendamentosEdit != NULL)
+    {
+        AgendamentosSelect_invalidateDrawing(hWndAgendamentosEdit);
+        UpdateWindow(hWndAgendamentosEdit);
+    }
+
+    HWND hWndAgendamentosSelect = FindWindowW(L"JanelaAgendamentosSelectClasse", NULL);
+    if (hWndAgendamentosSelect != NULL)
+    {
+        AgendamentosSelect_RecarregarDadosTabela(hWndAgendamentosSelect);
+    }
+
+    HWND hWndAgendamentosRead = FindWindowW(L"JanelaAgendamentosReadClasse", NULL);
+    if (hWndAgendamentosRead != NULL)
+    {
+        AgendamentosSelect_invalidateDrawing(hWndAgendamentosRead);
+        UpdateWindow(hWndAgendamentosRead);
+    }
+
+    // Pets
+    HWND hWndPetsAdd = FindWindowW(L"JanelaPetsAddClasse", NULL);
+    if (hWndPetsAdd != NULL && className != L"JanelaPetsAddClasse")
+    {
+        PetsSelect_invalidateDrawing(hWndPetsAdd);
+        UpdateWindow(hWndPetsAdd);
+    }
+
+    HWND hWndPetsEdit = FindWindowW(L"JanelaPetsEditClasse", NULL);
+    if (hWndPetsEdit != NULL)
+    {
+        PetsSelect_invalidateDrawing(hWndPetsEdit);
+        UpdateWindow(hWndPetsEdit);
+    }
+
+    HWND hWndPetsSelect = FindWindowW(L"JanelaPetsSelectClasse", NULL);
+    if (hWndPetsSelect != NULL)
+    {
+        PetsSelect_RecarregarDadosTabela(hWndPetsSelect);
+    }
+
+    HWND hWndPetsRead = FindWindowW(L"JanelaPetsReadClasse", NULL);
+    if (hWndPetsRead != NULL)
+    {
+        PetsSelect_invalidateDrawing(hWndPetsRead);
+        UpdateWindow(hWndPetsRead);
+    }
+
+    // Tutores
+    HWND hWndTutoresAdd = FindWindowW(L"JanelaTutoresAddClasse", NULL);
+    if (hWndTutoresAdd != NULL && className != L"JanelaTutoresAddClasse")
+    {
+        TutoresSelect_invalidateDrawing(hWndTutoresAdd);
+        UpdateWindow(hWndTutoresAdd);
+    }
+
+    HWND hWndTutoresEdit = FindWindowW(L"JanelaTutoresEditClasse", NULL);
+    if (hWndTutoresEdit != NULL)
+    {
+        TutoresSelect_invalidateDrawing(hWndTutoresEdit);
+        UpdateWindow(hWndTutoresEdit);
+    }
+
+    HWND hWndTutoresSelect = FindWindowW(L"JanelaTutoresSelectClasse", NULL);
+    if (hWndTutoresSelect != NULL)
+    {
+        TutoresSelect_RecarregarDadosTabela(hWndTutoresSelect);
+    }
+
+    HWND hWndTutoresRead = FindWindowW(L"JanelaTutoresReadClasse", NULL);
+    if (hWndTutoresRead != NULL)
+    {
+        TutoresSelect_invalidateDrawing(hWndTutoresRead);
+        UpdateWindow(hWndTutoresRead);
+    }
+}
+
+std::wstring GetActiveClassWindowName() {
+    // 1. Obter o Handle (HWND) da janela em primeiro plano (ativa)
+    HWND hWnd = GetForegroundWindow();
+
+    // 2. Verifica se o Handle é válido
+    if (hWnd == NULL) {
+        return L"";
+    }
+
+    // Define um tamanho máximo razoável para o nome da classe.
+    // O nome da classe pode ter até 256 caracteres (incluindo o terminador nulo) em WinAPI.
+    const int MAX_CLASS_NAME = 256;
+
+    // Alocar um buffer para armazenar o nome da classe
+    std::wstring className(MAX_CLASS_NAME, L'\0');
+
+    // 3. Obter o nome da classe
+    // GetClassNameW é a versão WIDE (Unicode) da função.
+    int copied = GetClassNameW(
+        hWnd,
+        &className[0], // Ponteiro para o buffer de destino
+        MAX_CLASS_NAME
+    );
+
+    if (copied > 0) {
+        // Redimensionar a string para o tamanho real do nome copiado
+        className.resize(copied);
+        return className;
+    }
+    else {
+        // Falha ao obter o nome da classe
+        return L"";
     }
 }

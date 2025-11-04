@@ -263,7 +263,16 @@ LRESULT CALLBACK WndProcTutoresRead(HWND hWnd, UINT message, WPARAM wParam, LPAR
         char* errMsg = 0;
         int rc = sqlite3_open("pet.db", &db);
         if (rc == SQLITE_OK) {
-            const char* sqlSelectConsulta = "SELECT * FROM Tutores;";
+            // Supondo que TutoresSelect_idRecord é um long long/int, convertemos para string:
+            std::string idRecordStr = std::to_string(TutoresSelect_idRecord);
+
+            // 2. Constrói a consulta usando std::string para concatenação segura
+            std::string sqlSelectConsulta_std =
+                "SELECT * FROM Tutores WHERE ID = " + idRecordStr + "; "; // Assumindo que a coluna é 'ID'
+
+            // 3. Se a sua função de banco de dados exigir 'const char*', converta:
+            const char* sqlSelectConsulta = sqlSelectConsulta_std.c_str();
+
             rc = sqlite3_exec(db, sqlSelectConsulta, TutoresSelect_sqlite_callback_consulta, &TutoresSelect_g_tableDataConsulta, &errMsg);
             if (rc != SQLITE_OK) {
                 if (errMsg) {
@@ -283,7 +292,12 @@ LRESULT CALLBACK WndProcTutoresRead(HWND hWnd, UINT message, WPARAM wParam, LPAR
             sqlite3_close(db);
         }
         else {
-            TutoresSelect_g_tableDataConsulta.push_back({ L"Erro", L"Não foi possível abrir o banco" });
+           // TutoresSelect_g_tableDataConsulta.push_back({ L"Erro", L"Não foi possível abrir o banco" });
+        }
+
+        if (TutoresSelect_g_tableDataConsulta.empty()) {
+            PostMessage(hWnd, WM_CLOSE, 0, 0);
+            break;
         }
 
         // Obter dimensões da janela

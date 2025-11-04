@@ -186,5 +186,23 @@
     <Image Include="Images\Seta-Baixo.ico">
       <Filter>Arquivos de Recurso</Filter>
     </Image>
+    <Image Include="images\icon3.ico">
+      <Filter>Arquivos de Recurso</Filter>
+    </Image>
+    <Image Include="images\icon4.ico">
+      <Filter>Arquivos de Recurso</Filter>
+    </Image>
+    <Image Include="..\..\..\OneDrive\Área de Trabalho\Icon.ico">
+      <Filter>Arquivos de Recurso</Filter>
+    </Image>
+    <Image Include="..\..\..\OneDrive\Área de Trabalho\Icon.png">
+      <Filter>Arquivos de Recurso</Filter>
+    </Image>
+    <Image Include="Images\animalpet.bmp">
+      <Filter>Arquivos de Recurso</Filter>
+    </Image>
+    <Image Include="images\icon.ico">
+      <Filter>Arquivos de Recurso</Filter>
+    </Image>
   </ItemGroup>
 </Project>

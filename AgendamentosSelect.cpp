@@ -83,12 +83,12 @@ LRESULT CALLBACK WndProcAgendamentosSelect(HWND hWnd, UINT message, WPARAM wPara
         }
         else {
             // Código de criação de tabela e inserção (mantido como está)
-            const char* sqlDrop = "DROP TABLE IF EXISTS Agendamentos;";
-            rc = sqlite3_exec(db, sqlDrop, 0, 0, &errMsg);
-            if (rc != SQLITE_OK) {
-                MessageBox(hWnd, L"Erro ao dropar tabela!", L"Erro", MB_OK | MB_ICONERROR);
-                sqlite3_free(errMsg);
-            }
+            //const char* sqlDrop = "DROP TABLE IF EXISTS Agendamentos;";
+            //rc = sqlite3_exec(db, sqlDrop, 0, 0, &errMsg);
+            //if (rc != SQLITE_OK) {
+                //MessageBox(hWnd, L"Erro ao dropar tabela!", L"Erro", MB_OK | MB_ICONERROR);
+                //sqlite3_free(errMsg);
+            //}
             const char* sqlCreate = "CREATE TABLE IF NOT EXISTS Agendamentos (ID INTEGER PRIMARY KEY AUTOINCREMENT, Banho TEXT, Tosa TEXT, Obs_Tosa TEXT, Parasitas TEXT, Lesoes TEXT, Obs_Lesoes TEXT, Appointment_Date TEXT, Appointment_Hour TEXT, Date TEXT, Hour TEXT, ID_Pet_FK INTEGER, FOREIGN KEY (ID_Pet_FK) REFERENCES Pets(ID) ON DELETE CASCADE ON UPDATE CASCADE);";
             rc = sqlite3_exec(db, sqlCreate, 0, 0, &errMsg);
             if (rc != SQLITE_OK) {
@@ -108,19 +108,19 @@ LRESULT CALLBACK WndProcAgendamentosSelect(HWND hWnd, UINT message, WPARAM wPara
             }
             else {
                 // Inserções (código original mantido)
-                std::wstring currentDate = AgendamentosSelect_GetCurrentDate();
-                std::wstring currentHour = AgendamentosSelect_GetCurrentHour();
-                for (int i = 1; i <= 100; i++) {
-                   std::wstring sqlInsertW = L"INSERT INTO Agendamentos (Banho, Tosa, Obs_Tosa, Parasitas, Lesoes, Obs_Lesoes, Appointment_Date, Appointment_Hour, Date, Hour, ID_Pet_FK) VALUES ('Padrão', 'Tesoura', 'ir qpiofj adfjs kçjf dkfjeif çsdaf jkasdjf iejf sdçf aksdfjis fdfj çaklsfjaksdfj kdsjfçaejf idsjfkasdf jaies', 'Carrapatos', 'Pele', 'asdf façldj fçkalsdj fdaskljf dsçkf jçklasdf jkaldsfj çkldsa fjaçklds jfakdls fjkalsdjf klasdjf çasdfj çasfj çadsklfjklf ', '04/07/2025', '15:00', '" + currentDate + L"', '" + currentHour + L"', 1);";
-                    int required = WideCharToMultiByte(CP_UTF8, 0, sqlInsertW.c_str(), -1, nullptr, 0, nullptr, nullptr);
-                    if (required > 0) {
-                        std::string sqlInsertUtf8(required, '\0');
-                        WideCharToMultiByte(CP_UTF8, 0, sqlInsertW.c_str(), -1, &sqlInsertUtf8[0], required, nullptr, nullptr);
-                        char* errMsg = nullptr;
-                        int rc = sqlite3_exec(db, sqlInsertUtf8.c_str(), nullptr, nullptr, &errMsg);
-                        if (rc != SQLITE_OK) sqlite3_free(errMsg);
-                    }
-                }
+                //std::wstring currentDate = AgendamentosSelect_GetCurrentDate();
+                //std::wstring currentHour = AgendamentosSelect_GetCurrentHour();
+                //for (int i = 1; i <= 100; i++) {
+                   //std::wstring sqlInsertW = L"INSERT INTO Agendamentos (Banho, Tosa, Obs_Tosa, Parasitas, Lesoes, Obs_Lesoes, Appointment_Date, Appointment_Hour, Date, Hour, ID_Pet_FK) VALUES ('Padrão', 'Tesoura', 'ir qpiofj adfjs kçjf dkfjeif çsdaf jkasdjf iejf sdçf aksdfjis fdfj çaklsfjaksdfj kdsjfçaejf idsjfkasdf jaies', 'Carrapatos', 'Pele', 'asdf façldj fçkalsdj fdaskljf dsçkf jçklasdf jkaldsfj çkldsa fjaçklds jfakdls fjkalsdjf klasdjf çasdfj çasfj çadsklfjklf ', '04/07/2025', '15:00', '" + currentDate + L"', '" + currentHour + L"', 1);";
+                    //int required = WideCharToMultiByte(CP_UTF8, 0, sqlInsertW.c_str(), -1, nullptr, 0, nullptr, nullptr);
+                    //if (required > 0) {
+                        //std::string sqlInsertUtf8(required, '\0');
+                        //WideCharToMultiByte(CP_UTF8, 0, sqlInsertW.c_str(), -1, &sqlInsertUtf8[0], required, nullptr, nullptr);
+                        //char* errMsg = nullptr;
+                        //int rc = sqlite3_exec(db, sqlInsertUtf8.c_str(), nullptr, nullptr, &errMsg);
+                        //if (rc != SQLITE_OK) sqlite3_free(errMsg);
+                    //}
+                //}
                 //std::wstring sqlInsertW2 = L"INSERT INTO Pets (Nome_do_Pet, Raca, Nome_do_Tutor, CEP, Cor, Idade, Peso, Sexo, Castrado, Endereco, Ponto_de_referencia, Banho, Tosa, Obs_Tosa, Parasitas, Lesoes, Obs_Lesoes, Telefone, CPF, Date, Hour) VALUES ('Astralis', 'Viralata', 'Débora', '36309022', 'Preto', 6, 18, 'Feminino', 'Não', 'Rua Ricador Geraldo dos Santos - Alto das Mercês - nº12', 'Perto da igreja das Mercês', 'Padrão', 'Tesoura', 'aa ksfj asldfj açlksdj fkasjd fçklasdjf aksdlfjkalçsdfj kçalsdjf kçlasjd çfkasdj fklçaj sdçlfkjakslfj çlasdjf çasd jfçaskdjfsdf', 'Carrapatos', 'Pele', ' asdfj açlsjf akçslj fkçlasdj fkçlasdjf lçkasjdf kasdjfkiujriwejfç dfkmdnfçnvçaidsjfçkdsfjaçksdjfkaçsjdfkasdjfkçlasjdçfaksdjf', '32998365552', '09813426789', '" + currentDate + L"', '" + currentHour + L"');";
                 //int required2 = WideCharToMultiByte(CP_UTF8, 0, sqlInsertW2.c_str(), -1, nullptr, 0, nullptr, nullptr);
                 //if (required2 > 0) {
@@ -171,8 +171,9 @@ LRESULT CALLBACK WndProcAgendamentosSelect(HWND hWnd, UINT message, WPARAM wPara
                 HWND hWndRead = FindWindowW(L"JanelaAgendamentosReadClasse", NULL);
                 if (hWndRead != NULL)
                 {
+                    AgendamentosSelect_invalidateDrawing(hWndRead);
+                    UpdateWindow(hWndRead);
                     ShowWindow(hWndRead, SW_MAXIMIZE);
-                    SetForegroundWindow(hWndRead);
                 }
             }
         }
@@ -193,8 +194,9 @@ LRESULT CALLBACK WndProcAgendamentosSelect(HWND hWnd, UINT message, WPARAM wPara
                 HWND hWndRead = FindWindowW(L"JanelaAgendamentosEditClasse", NULL);
                 if (hWndRead != NULL)
                 {
+                    AgendamentosSelect_invalidateDrawing(hWndRead);
+                    UpdateWindow(hWndRead);
                     ShowWindow(hWndRead, SW_MAXIMIZE);
-                    SetForegroundWindow(hWndRead);
                 }
             }
         }
@@ -204,11 +206,11 @@ LRESULT CALLBACK WndProcAgendamentosSelect(HWND hWnd, UINT message, WPARAM wPara
             //swprintf_s(msg, L"Botão %s%d clicado! Id: %d", L"Deletar", (int)id, (int)id);
             //MessageBoxW(hWnd, msg, L"Info", MB_OK);
 
-            AgendamentosSelect_idRecord = id;
-            std::wstring msg = L"Deletar registro ID " + std::to_wstring(AgendamentosSelect_idRecord) + L"?";
+            // AgendamentosSelect_idRecord = id;
+            std::wstring msg = L"Deletar registro ID " + std::to_wstring(id) + L"?";
             if (MessageBoxW(hWnd, msg.c_str(), L"Confirmar", MB_YESNO | MB_ICONQUESTION) == IDYES) {
-                AgendamentosSelect_deleteRecordById("pet.db", AgendamentosSelect_idRecord, hWnd);
-                AgendamentosSelect_RecarregarDadosTabela(hWnd);
+                AgendamentosSelect_deleteRecordById("pet.db", id, hWnd);
+                AtualizarJanelas();
             }
         }
         else if (wmId == AgendamentosSelect_FILTRAR)

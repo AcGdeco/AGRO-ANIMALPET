@@ -1,4 +1,4 @@
-#include "AgendamentosConsultar.h"
+Ôªø#include "AgendamentosConsultar.h"
 #include "MenuUniversal.h"
 #include <windows.h>
 #include <sal.h>
@@ -8,7 +8,7 @@
 #include "sqlite3.h"
 #include <vector>
 
-// Vari·veis externas para scroll
+// Vari√°veis externas para scroll
 extern int AgendamentosSelect_g_scrollY;
 extern int AgendamentosSelect_g_clientHeight;
 extern int AgendamentosSelect_g_contentHeight;
@@ -16,21 +16,59 @@ extern int AgendamentosSelect_g_scrollX;
 extern int AgendamentosSelect_g_clientWidth;
 extern int AgendamentosSelect_g_contentWidth;
 
+std::wstring idTutorAgendamento;
+std::wstring idPetAgendamento;
+
 std::vector<std::vector<std::wstring>> AgendamentosSelect_g_tableDataConsulta;
 
-// FunÁ„o auxiliar para converter de UTF-8 (char*) para std::wstring (UTF-16)
+
+// Fun√ß√£o para atualizar posi√ß√£o dos controles com scroll
+void AgendamentosSelect_AtualizarPosicoesControlesAgendamentoConsultar(HWND hWnd)
+{
+    RECT rect;
+    GetClientRect(hWnd, &rect);
+    int width = (rect.right - rect.left) - 44;
+
+    int cellHeight = 32;
+    int numColumns = 21;
+    int cellWidth = (width + 2000) / (numColumns > 0 ? numColumns : 1);
+    int startY = 40 - AgendamentosSelect_g_scrollY;
+    int startX = 22 - AgendamentosSelect_g_scrollX;
+    int xPos = 0;
+    int yPos = 0;
+    int colNumber;
+    int countRow = 0;
+
+    xPos = startX;
+    yPos = startY + 14 * cellHeight + 1;
+
+    // Atualizar posi√ß√£o do bot√£o
+    if (AgendamentosSelect_g_hButton_consultar_tutor) {
+        SetWindowPos(AgendamentosSelect_g_hButton_consultar_tutor, NULL, xPos, yPos, 80, 30,
+            SWP_NOZORDER | SWP_NOACTIVATE);
+    }
+
+    yPos = startY + 17 * cellHeight + 1;
+    if (AgendamentosSelect_g_hButton_consultar_pet) {
+        SetWindowPos(AgendamentosSelect_g_hButton_consultar_pet, NULL, xPos, yPos, 80, 30,
+            SWP_NOZORDER | SWP_NOACTIVATE);
+    }
+}
+
+
+// Fun√ß√£o auxiliar para converter de UTF-8 (char*) para std::wstring (UTF-16)
 std::wstring AgendamentosSelect_utf8_to_wstring_consulta(const char* str) {
     if (!str) return L"NULL";
     int size_needed = MultiByteToWideChar(CP_UTF8, 0, str, -1, nullptr, 0);
     if (size_needed <= 0) return L"";
-    std::wstring wstr(size_needed - 1, 0); // -1 para n„o incluir o caractere nulo
+    std::wstring wstr(size_needed - 1, 0); // -1 para n√£o incluir o caractere nulo
     MultiByteToWideChar(CP_UTF8, 0, str, -1, &wstr[0], size_needed);
     return wstr;
 }
 
 int AgendamentosSelect_sqlite_callback_consulta(void* data, int argc, char** argv, char** azColName) {
     std::vector<std::vector<std::wstring>>* table = static_cast<std::vector<std::vector<std::wstring>>*>(data);
-    // Primeira chamada: adicionar cabeÁalhos (nomes das colunas)
+    // Primeira chamada: adicionar cabe√ßalhos (nomes das colunas)
     if (table->empty()) {
         std::vector<std::wstring> headers;
         for (int i = 0; i < argc; i++) {
@@ -49,10 +87,10 @@ int AgendamentosSelect_sqlite_callback_consulta(void* data, int argc, char** arg
     return 0;
 }
 
-// DeclaraÁ„o do procedimento da janela
+// Declara√ß√£o do procedimento da janela
 LRESULT CALLBACK WndProcAgendamentosRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
-// FunÁ„o para configurar scroll bars
+// Fun√ß√£o para configurar scroll bars
 void AgendamentosSelect_ConfigurarScrollBarsConsulta(HWND hWnd)
 {
     RECT rect;
@@ -60,10 +98,10 @@ void AgendamentosSelect_ConfigurarScrollBarsConsulta(HWND hWnd)
     AgendamentosSelect_g_clientHeight = rect.bottom - rect.top;
     AgendamentosSelect_g_clientWidth = rect.right - rect.left;
 
-    // Calcular altura total do conte˙do baseado na tabela
+    // Calcular altura total do conte√∫do baseado na tabela
     int cellHeight = 32;
     AgendamentosSelect_g_contentHeight = 24 * cellHeight + 100; // 22 colunas + margem
-    AgendamentosSelect_g_contentWidth = 2000; // Largura fixa para conte˙do largo
+    AgendamentosSelect_g_contentWidth = 2000; // Largura fixa para conte√∫do largo
 
     SCROLLINFO si = {};
     si.cbSize = sizeof(SCROLLINFO);
@@ -84,7 +122,7 @@ void AgendamentosSelect_ConfigurarScrollBarsConsulta(HWND hWnd)
     SetScrollInfo(hWnd, SB_HORZ, &si, TRUE);
 }
 
-// FunÁ„o para registrar a classe da janela (pode ser chamada de outro lugar, como Pet.cpp)
+// Fun√ß√£o para registrar a classe da janela (pode ser chamada de outro lugar, como Pet.cpp)
 BOOL RegisterAgendamentosReadClass(HINSTANCE hInstance)
 {
     WNDCLASSEXW wcex = { 0 };
@@ -94,7 +132,7 @@ BOOL RegisterAgendamentosReadClass(HINSTANCE hInstance)
     wcex.hInstance = hInstance;
     wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
     wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-    wcex.lpszMenuName = NULL;  // Menu ser· definido dinamicamente
+    wcex.lpszMenuName = NULL;  // Menu ser√° definido dinamicamente
     wcex.lpszClassName = L"JanelaAgendamentosReadClasse";
     wcex.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_PET));
     wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
@@ -105,21 +143,104 @@ BOOL RegisterAgendamentosReadClass(HINSTANCE hInstance)
 // Procedimento da janela Read
 LRESULT CALLBACK WndProcAgendamentosRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    // Processar o menu APENAS para mensagens especÌficas
+    // Processar o menu APENAS para mensagens espec√≠ficas
     if (message == WM_COMMAND || message == WM_INITMENU || message == WM_MENUSELECT) {
         if (AgendamentosSelect_ProcessarMenu(hWnd, message, wParam, lParam)) {
-            return 0; // Mensagem j· processada pelo menu
+            return 0; // Mensagem j√° processada pelo menu
         }
     }
 
-    // Depois processa as mensagens especÌficas da janela
+    // Depois processa as mensagens espec√≠ficas da janela
     switch (message)
     {
+    case WM_COMMAND:
+    {
+        int wmId = LOWORD(wParam);
+
+        if (wmId == 0) { //CONSULTAR
+            idTutorAgendamento = AgendamentosSelect_g_tableDataConsulta[1][0];
+            TutoresSelect_idRecord = std::stoll(idTutorAgendamento);
+
+            if (!AgendamentosSelect_CreateNewWindow(hWnd, hInst, L"JanelaTutoresReadClasse", L"CONSULTAR TUTOR"))
+            {
+                // O erro j√° √© tratado dentro da fun√ß√£o
+                break;
+            }
+            else {
+                HWND hWndRead = FindWindowW(L"JanelaTutoresReadClasse", NULL);
+                if (hWndRead != NULL)
+                {
+                    AgendamentosSelect_invalidateDrawing(hWndRead);
+                    ShowWindow(hWndRead, SW_MAXIMIZE);
+                    SetForegroundWindow(hWndRead);
+                }
+            }
+        }
+        else if (wmId == 1) { //CONSULTAR
+            idPetAgendamento = AgendamentosSelect_g_tableDataConsulta[1][9];
+            PetsSelect_idRecord = std::stoll(idPetAgendamento);
+
+            if (!AgendamentosSelect_CreateNewWindow(hWnd, hInst, L"JanelaPetsReadClasse", L"CONSULTAR PET"))
+            {
+                // O erro j√° √© tratado dentro da fun√ß√£o
+                break;
+            }
+            else {
+                HWND hWndRead = FindWindowW(L"JanelaPetsReadClasse", NULL);
+                if (hWndRead != NULL)
+                {
+                    AgendamentosSelect_invalidateDrawing(hWndRead);
+                    ShowWindow(hWndRead, SW_MAXIMIZE);
+                    SetForegroundWindow(hWndRead);
+                }
+            }
+        }
+        break;
+    }
     case WM_CREATE: {
         // Resetar scroll para garantir que comece do topo
         AgendamentosSelect_g_scrollY = 0;
         AgendamentosSelect_g_scrollX = 0;
         AgendamentosSelect_ConfigurarScrollBarsConsulta(hWnd);
+
+        // Obter dimens√µes da janela
+        // Texto de exemplo
+        RECT rect;
+        GetClientRect(hWnd, &rect);
+        int width = (rect.right - rect.left) - 44;
+        int height = rect.bottom - rect.top;
+
+        // Configurar a tabela com scroll
+        int cellHeight = 32;  // Altura de cada c√©lula
+        int numColumns = AgendamentosSelect_g_tableDataConsulta.empty() ? 0 : AgendamentosSelect_g_tableDataConsulta[0].size() + 3;
+        int cellWidth = (width + 2000) / (numColumns > 0 ? numColumns : 1);
+        int startY = 40 - AgendamentosSelect_g_scrollY;  // Posi√ß√£o Y com scroll
+        int startX = 22 - AgendamentosSelect_g_scrollX;  // Posi√ß√£o X com scroll
+
+        int xPos = startX;
+        int yPos = startY + 14 * cellHeight + 1;
+
+        // Criar bot√£o consultar
+        AgendamentosSelect_g_hButton_consultar_tutor = CreateWindowW(
+            L"BUTTON", L"Consultar",
+            WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON | WS_TABSTOP,
+            xPos, yPos, 80, 30,
+            hWnd, (HMENU)(0),
+            (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL
+        );
+
+        xPos = startX;
+        yPos = startY + 17 * cellHeight + 1;
+
+        // Criar bot√£o consultar
+        AgendamentosSelect_g_hButton_consultar_pet = CreateWindowW(
+            L"BUTTON", L"Consultar",
+            WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON | WS_TABSTOP,
+            xPos, yPos, 80, 30,
+            hWnd, (HMENU)(1),
+            (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL
+        );
+
         break;
     }
 
@@ -150,6 +271,7 @@ LRESULT CALLBACK WndProcAgendamentosRead(HWND hWnd, UINT message, WPARAM wParam,
 
         if (si.nPos != oldPos) {
             AgendamentosSelect_g_scrollY = si.nPos;
+            AgendamentosSelect_AtualizarPosicoesControlesAgendamentoConsultar(hWnd);
             AgendamentosSelect_invalidateDrawing(hWnd);
             UpdateWindow(hWnd);
         }
@@ -181,6 +303,7 @@ LRESULT CALLBACK WndProcAgendamentosRead(HWND hWnd, UINT message, WPARAM wParam,
 
         if (si.nPos != oldPos) {
             AgendamentosSelect_g_scrollX = si.nPos;
+            AgendamentosSelect_AtualizarPosicoesControlesAgendamentoConsultar(hWnd);
             AgendamentosSelect_invalidateDrawing(hWnd);
             UpdateWindow(hWnd);
         }
@@ -191,13 +314,13 @@ LRESULT CALLBACK WndProcAgendamentosRead(HWND hWnd, UINT message, WPARAM wParam,
         int newWidth = LOWORD(lParam);
         int newHeight = HIWORD(lParam);
 
-        // Verificar se È uma mudanÁa significativa de tamanho (maximizar/restaurar)
+        // Verificar se √© uma mudan√ßa significativa de tamanho (maximizar/restaurar)
         static int oldWidth = 0;
         static int oldHeight = 0;
 
         if ((newWidth > oldWidth * 1.5) || (newHeight > oldHeight * 1.5) ||
             (newWidth < oldWidth * 0.7) || (newHeight < oldHeight * 0.7)) {
-            // MudanÁa significativa - resetar scroll para o topo
+            // Mudan√ßa significativa - resetar scroll para o topo
             AgendamentosSelect_g_scrollY = 0;
             AgendamentosSelect_g_scrollX = 0;
         }
@@ -209,6 +332,7 @@ LRESULT CALLBACK WndProcAgendamentosRead(HWND hWnd, UINT message, WPARAM wParam,
         AgendamentosSelect_g_clientHeight = newHeight;
         SendMessage(hWnd, WM_SETREDRAW, FALSE, 0);
         AgendamentosSelect_ConfigurarScrollBarsConsulta(hWnd);
+        AgendamentosSelect_AtualizarPosicoesControlesAgendamentoConsultar(hWnd);
         SendMessage(hWnd, WM_SETREDRAW, TRUE, 0);
         AgendamentosSelect_invalidateDrawing(hWnd);
         break;
@@ -235,6 +359,7 @@ LRESULT CALLBACK WndProcAgendamentosRead(HWND hWnd, UINT message, WPARAM wParam,
 
         if (si.nPos != oldPos) {
             AgendamentosSelect_g_scrollY = si.nPos;
+            AgendamentosSelect_AtualizarPosicoesControlesAgendamentoConsultar(hWnd);
             AgendamentosSelect_invalidateDrawing(hWnd);
             UpdateWindow(hWnd);
         }
@@ -263,7 +388,24 @@ LRESULT CALLBACK WndProcAgendamentosRead(HWND hWnd, UINT message, WPARAM wParam,
         char* errMsg = 0;
         int rc = sqlite3_open("pet.db", &db);
         if (rc == SQLITE_OK) {
-            const char* sqlSelectConsulta = "SELECT * FROM Pets;";
+
+            // 1. Defina o buffer de destino. Escolha um tamanho adequado.
+            char buffer[512];
+
+            // 2. Use snprintf para formatar a string
+            snprintf(
+                buffer,
+                sizeof(buffer),
+                "SELECT * "
+                "FROM Tutores T INNER JOIN Pets P ON T.ID = P.ID_Tutor_FK "
+                "INNER JOIN Agendamentos A ON P.ID = A.ID_Pet_FK "
+                "WHERE A.ID = %d;",
+                AgendamentosSelect_idRecord // O valor que ser√° inserido no '%d'
+            );
+
+            // 3. O 'buffer' agora cont√©m a string SQL formatada.
+            const char* sqlSelectConsulta = buffer;
+
             rc = sqlite3_exec(db, sqlSelectConsulta, AgendamentosSelect_sqlite_callback_consulta, &AgendamentosSelect_g_tableDataConsulta, &errMsg);
             if (rc != SQLITE_OK) {
                 if (errMsg) {
@@ -283,22 +425,30 @@ LRESULT CALLBACK WndProcAgendamentosRead(HWND hWnd, UINT message, WPARAM wParam,
             sqlite3_close(db);
         }
         else {
-            AgendamentosSelect_g_tableDataConsulta.push_back({ L"Erro", L"N„o foi possÌvel abrir o banco" });
+            AgendamentosSelect_g_tableDataConsulta.push_back({ L"Erro", L"N√£o foi poss√≠vel abrir o banco" });
         }
 
-        // Obter dimensıes da janela
+        if (AgendamentosSelect_g_tableDataConsulta.empty()) {
+            PostMessage(hWnd, WM_CLOSE, 0, 0);
+            break;
+        }
+
+        idTutorAgendamento = AgendamentosSelect_g_tableDataConsulta[1][0];
+        idPetAgendamento = AgendamentosSelect_g_tableDataConsulta[1][9];
+
+        // Obter dimens√µes da janela
         GetClientRect(hWnd, &rect);
         int width = (rect.right - rect.left) - 44;
         int height = rect.bottom - rect.top;
 
         // Configurar a tabela com scroll
-        int cellHeight = 32;  // Altura de cada cÈlula
+        int cellHeight = 32;  // Altura de cada c√©lula
         int numColumns = AgendamentosSelect_g_tableDataConsulta.empty() ? 0 : AgendamentosSelect_g_tableDataConsulta[0].size() + 3;
         int cellWidth = (width + 2000) / (numColumns > 0 ? numColumns : 1);
-        int startY = 40 - AgendamentosSelect_g_scrollY;  // PosiÁ„o Y com scroll
-        int startX = 22 - AgendamentosSelect_g_scrollX;  // PosiÁ„o X com scroll
+        int startY = 40 - AgendamentosSelect_g_scrollY;  // Posi√ß√£o Y com scroll
+        int startX = 22 - AgendamentosSelect_g_scrollX;  // Posi√ß√£o X com scroll
 
-        //TÌtulo
+        //T√≠tulo
         AgendamentosSelect_windowsTitle(hdc, startX, startY - 20, L"CONSULTAR AGENDAMENTO", 21);
 
         // Desenhar a grade
@@ -313,12 +463,12 @@ LRESULT CALLBACK WndProcAgendamentosRead(HWND hWnd, UINT message, WPARAM wParam,
         HBRUSH hBrushGray = CreateSolidBrush(RGB(240, 240, 240));
         HBRUSH hOldBrush = (HBRUSH)SelectObject(hdc, hBrushWhite);
 
-        // Desenhar o texto nas cÈlulas
+        // Desenhar o texto nas c√©lulas
         SetBkMode(hdc, TRANSPARENT);
         int colNumber = 0;
         int rowNumber = 0;
 
-        for (size_t col = 0; col < 24; col++) {
+        for (size_t col = 20; col < 31; col++) {
             colNumber++;
 
             HBRUSH hCurrentBrush = (col % 2 == 0) ? hBrushGray : hBrushWhite;
@@ -334,102 +484,135 @@ LRESULT CALLBACK WndProcAgendamentosRead(HWND hWnd, UINT message, WPARAM wParam,
             FillRect(hdc, &rowRect, hCurrentBrush);
 
             for (size_t row = 0; row < AgendamentosSelect_g_tableDataConsulta.size(); row++) {
-                if (AgendamentosSelect_g_tableDataConsulta[row][0] == std::to_wstring(AgendamentosSelect_idRecord) || row == 0) {
+                int xPos;
+                int yPos;
 
-                    int xPos;
-                    int yPos;
+                if (row == 0) {
+                    xPos = startX + 10;
+                    yPos = startY + colNumber * cellHeight + 7;
+                    AgendamentosSelect_fonte(L"Header", RGB(0, 0, 0), hdc);
+                }
+                else {
+                    xPos = startX + cellWidth + 60;
+                    yPos = startY + colNumber * cellHeight + 7;
+                    AgendamentosSelect_fonte(L"Font", RGB(0, 0, 0), hdc);
+                }
 
-                    if (row == 0) {
-                        xPos = startX + 10;
-                        yPos = startY + colNumber * cellHeight + 7;
-                        AgendamentosSelect_fonte(L"Header", RGB(0, 0, 0), hdc);
-                    }
-                    else {
-                        xPos = startX + cellWidth + 60;
-                        yPos = startY + colNumber * cellHeight + 7;
-                        AgendamentosSelect_fonte(L"Font", RGB(0, 0, 0), hdc);
-                    }
-
-                    if (AgendamentosSelect_g_tableDataConsulta[row][col] == L"ID") {
-                        TextOut(hdc, xPos, yPos, L"ID:", 3);
-                    }
-                    else if (AgendamentosSelect_g_tableDataConsulta[row][col] == L"Nome_do_Pet") {
-                        TextOut(hdc, xPos, yPos, L"Nome do Pet:", 12);
-                    }
-                    else if (AgendamentosSelect_g_tableDataConsulta[row][col] == L"Raca") {
-                        TextOut(hdc, xPos, yPos, L"RaÁa:", 5);
-                    }
-                    else if (AgendamentosSelect_g_tableDataConsulta[row][col] == L"Nome_do_Tutor") {
-                        TextOut(hdc, xPos, yPos, L"Nome do Tutor:", 14);
-                    }
-                    else if (AgendamentosSelect_g_tableDataConsulta[row][col] == L"CEP") {
-                        TextOut(hdc, xPos, yPos, L"CEP:", 4);
-                    }
-                    else if (AgendamentosSelect_g_tableDataConsulta[row][col] == L"Cor") {
-                        TextOut(hdc, xPos, yPos, L"Cor:", 4);
-                    }
-                    else if (AgendamentosSelect_g_tableDataConsulta[row][col] == L"Idade") {
-                        TextOut(hdc, xPos, yPos, L"Idade:", 6);
-                    }
-                    else if (AgendamentosSelect_g_tableDataConsulta[row][col] == L"Peso") {
-                        TextOut(hdc, xPos, yPos, L"Peso:", 5);
-                    }
-                    else if (AgendamentosSelect_g_tableDataConsulta[row][col] == L"Sexo") {
-                        TextOut(hdc, xPos, yPos, L"Sexo:", 5);
-                    }
-                    else if (AgendamentosSelect_g_tableDataConsulta[row][col] == L"Castrado") {
-                        TextOut(hdc, xPos, yPos, L"Castrado:", 9);
-                    }
-                    else if (AgendamentosSelect_g_tableDataConsulta[row][col] == L"Endereco") {
-                        TextOut(hdc, xPos, yPos, L"EndereÁo:", 9);
-                    }
-                    else if (AgendamentosSelect_g_tableDataConsulta[row][col] == L"Ponto_de_referencia") {
-                        TextOut(hdc, xPos, yPos, L"Ponto de ReferÍncia:", 20);
-                    }
-                    else if (AgendamentosSelect_g_tableDataConsulta[row][col] == L"Banho") {
-                        TextOut(hdc, xPos, yPos, L"Banho:", 6);
-                    }
-                    else if (AgendamentosSelect_g_tableDataConsulta[row][col] == L"Tosa") {
-                        TextOut(hdc, xPos, yPos, L"Tosa:", 5);
-                    }
-                    else if (AgendamentosSelect_g_tableDataConsulta[row][col] == L"Obs_Tosa") {
-                        TextOut(hdc, xPos, yPos, L"ObservaÁ„o:", 11);
-                    }
-                    else if (AgendamentosSelect_g_tableDataConsulta[row][col] == L"Parasitas") {
-                        TextOut(hdc, xPos, yPos, L"Parasitas:", 10);
-                    }
-                    else if (AgendamentosSelect_g_tableDataConsulta[row][col] == L"Lesoes") {
-                        TextOut(hdc, xPos, yPos, L"Lesıes:", 7);
-                    }
-                    else if (AgendamentosSelect_g_tableDataConsulta[row][col] == L"Obs_Lesoes") {
-                        TextOut(hdc, xPos, yPos, L"ObservaÁ„o:", 11);
-                    }
-                    else if (AgendamentosSelect_g_tableDataConsulta[row][col] == L"Telefone") {
-                        TextOut(hdc, xPos, yPos, L"Telefone:", 9);
-                    }
-                    else if (AgendamentosSelect_g_tableDataConsulta[row][col] == L"CPF") {
-                        TextOut(hdc, xPos, yPos, L"CPF:", 4);
-                    }
-                    else if (AgendamentosSelect_g_tableDataConsulta[row][col] == L"Appointment_Date") {
-                        TextOut(hdc, xPos, yPos, L"Data do Agendamento:", 20);
-                    }
-                    else if (AgendamentosSelect_g_tableDataConsulta[row][col] == L"Appointment_Hour") {
-                        TextOut(hdc, xPos, yPos, L"Hora do Agendamento:", 20);
-                    }
-                    else if (AgendamentosSelect_g_tableDataConsulta[row][col] == L"Date") {
-                        TextOut(hdc, xPos, yPos, L"Data do Registro:", 17);
-                    }
-                    else if (AgendamentosSelect_g_tableDataConsulta[row][col] == L"Hour") {
-                        TextOut(hdc, xPos, yPos, L"Hora do Registro:", 17);
-                    }
-                    else {
-                        TextOut(hdc, xPos, yPos, AgendamentosSelect_g_tableDataConsulta[row][col].c_str(),
-                            static_cast<int>(AgendamentosSelect_g_tableDataConsulta[row][col].length()));
-                    }
+                if (AgendamentosSelect_g_tableDataConsulta[row][col] == L"ID") {
+                    TextOut(hdc, xPos, yPos, L"ID:", 3);
+                }
+                else if (AgendamentosSelect_g_tableDataConsulta[row][col] == L"Nome_do_Pet") {
+                    TextOut(hdc, xPos, yPos, L"Nome do Pet:", 12);
+                }
+                else if (AgendamentosSelect_g_tableDataConsulta[row][col] == L"Raca") {
+                    TextOut(hdc, xPos, yPos, L"Ra√ßa:", 5);
+                }
+                else if (AgendamentosSelect_g_tableDataConsulta[row][col] == L"Nome_do_Tutor") {
+                    TextOut(hdc, xPos, yPos, L"Nome do Tutor:", 14);
+                }
+                else if (AgendamentosSelect_g_tableDataConsulta[row][col] == L"CEP") {
+                    TextOut(hdc, xPos, yPos, L"CEP:", 4);
+                }
+                else if (AgendamentosSelect_g_tableDataConsulta[row][col] == L"Cor") {
+                    TextOut(hdc, xPos, yPos, L"Cor:", 4);
+                }
+                else if (AgendamentosSelect_g_tableDataConsulta[row][col] == L"Idade") {
+                    TextOut(hdc, xPos, yPos, L"Idade:", 6);
+                }
+                else if (AgendamentosSelect_g_tableDataConsulta[row][col] == L"Peso") {
+                    TextOut(hdc, xPos, yPos, L"Peso:", 5);
+                }
+                else if (AgendamentosSelect_g_tableDataConsulta[row][col] == L"Sexo") {
+                    TextOut(hdc, xPos, yPos, L"Sexo:", 5);
+                }
+                else if (AgendamentosSelect_g_tableDataConsulta[row][col] == L"Castrado") {
+                    TextOut(hdc, xPos, yPos, L"Castrado:", 9);
+                }
+                else if (AgendamentosSelect_g_tableDataConsulta[row][col] == L"Endereco") {
+                    TextOut(hdc, xPos, yPos, L"Endere√ßo:", 9);
+                }
+                else if (AgendamentosSelect_g_tableDataConsulta[row][col] == L"Ponto_de_referencia") {
+                    TextOut(hdc, xPos, yPos, L"Ponto de Refer√™ncia:", 20);
+                }
+                else if (AgendamentosSelect_g_tableDataConsulta[row][col] == L"Banho") {
+                    TextOut(hdc, xPos, yPos, L"Banho:", 6);
+                }
+                else if (AgendamentosSelect_g_tableDataConsulta[row][col] == L"Tosa") {
+                    TextOut(hdc, xPos, yPos, L"Tosa:", 5);
+                }
+                else if (AgendamentosSelect_g_tableDataConsulta[row][col] == L"Obs_Tosa") {
+                    TextOut(hdc, xPos, yPos, L"Observa√ß√£o:", 11);
+                }
+                else if (AgendamentosSelect_g_tableDataConsulta[row][col] == L"Parasitas") {
+                    TextOut(hdc, xPos, yPos, L"Parasitas:", 10);
+                }
+                else if (AgendamentosSelect_g_tableDataConsulta[row][col] == L"Lesoes") {
+                    TextOut(hdc, xPos, yPos, L"Les√µes:", 7);
+                }
+                else if (AgendamentosSelect_g_tableDataConsulta[row][col] == L"Obs_Lesoes") {
+                    TextOut(hdc, xPos, yPos, L"Observa√ß√£o:", 11);
+                }
+                else if (AgendamentosSelect_g_tableDataConsulta[row][col] == L"Telefone") {
+                    TextOut(hdc, xPos, yPos, L"Telefone:", 9);
+                }
+                else if (AgendamentosSelect_g_tableDataConsulta[row][col] == L"CPF") {
+                    TextOut(hdc, xPos, yPos, L"CPF:", 4);
+                }
+                else if (AgendamentosSelect_g_tableDataConsulta[row][col] == L"Appointment_Date") {
+                    TextOut(hdc, xPos, yPos, L"Data do Agendamento:", 20);
+                }
+                else if (AgendamentosSelect_g_tableDataConsulta[row][col] == L"Appointment_Hour") {
+                    TextOut(hdc, xPos, yPos, L"Hora do Agendamento:", 20);
+                }
+                else if (AgendamentosSelect_g_tableDataConsulta[row][col] == L"Date") {
+                    TextOut(hdc, xPos, yPos, L"Data do Registro:", 17);
+                }
+                else if (AgendamentosSelect_g_tableDataConsulta[row][col] == L"Hour") {
+                    TextOut(hdc, xPos, yPos, L"Hora do Registro:", 17);
+                }
+                else {
+                    TextOut(hdc, xPos, yPos, AgendamentosSelect_g_tableDataConsulta[row][col].c_str(),
+                        static_cast<int>(AgendamentosSelect_g_tableDataConsulta[row][col].length()));
                 }
                 rowNumber++;
             }
         }
+
+        SelectObject(hdc, hBrushGray);
+
+        // Desenhar o fundo da linha (com scroll)
+        RECT rowRect = {
+            startX,
+            startY + static_cast<int>(colNumber + 2) * cellHeight,
+            startX + width,
+            startY + (static_cast<int>(colNumber) + 3) * cellHeight
+        };
+        FillRect(hdc, &rowRect, hBrushGray);
+
+        int yPos = startY + (colNumber + 2) * cellHeight + 7;
+        int xPos = startX + 10;
+        TextOut(hdc, xPos, yPos, L"Nome do Tutor:", 14);
+
+        yPos = startY + (colNumber + 2) * cellHeight + 7;
+        xPos = startX + cellWidth + 60;
+        TextOut(hdc, xPos, yPos, AgendamentosSelect_g_tableDataConsulta[1][1].c_str(), static_cast<int>(AgendamentosSelect_g_tableDataConsulta[1][1].length()));
+
+        // Desenhar o fundo da linha (com scroll)
+        rowRect = {
+            startX,
+            startY + static_cast<int>(colNumber + 5) * cellHeight,
+            startX + width,
+            startY + (static_cast<int>(colNumber) + 6) * cellHeight
+        };
+        FillRect(hdc, &rowRect, hBrushGray);
+
+        yPos = startY + (colNumber + 5) * cellHeight + 7;
+        xPos = startX + 10;
+        TextOut(hdc, xPos, yPos, L"Nome do Pet:", 12);
+
+        yPos = startY + (colNumber + 5) * cellHeight + 7;
+        xPos = startX + cellWidth + 60;
+        TextOut(hdc, xPos, yPos, AgendamentosSelect_g_tableDataConsulta[1][10].c_str(), static_cast<int>(AgendamentosSelect_g_tableDataConsulta[1][10].length()));
 
         // Limpar recursos
         SelectObject(hdc, hOldBrush);
@@ -452,7 +635,7 @@ LRESULT CALLBACK WndProcAgendamentosRead(HWND hWnd, UINT message, WPARAM wParam,
         {
             return 0; // Ignora o clique durante o redesenho
         }
-        // LÛgica existente para clique, se aplic·vel
+        // L√≥gica existente para clique, se aplic√°vel
         return DefWindowProc(hWnd, message, wParam, lParam);
     }
     break;
@@ -463,7 +646,7 @@ LRESULT CALLBACK WndProcAgendamentosRead(HWND hWnd, UINT message, WPARAM wParam,
         {
             return 0; // Ignora o clique durante o redesenho
         }
-        // LÛgica existente para clique, se aplic·vel
+        // L√≥gica existente para clique, se aplic√°vel
         return DefWindowProc(hWnd, message, wParam, lParam);
     }
     break;
@@ -478,7 +661,7 @@ LRESULT CALLBACK WndProcAgendamentosRead(HWND hWnd, UINT message, WPARAM wParam,
     return 0;
 }
 
-// FunÁ„o obsoleta (removida do WinMain, mas mantida para compatibilidade se necess·ria)
+// Fun√ß√£o obsoleta (removida do WinMain, mas mantida para compatibilidade se necess√°ria)
 LRESULT CALLBACK NewWndProcAgendamentosRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message)
@@ -487,7 +670,7 @@ LRESULT CALLBACK NewWndProcAgendamentosRead(HWND hWnd, UINT message, WPARAM wPar
     {
         PAINTSTRUCT ps;
         HDC hdc = BeginPaint(hWnd, &ps);
-        TextOut(hdc, 10, 10, L"Esta È a nova janela Read!", 21);
+        TextOut(hdc, 10, 10, L"Esta √© a nova janela Read!", 21);
         EndPaint(hWnd, &ps);
     }
     break;
@@ -500,7 +683,7 @@ LRESULT CALLBACK NewWndProcAgendamentosRead(HWND hWnd, UINT message, WPARAM wPar
     return 0;
 }
 
-// FunÁ„o obsoleta (removida do WinMain, mas mantida para compatibilidade se necess·ria)
+// Fun√ß√£o obsoleta (removida do WinMain, mas mantida para compatibilidade se necess√°ria)
 BOOL InitAgendamentosRead(HINSTANCE hInstance)
 {
     WNDCLASSW wc = { 0 };

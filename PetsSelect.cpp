@@ -83,12 +83,12 @@ LRESULT CALLBACK WndProcPetsSelect(HWND hWnd, UINT message, WPARAM wParam, LPARA
         }
         else {
             // Código de criação de tabela e inserção (mantido como está)
-            const char* sqlDrop = "DROP TABLE IF EXISTS Pets;";
-            rc = sqlite3_exec(db, sqlDrop, 0, 0, &errMsg);
-            if (rc != SQLITE_OK) {
-                MessageBox(hWnd, L"Erro ao dropar tabela!", L"Erro", MB_OK | MB_ICONERROR);
-                sqlite3_free(errMsg);
-            }
+            //const char* sqlDrop = "DROP TABLE IF EXISTS Pets;";
+            //rc = sqlite3_exec(db, sqlDrop, 0, 0, &errMsg);
+            //if (rc != SQLITE_OK) {
+                //MessageBox(hWnd, L"Erro ao dropar tabela!", L"Erro", MB_OK | MB_ICONERROR);
+                //sqlite3_free(errMsg);
+            //}
             const char* sqlCreate = "CREATE TABLE IF NOT EXISTS Pets (ID INTEGER PRIMARY KEY AUTOINCREMENT, Nome_do_Pet TEXT, Raca TEXT, Cor TEXT, Idade TEXT, Peso TEXT, Sexo TEXT, Castrado TEXT, Date TEXT, Hour TEXT, ID_Tutor_FK INTEGER, FOREIGN KEY (ID_Tutor_FK) REFERENCES Tutores(ID) ON DELETE CASCADE ON UPDATE CASCADE);";
             rc = sqlite3_exec(db, sqlCreate, 0, 0, &errMsg);
             if (rc != SQLITE_OK) {
@@ -108,19 +108,19 @@ LRESULT CALLBACK WndProcPetsSelect(HWND hWnd, UINT message, WPARAM wParam, LPARA
             }
             else {
                 // Inserções (código original mantido)
-                std::wstring currentDate = PetsSelect_GetCurrentDate();
-                std::wstring currentHour = PetsSelect_GetCurrentHour();
-                for (int i = 1; i <= 100; i++) {
-                   std::wstring sqlInsertW = L"INSERT INTO Pets (Nome_do_Pet, Raca, Cor, Idade, Peso, Sexo, Castrado, Date, Hour, ID_Tutor_FK) VALUES ('Fido', 'Bulldog', 'Preto', 5, 25, 'Masculino', 'Sim', '" + currentDate + L"', '" + currentHour + L"', 1);";
-                    int required = WideCharToMultiByte(CP_UTF8, 0, sqlInsertW.c_str(), -1, nullptr, 0, nullptr, nullptr);
-                    if (required > 0) {
-                        std::string sqlInsertUtf8(required, '\0');
-                        WideCharToMultiByte(CP_UTF8, 0, sqlInsertW.c_str(), -1, &sqlInsertUtf8[0], required, nullptr, nullptr);
-                        char* errMsg = nullptr;
-                        int rc = sqlite3_exec(db, sqlInsertUtf8.c_str(), nullptr, nullptr, &errMsg);
-                        if (rc != SQLITE_OK) sqlite3_free(errMsg);
-                    }
-                }
+                //std::wstring currentDate = PetsSelect_GetCurrentDate();
+                //std::wstring currentHour = PetsSelect_GetCurrentHour();
+                //for (int i = 1; i <= 100; i++) {
+                   //std::wstring sqlInsertW = L"INSERT INTO Pets (Nome_do_Pet, Raca, Cor, Idade, Peso, Sexo, Castrado, Date, Hour, ID_Tutor_FK) VALUES ('Fido', 'Bulldog', 'Preto', 5, 25, 'Masculino', 'Sim', '" + currentDate + L"', '" + currentHour + L"', 1);";
+                    //int required = WideCharToMultiByte(CP_UTF8, 0, sqlInsertW.c_str(), -1, nullptr, 0, nullptr, nullptr);
+                    //if (required > 0) {
+                        //std::string sqlInsertUtf8(required, '\0');
+                        //WideCharToMultiByte(CP_UTF8, 0, sqlInsertW.c_str(), -1, &sqlInsertUtf8[0], required, nullptr, nullptr);
+                        //char* errMsg = nullptr;
+                        //int rc = sqlite3_exec(db, sqlInsertUtf8.c_str(), nullptr, nullptr, &errMsg);
+                        //if (rc != SQLITE_OK) sqlite3_free(errMsg);
+                    //}
+                //}
                 //std::wstring sqlInsertW2 = L"INSERT INTO Pets (Nome_do_Pet, Raca, Nome_do_Tutor, CEP, Cor, Idade, Peso, Sexo, Castrado, Endereco, Ponto_de_referencia, Banho, Tosa, Obs_Tosa, Parasitas, Lesoes, Obs_Lesoes, Telefone, CPF, Date, Hour) VALUES ('Astralis', 'Viralata', 'Débora', '36309022', 'Preto', 6, 18, 'Feminino', 'Não', 'Rua Ricador Geraldo dos Santos - Alto das Mercês - nº12', 'Perto da igreja das Mercês', 'Padrão', 'Tesoura', 'aa ksfj asldfj açlksdj fkasjd fçklasdjf aksdlfjkalçsdfj kçalsdjf kçlasjd çfkasdj fklçaj sdçlfkjakslfj çlasdjf çasd jfçaskdjfsdf', 'Carrapatos', 'Pele', ' asdfj açlsjf akçslj fkçlasdj fkçlasdjf lçkasjdf kasdjfkiujriwejfç dfkmdnfçnvçaidsjfçkdsfjaçksdjfkaçsjdfkasdjfkçlasjdçfaksdjf', '32998365552', '09813426789', '" + currentDate + L"', '" + currentHour + L"');";
                 //int required2 = WideCharToMultiByte(CP_UTF8, 0, sqlInsertW2.c_str(), -1, nullptr, 0, nullptr, nullptr);
                 //if (required2 > 0) {
@@ -171,8 +171,9 @@ LRESULT CALLBACK WndProcPetsSelect(HWND hWnd, UINT message, WPARAM wParam, LPARA
                 HWND hWndRead = FindWindowW(L"JanelaPetsReadClasse", NULL);
                 if (hWndRead != NULL)
                 {
+                    PetsSelect_invalidateDrawing(hWndRead);
+                    UpdateWindow(hWndRead);
                     ShowWindow(hWndRead, SW_MAXIMIZE);
-                    SetForegroundWindow(hWndRead);
                 }
             }
         }
@@ -193,8 +194,9 @@ LRESULT CALLBACK WndProcPetsSelect(HWND hWnd, UINT message, WPARAM wParam, LPARA
                 HWND hWndRead = FindWindowW(L"JanelaPetsEditClasse", NULL);
                 if (hWndRead != NULL)
                 {
+                    PetsSelect_invalidateDrawing(hWndRead);
+                    UpdateWindow(hWndRead);
                     ShowWindow(hWndRead, SW_MAXIMIZE);
-                    SetForegroundWindow(hWndRead);
                 }
             }
         }
@@ -204,11 +206,11 @@ LRESULT CALLBACK WndProcPetsSelect(HWND hWnd, UINT message, WPARAM wParam, LPARA
             //swprintf_s(msg, L"Botão %s%d clicado! Id: %d", L"Deletar", (int)id, (int)id);
             //MessageBoxW(hWnd, msg, L"Info", MB_OK);
 
-            PetsSelect_idRecord = id;
-            std::wstring msg = L"Deletar registro ID " + std::to_wstring(PetsSelect_idRecord) + L"?";
+            // PetsSelect_idRecord = id;
+            std::wstring msg = L"Deletar registro ID " + std::to_wstring(id) + L"?\nAgendamentos cadastrados com esse Pet serão deletados.";
             if (MessageBoxW(hWnd, msg.c_str(), L"Confirmar", MB_YESNO | MB_ICONQUESTION) == IDYES) {
-                PetsSelect_deleteRecordById("pet.db", PetsSelect_idRecord, hWnd);
-                PetsSelect_RecarregarDadosTabela(hWnd);
+                PetsSelect_deleteRecordById("pet.db", id, hWnd);
+                AtualizarJanelas();
             }
         }
         else if (wmId == PetsSelect_FILTRAR)
@@ -418,6 +420,7 @@ LRESULT CALLBACK WndProcPetsSelect(HWND hWnd, UINT message, WPARAM wParam, LPARA
             limit = min(PetsSelect_offsetTableRow + PetsSelect_limitTableRow, PetsSelect_rowsNumber);
         }
 
+        std::wstring displayText;
         // DESENHAR APENAS UMA VEZ - REMOVER loops desnecessários
         for (size_t row = PetsSelect_offsetTableRow; row < limit && row < PetsSelect_g_tableData.size(); row++) {
             if (row < PetsSelect_g_tableData.size()) {
@@ -443,9 +446,17 @@ LRESULT CALLBACK WndProcPetsSelect(HWND hWnd, UINT message, WPARAM wParam, LPARA
                 counter = 0;
                 // Desenhar as células de dados
                 for (size_t col = 0; col < PetsSelect_g_tableData[row].size(); col++) {
-                    if (col == 0 || col == 1 || col == 2 || col == 3 || col == 4 || col == 5 || col == 12) {
-                        std::wstring displayText = PetsSelect_g_tableData[row][col];
+                    if (col == 1) {
+                        displayText = PetsSelect_g_tableData[row][12];
+                    }
+                    else if (col == 0) {
+                        displayText = PetsSelect_g_tableData[row][col];
+                    }
+                    else {
+                        displayText = PetsSelect_g_tableData[row][col - 1];
+                    }
 
+                    if (col == 0 || col == 1 || col == 2 || col == 3 || col == 4 || col == 5 || col == 6) {
                         int xPos = startX + counter * cellWidth + 10;
                         int yPos = startY + linha * cellHeight + 7;
 

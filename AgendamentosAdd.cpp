@@ -666,13 +666,7 @@ LRESULT CALLBACK WndProcAgendamentosAdd(HWND hWnd, UINT message, WPARAM wParam, 
                         sqlite3_free(errMsg);
                     }
                     else {
-
-                        HWND hwndSelect = FindWindow(TEXT("JanelaAgendamentosSelectClasse"), NULL);
-                        if (hwndSelect != NULL) {
-                            //std::cout << "Janela encontrada! HWND: " << hwnd << std::endl;
-                            AgendamentosSelect_RecarregarDadosTabela(hwndSelect);
-                        }
-
+                        AtualizarJanelas();
                         MessageBox(hWnd, L"Dados inseridos com sucesso!", L"Sucesso", MB_OK);
                     }
                 }
@@ -768,7 +762,7 @@ LRESULT CALLBACK WndProcAgendamentosAdd(HWND hWnd, UINT message, WPARAM wParam, 
         SendMessage(hComboBox, CB_RESETCONTENT, 0, 0);
         TutoresPetsSelect_Global_preencherComboBox(hComboBox);
 
-                PAINTSTRUCT ps;
+        PAINTSTRUCT ps;
         HDC hdc = BeginPaint(hWnd, &ps);
 
         // Double buffering
