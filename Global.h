@@ -17,6 +17,7 @@ void AgendamentosSelect_RecarregarDadosTabela(HWND hWnd);
 void AgendamentosSelect_invalidateDrawing(HWND hWnd);
 void TutoresSelect_RecarregarDadosTabela(HWND hWnd);
 void TutoresSelect_invalidateDrawing(HWND hWnd);
+std::string GetAppDataPath();
 
 void TutoresSelect_Global_selectDB();
 void TutoresSelect_Global_preencherComboBox(HWND hComboBox);

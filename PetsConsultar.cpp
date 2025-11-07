@@ -344,10 +344,15 @@ LRESULT CALLBACK WndProcPetsRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
         // 1. LIMPAR DADOS ANTIGOS ANTES DE CADA CONSULTA
         PetsSelect_g_tableDataConsulta.clear();
 
-        // Consultar o banco apenas se a tabela estiver vazia
-        sqlite3* db;
+        // Abrir ou criar o banco de dados (código original mantido)
         char* errMsg = 0;
-        int rc = sqlite3_open("pet.db", &db);
+        sqlite3* db = nullptr;
+        std::string dbPath = GetAppDataPath() + "pet.db";
+
+        // Cria a pasta se não existir
+        CreateDirectoryA(dbPath.substr(0, dbPath.find_last_of('\\')).c_str(), NULL);
+
+        int rc = sqlite3_open(dbPath.c_str(), &db);
         if (rc == SQLITE_OK) {
             std::string idRecordStr = std::to_string(PetsSelect_idRecord);
 

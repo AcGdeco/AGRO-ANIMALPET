@@ -92,7 +92,7 @@ LRESULT CALLBACK WndProcAgendamentosAdd(HWND hWnd, UINT message, WPARAM wParam, 
         int startX = 22 - AgendamentosSelect_g_scrollX;
 
         // Criar campos de entrada
-        for (int col = 0; col < 9; col++) {
+        for (int col = 0; col < 10; col++) {
             int colNumber = col + 1;
             int controlID = col + 2; // IDs de 2 a 22
             int xPos = startX + cellWidth + 10;
@@ -350,7 +350,7 @@ LRESULT CALLBACK WndProcAgendamentosAdd(HWND hWnd, UINT message, WPARAM wParam, 
         }
 
         // Criar botão
-        int buttonY = startY + 22 * cellHeight + 3;
+        int buttonY = startY + 23 * cellHeight + 3;
         AgendamentosSelect_g_hButton = CreateWindowW(
             L"BUTTON", L"Salvar",
             WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON | WS_TABSTOP,
@@ -503,8 +503,8 @@ LRESULT CALLBACK WndProcAgendamentosAdd(HWND hWnd, UINT message, WPARAM wParam, 
 
         if (wmId == 1) // Botão "Salvar Registro"
         {
-            std::wstring dados[11];
-            for (int i = 2; i <= 11; i++) {
+            std::wstring dados[12];
+            for (int i = 2; i <= 12; i++) {
                 std::wstring controlIDStr = std::to_wstring(i);
                 HWND input = GetDlgItem(hWnd, i);
 
@@ -638,9 +638,15 @@ LRESULT CALLBACK WndProcAgendamentosAdd(HWND hWnd, UINT message, WPARAM wParam, 
                 }
             }
 
-            sqlite3* db;
+            // Abrir ou criar o banco de dados (código original mantido)
             char* errMsg = 0;
-            int rc = sqlite3_open("pet.db", &db);
+            sqlite3* db = nullptr;
+            std::string dbPath = GetAppDataPath() + "pet.db";
+
+            // Cria a pasta se não existir
+            CreateDirectoryA(dbPath.substr(0, dbPath.find_last_of('\\')).c_str(), NULL);
+
+            int rc = sqlite3_open(dbPath.c_str(), &db);
             if (rc) {
                 MessageBox(hWnd, L"Erro ao abrir/criar o banco de dados!", L"Erro", MB_OK | MB_ICONERROR);
             }
@@ -648,7 +654,7 @@ LRESULT CALLBACK WndProcAgendamentosAdd(HWND hWnd, UINT message, WPARAM wParam, 
                 std::wstring currentDate = AgendamentosSelect_GetCurrentDate();
                 std::wstring currentHour = AgendamentosSelect_GetCurrentHour();
 
-                std::wstring sqlInsertW = L"INSERT INTO Agendamentos (ID_Pet_FK, Banho, Tosa, Obs_Tosa, Parasitas, Lesoes, Obs_Lesoes, Appointment_Date, Appointment_Hour, Date, Hour) VALUES ('" + AgendamentosSelect_treatDataAppointment(dados[2], 2) + L"', '" + AgendamentosSelect_treatDataAppointment(dados[3], 3) + L"', '" + AgendamentosSelect_treatDataAppointment(dados[4], 4) + L"', '" + AgendamentosSelect_treatDataAppointment(dados[5], 5) + L"', '" + AgendamentosSelect_treatDataAppointment(dados[6], 6) + L"', '" + AgendamentosSelect_treatDataAppointment(dados[7], 7) + L"', '" + AgendamentosSelect_treatDataAppointment(dados[8], 8) + L"', '" + AgendamentosSelect_treatDataAppointment(dados[9], 9) + L"', '" + AgendamentosSelect_treatDataAppointment(dados[10], 10) + L"', '" + currentDate + L"', '" + currentHour + L"');";
+                std::wstring sqlInsertW = L"INSERT INTO Agendamentos (ID_Pet_FK, Banho, Tosa, Obs_Tosa, Parasitas, Lesoes, Obs_Lesoes, Appointment_Date, Appointment_Hour, Date, Hour, Price) VALUES ('" + AgendamentosSelect_treatDataAppointment(dados[2], 2) + L"', '" + AgendamentosSelect_treatDataAppointment(dados[3], 3) + L"', '" + AgendamentosSelect_treatDataAppointment(dados[4], 4) + L"', '" + AgendamentosSelect_treatDataAppointment(dados[5], 5) + L"', '" + AgendamentosSelect_treatDataAppointment(dados[6], 6) + L"', '" + AgendamentosSelect_treatDataAppointment(dados[7], 7) + L"', '" + AgendamentosSelect_treatDataAppointment(dados[8], 8) + L"', '" + AgendamentosSelect_treatDataAppointment(dados[9], 9) + L"', '" + AgendamentosSelect_treatDataAppointment(dados[10], 10) + L"', '" + currentDate + L"', '" + currentHour + L"', '" + AgendamentosSelect_treatDataAppointment(dados[11], 11) + L"');";
 
                 if (AgendamentosSelect_error == L"1") {
                     MessageBox(hWnd, AgendamentosSelect_msg, L"Erro", MB_OK | MB_ICONERROR);
@@ -789,7 +795,7 @@ LRESULT CALLBACK WndProcAgendamentosAdd(HWND hWnd, UINT message, WPARAM wParam, 
 
         // Desenhar linhas visíveis
         int firstVisibleRow = max(0, (AgendamentosSelect_g_scrollY - 40) / cellHeight);
-        int lastVisibleRow = min(8, firstVisibleRow + (AgendamentosSelect_g_clientHeight / cellHeight) + 2);
+        int lastVisibleRow = min(9, firstVisibleRow + (AgendamentosSelect_g_clientHeight / cellHeight) + 2);
 
         HBRUSH hBrushWhite = CreateSolidBrush(RGB(255, 255, 255));
         HBRUSH hBrushGray = CreateSolidBrush(RGB(240, 240, 240));
@@ -798,7 +804,7 @@ LRESULT CALLBACK WndProcAgendamentosAdd(HWND hWnd, UINT message, WPARAM wParam, 
         SetBkMode(hdcMem, OPAQUE);
 
         for (int row = firstVisibleRow; row <= lastVisibleRow; row++) {
-            if (row >= 9) break;
+            if (row >= 10) break;
 
             HBRUSH hCurrentBrush = (row % 2 == 0) ? hBrushGray : hBrushWhite;
             COLORREF bgColor = (row % 2 == 0) ? RGB(240, 240, 240) : RGB(255, 255, 255);
@@ -824,10 +830,10 @@ LRESULT CALLBACK WndProcAgendamentosAdd(HWND hWnd, UINT message, WPARAM wParam, 
             // Desenhar labels
             const wchar_t* labels[] = {
                 L"Nome do Tutor e do Pet:", L"Banho:", L"Tosa:", L"Observação:",
-                L"Parasitas:", L"Lesões:", L"Observação:", L"Data:", L"Hora:"
+                L"Parasitas:", L"Lesões:", L"Observação:", L"Data:", L"Hora:", L"Preço R$:"
             };
 
-            if (row < 9) {
+            if (row < 10) {
                 TextOut(hdcMem, xPosLabel, yPosLabel, labels[row], wcslen(labels[row]));
             }
         }

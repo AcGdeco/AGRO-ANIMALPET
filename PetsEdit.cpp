@@ -258,10 +258,15 @@ void PetsSelect_selectBD() {
     // 1. LIMPAR DADOS ANTIGOS ANTES DE CADA CONSULTA
     PetsSelect_g_tableDataEditar.clear();
 
-    // Consultar o banco apenas se a tabela estiver vazia
-    sqlite3* db;
+    // Abrir ou criar o banco de dados (código original mantido)
     char* errMsg = 0;
-    int rc = sqlite3_open("pet.db", &db);
+    sqlite3* db = nullptr;
+    std::string dbPath = GetAppDataPath() + "pet.db";
+
+    // Cria a pasta se não existir
+    CreateDirectoryA(dbPath.substr(0, dbPath.find_last_of('\\')).c_str(), NULL);
+
+    int rc = sqlite3_open(dbPath.c_str(), &db);
     if (rc == SQLITE_OK) {
         std::string idRecordStr = std::to_string(PetsSelect_idRecord);
         std::string sqlSelect = "SELECT *, P.ID AS ID_Pet, T.ID AS ID_Tutor FROM Pets AS P INNER JOIN Tutores AS T ON ID_Tutor_FK = ID_Tutor WHERE ID_Pet = '" + idRecordStr + "';";
@@ -627,9 +632,15 @@ LRESULT CALLBACK WndProcPetsEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
                 }
             }
 
-            sqlite3* db;
+            // Abrir ou criar o banco de dados (código original mantido)
             char* errMsg = 0;
-            int rc = sqlite3_open("pet.db", &db);
+            sqlite3* db = nullptr;
+            std::string dbPath = GetAppDataPath() + "pet.db";
+
+            // Cria a pasta se não existir
+            CreateDirectoryA(dbPath.substr(0, dbPath.find_last_of('\\')).c_str(), NULL);
+
+            int rc = sqlite3_open(dbPath.c_str(), &db);
             if (rc) {
                 MessageBox(hWnd, L"Erro ao abrir/criar o banco de dados!", L"Erro", MB_OK | MB_ICONERROR);
             }

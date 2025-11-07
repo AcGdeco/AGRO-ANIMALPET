@@ -73,78 +73,8 @@ LRESULT CALLBACK WndProcAgendamentosSelect(HWND hWnd, UINT message, WPARAM wPara
             SetWindowLongPtr(hWnd, GWL_STYLE, style | WS_VSCROLL);
         }
 
-        // Abrir ou criar o banco de dados (código original mantido)
-        sqlite3* db;
-        char* errMsg = 0;
-        int rc = sqlite3_open("pet.db", &db);
-        if (rc) {
-            MessageBox(hWnd, L"Erro ao abrir/criar o banco de dados!", L"Erro", MB_OK | MB_ICONERROR);
-            sqlite3_free(errMsg);
-        }
-        else {
-            // Código de criação de tabela e inserção (mantido como está)
-            //const char* sqlDrop = "DROP TABLE IF EXISTS Agendamentos;";
-            //rc = sqlite3_exec(db, sqlDrop, 0, 0, &errMsg);
-            //if (rc != SQLITE_OK) {
-                //MessageBox(hWnd, L"Erro ao dropar tabela!", L"Erro", MB_OK | MB_ICONERROR);
-                //sqlite3_free(errMsg);
-            //}
-            const char* sqlCreate = "CREATE TABLE IF NOT EXISTS Agendamentos (ID INTEGER PRIMARY KEY AUTOINCREMENT, Banho TEXT, Tosa TEXT, Obs_Tosa TEXT, Parasitas TEXT, Lesoes TEXT, Obs_Lesoes TEXT, Appointment_Date TEXT, Appointment_Hour TEXT, Date TEXT, Hour TEXT, ID_Pet_FK INTEGER, FOREIGN KEY (ID_Pet_FK) REFERENCES Pets(ID) ON DELETE CASCADE ON UPDATE CASCADE);";
-            rc = sqlite3_exec(db, sqlCreate, 0, 0, &errMsg);
-            if (rc != SQLITE_OK) {
-                wchar_t fullMsg[512] = L"Erro ao criar tabela! Código: ";
-                wchar_t codeStr[32];
-                swprintf_s(codeStr, L"%d", rc);
-                wcscat_s(fullMsg, codeStr);
-                if (errMsg) {
-                    size_t len = strlen(errMsg) + 1;
-                    wchar_t wErrMsg[256];
-                    mbstowcs_s(NULL, wErrMsg, len, errMsg, _TRUNCATE);
-                    wcscat_s(fullMsg, L" - Detalhes: ");
-                    wcscat_s(fullMsg, wErrMsg);
-                }
-                MessageBox(hWnd, fullMsg, L"Erro", MB_OK | MB_ICONERROR);
-                sqlite3_free(errMsg);
-            }
-            else {
-                // Inserções (código original mantido)
-                //std::wstring currentDate = AgendamentosSelect_GetCurrentDate();
-                //std::wstring currentHour = AgendamentosSelect_GetCurrentHour();
-                //for (int i = 1; i <= 100; i++) {
-                   //std::wstring sqlInsertW = L"INSERT INTO Agendamentos (Banho, Tosa, Obs_Tosa, Parasitas, Lesoes, Obs_Lesoes, Appointment_Date, Appointment_Hour, Date, Hour, ID_Pet_FK) VALUES ('Padrão', 'Tesoura', 'ir qpiofj adfjs kçjf dkfjeif çsdaf jkasdjf iejf sdçf aksdfjis fdfj çaklsfjaksdfj kdsjfçaejf idsjfkasdf jaies', 'Carrapatos', 'Pele', 'asdf façldj fçkalsdj fdaskljf dsçkf jçklasdf jkaldsfj çkldsa fjaçklds jfakdls fjkalsdjf klasdjf çasdfj çasfj çadsklfjklf ', '04/07/2025', '15:00', '" + currentDate + L"', '" + currentHour + L"', 1);";
-                    //int required = WideCharToMultiByte(CP_UTF8, 0, sqlInsertW.c_str(), -1, nullptr, 0, nullptr, nullptr);
-                    //if (required > 0) {
-                        //std::string sqlInsertUtf8(required, '\0');
-                        //WideCharToMultiByte(CP_UTF8, 0, sqlInsertW.c_str(), -1, &sqlInsertUtf8[0], required, nullptr, nullptr);
-                        //char* errMsg = nullptr;
-                        //int rc = sqlite3_exec(db, sqlInsertUtf8.c_str(), nullptr, nullptr, &errMsg);
-                        //if (rc != SQLITE_OK) sqlite3_free(errMsg);
-                    //}
-                //}
-                //std::wstring sqlInsertW2 = L"INSERT INTO Pets (Nome_do_Pet, Raca, Nome_do_Tutor, CEP, Cor, Idade, Peso, Sexo, Castrado, Endereco, Ponto_de_referencia, Banho, Tosa, Obs_Tosa, Parasitas, Lesoes, Obs_Lesoes, Telefone, CPF, Date, Hour) VALUES ('Astralis', 'Viralata', 'Débora', '36309022', 'Preto', 6, 18, 'Feminino', 'Não', 'Rua Ricador Geraldo dos Santos - Alto das Mercês - nº12', 'Perto da igreja das Mercês', 'Padrão', 'Tesoura', 'aa ksfj asldfj açlksdj fkasjd fçklasdjf aksdlfjkalçsdfj kçalsdjf kçlasjd çfkasdj fklçaj sdçlfkjakslfj çlasdjf çasd jfçaskdjfsdf', 'Carrapatos', 'Pele', ' asdfj açlsjf akçslj fkçlasdj fkçlasdjf lçkasjdf kasdjfkiujriwejfç dfkmdnfçnvçaidsjfçkdsfjaçksdjfkaçsjdfkasdjfkçlasjdçfaksdjf', '32998365552', '09813426789', '" + currentDate + L"', '" + currentHour + L"');";
-                //int required2 = WideCharToMultiByte(CP_UTF8, 0, sqlInsertW2.c_str(), -1, nullptr, 0, nullptr, nullptr);
-                //if (required2 > 0) {
-                    //std::string sqlInsertUtf8(required2, '\0');
-                    //WideCharToMultiByte(CP_UTF8, 0, sqlInsertW2.c_str(), -1, &sqlInsertUtf8[0], required2, nullptr, nullptr);
-                    //char* errMsg = nullptr;
-                    //int rc = sqlite3_exec(db, sqlInsertUtf8.c_str(), nullptr, nullptr, &errMsg);
-                    //if (rc != SQLITE_OK) sqlite3_free(errMsg);
-                //}
-                //if (rc != SQLITE_OK && errMsg) {
-                    //size_t len = strlen(errMsg) + 1;
-                    //wchar_t wErrMsg[256];
-                    //mbstowcs_s(NULL, wErrMsg, len, errMsg, _TRUNCATE);
-                    //wchar_t fullMsg[512];
-                    //swprintf_s(fullMsg, L"Erro ao inserir dados! Detalhes: %s", wErrMsg);
-                    //MessageBoxW(hWnd, fullMsg, L"Erro", MB_OK | MB_ICONERROR);
-                    //sqlite3_free(errMsg);
-                //}
-            }
-            sqlite3_close(db);
+        AgendamentosSelect_RecarregarDadosTabela(hWnd);
 
-            AgendamentosSelect_RecarregarDadosTabela(hWnd);
-
-        }
         return 0;
     }
     break;
@@ -219,10 +149,10 @@ LRESULT CALLBACK WndProcAgendamentosSelect(HWND hWnd, UINT message, WPARAM wPara
             //swprintf_s(msg, L"Botão %s%d clicado!", L"Filtrar", (int)id, (int)id);
             //MessageBoxW(hWnd, msg, L"Info", MB_OK);
 
-            for (int i = 0; i <= 33; i++) {
+            for (int i = 0; i <= 34; i++) {
                 std::wstring controlIDStr = std::to_wstring(i);
                 HWND input = GetDlgItem(hWnd, i + 20);
-                if (i == 1 || i == 2 || i == 4 || i == 5 || i == 19 || i == 20) { // Se o comando veio do nosso ComboBox
+                if (i == 1 || i == 2 || i == 4 || i == 5 || i == 20 || i == 21) { // Se o comando veio do nosso ComboBox
                     // 1. Obter o índice do item selecionado
                     int indiceSelecionado = (int)SendMessageW(
                         input, CB_GETCURSEL, 0, 0
@@ -317,7 +247,7 @@ LRESULT CALLBACK WndProcAgendamentosSelect(HWND hWnd, UINT message, WPARAM wPara
         int cellHeight = 32;
         int numColumns = AgendamentosSelect_g_tableData.empty() ? 0 : 7;
         int cellWidth = width / (numColumns > 0 ? numColumns + 3 : 1); // +3 para os botões
-        int startY = 350 - AgendamentosSelect_g_scrollY;  // Posição Y com scroll
+        int startY = 410 - AgendamentosSelect_g_scrollY;  // Posição Y com scroll
         int startX = 22 - AgendamentosSelect_g_scrollX;  // Posição X com scroll
 
         // LIMPAR a área de desenho primeiro
@@ -334,7 +264,7 @@ LRESULT CALLBACK WndProcAgendamentosSelect(HWND hWnd, UINT message, WPARAM wPara
         SetBkMode(hdc, TRANSPARENT);
 
         //Título
-        AgendamentosSelect_windowsTitle(hdc, startX, startY - 330, L"AGENDAMENTOS", 12);
+        AgendamentosSelect_windowsTitle(hdc, startX, startY - 380, L"AGENDAMENTOS", 12);
 
         // Desenhar filtros
         AgendamentosSelect_createHeaderFilters(hdc, hWnd);

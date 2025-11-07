@@ -106,6 +106,7 @@ void AgendamentosSelect_ordenarDefinicoesValores(HWND hWnd);
 void AgendamentosSelect_ordenarMudarIcone(HWND hWnd);
 BOOL AgendamentosSelect_CreateNewWindow(HWND hWndParent, HINSTANCE hInst, LPCWSTR className, LPCWSTR windowTittle);
 int AgendamentosSelect_columnValue(int col);
+std::wstring FormatarPrecoSemPontoMilhar(double valor);
 
 // Definição da estrutura
 struct AgendamentosSelect_Data {

@@ -40,7 +40,7 @@ void AgendamentosSelect_AtualizarPosicoesControlesAgendamentoConsultar(HWND hWnd
     int countRow = 0;
 
     xPos = startX;
-    yPos = startY + 14 * cellHeight + 1;
+    yPos = startY + 15 * cellHeight + 1;
 
     // Atualizar posição do botão
     if (AgendamentosSelect_g_hButton_consultar_tutor) {
@@ -48,7 +48,7 @@ void AgendamentosSelect_AtualizarPosicoesControlesAgendamentoConsultar(HWND hWnd
             SWP_NOZORDER | SWP_NOACTIVATE);
     }
 
-    yPos = startY + 17 * cellHeight + 1;
+    yPos = startY + 18 * cellHeight + 1;
     if (AgendamentosSelect_g_hButton_consultar_pet) {
         SetWindowPos(AgendamentosSelect_g_hButton_consultar_pet, NULL, xPos, yPos, 80, 30,
             SWP_NOZORDER | SWP_NOACTIVATE);
@@ -218,7 +218,7 @@ LRESULT CALLBACK WndProcAgendamentosRead(HWND hWnd, UINT message, WPARAM wParam,
         int startX = 22 - AgendamentosSelect_g_scrollX;  // Posição X com scroll
 
         int xPos = startX;
-        int yPos = startY + 14 * cellHeight + 1;
+        int yPos = startY + 15 * cellHeight + 1;
 
         // Criar botão consultar
         AgendamentosSelect_g_hButton_consultar_tutor = CreateWindowW(
@@ -230,7 +230,7 @@ LRESULT CALLBACK WndProcAgendamentosRead(HWND hWnd, UINT message, WPARAM wParam,
         );
 
         xPos = startX;
-        yPos = startY + 17 * cellHeight + 1;
+        yPos = startY + 18 * cellHeight + 1;
 
         // Criar botão consultar
         AgendamentosSelect_g_hButton_consultar_pet = CreateWindowW(
@@ -383,10 +383,15 @@ LRESULT CALLBACK WndProcAgendamentosRead(HWND hWnd, UINT message, WPARAM wParam,
         // 1. LIMPAR DADOS ANTIGOS ANTES DE CADA CONSULTA
         AgendamentosSelect_g_tableDataConsulta.clear();
 
-        // Consultar o banco apenas se a tabela estiver vazia
-        sqlite3* db;
+        // Abrir ou criar o banco de dados (código original mantido)
         char* errMsg = 0;
-        int rc = sqlite3_open("pet.db", &db);
+        sqlite3* db = nullptr;
+        std::string dbPath = GetAppDataPath() + "pet.db";
+
+        // Cria a pasta se não existir
+        CreateDirectoryA(dbPath.substr(0, dbPath.find_last_of('\\')).c_str(), NULL);
+
+        int rc = sqlite3_open(dbPath.c_str(), &db);
         if (rc == SQLITE_OK) {
 
             // 1. Defina o buffer de destino. Escolha um tamanho adequado.
@@ -468,7 +473,7 @@ LRESULT CALLBACK WndProcAgendamentosRead(HWND hWnd, UINT message, WPARAM wParam,
         int colNumber = 0;
         int rowNumber = 0;
 
-        for (size_t col = 20; col < 31; col++) {
+        for (size_t col = 20; col < 32; col++) {
             colNumber++;
 
             HBRUSH hCurrentBrush = (col % 2 == 0) ? hBrushGray : hBrushWhite;
@@ -570,9 +575,21 @@ LRESULT CALLBACK WndProcAgendamentosRead(HWND hWnd, UINT message, WPARAM wParam,
                 else if (AgendamentosSelect_g_tableDataConsulta[row][col] == L"Hour") {
                     TextOut(hdc, xPos, yPos, L"Hora do Registro:", 17);
                 }
+                else if (AgendamentosSelect_g_tableDataConsulta[row][col] == L"Price") {
+                    TextOut(hdc, xPos, yPos, L"Preço R$:", 9);
+                }
                 else {
-                    TextOut(hdc, xPos, yPos, AgendamentosSelect_g_tableDataConsulta[row][col].c_str(),
-                        static_cast<int>(AgendamentosSelect_g_tableDataConsulta[row][col].length()));
+                    if (col == 31) {
+                        std::wstring precoStr = AgendamentosSelect_g_tableDataConsulta[row][col];
+                        double valor = std::stod(precoStr);
+                        
+                        TextOut(hdc, xPos, yPos, FormatarPrecoSemPontoMilhar(valor).c_str(),
+                            static_cast<int>(FormatarPrecoSemPontoMilhar(valor).length()));
+                    }
+                    else {
+                        TextOut(hdc, xPos, yPos, AgendamentosSelect_g_tableDataConsulta[row][col].c_str(),
+                            static_cast<int>(AgendamentosSelect_g_tableDataConsulta[row][col].length()));
+                    }
                 }
                 rowNumber++;
             }

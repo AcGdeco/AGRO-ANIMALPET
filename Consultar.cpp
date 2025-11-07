@@ -258,10 +258,15 @@ LRESULT CALLBACK WndProcRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
         // 1. LIMPAR DADOS ANTIGOS ANTES DE CADA CONSULTA
         g_tableDataConsulta.clear();
 
-        // Consultar o banco apenas se a tabela estiver vazia
-        sqlite3* db;
+        // Abrir ou criar o banco de dados (código original mantido)
         char* errMsg = 0;
-        int rc = sqlite3_open("pet.db", &db);
+        sqlite3* db = nullptr;
+        std::string dbPath = GetAppDataPath() + "pet.db";
+
+        // Cria a pasta se não existir
+        CreateDirectoryA(dbPath.substr(0, dbPath.find_last_of('\\')).c_str(), NULL);
+
+        int rc = sqlite3_open(dbPath.c_str(), &db);
         if (rc == SQLITE_OK) {
             const char* sqlSelectConsulta = "SELECT * FROM Tudo;";
             rc = sqlite3_exec(db, sqlSelectConsulta, sqlite_callback_consulta, &g_tableDataConsulta, &errMsg);

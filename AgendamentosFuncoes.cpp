@@ -16,6 +16,9 @@
 #include <tuple>
 #include <algorithm>
 #include <cwctype>
+#include <iomanip>
+#include <cmath>
+
 #define min(a, b) ((a) < (b) ? (a) : (b)) 
 
 int AgendamentosSelect_g_scrollX;      // Posição horizontal do scroll
@@ -51,7 +54,7 @@ std::string AgendamentosSelect_orderColumn = "A.ID";
 std::string AgendamentosSelect_orderAscDesc = "DESC";
 std::vector<int> AgendamentosSelect_naoDesenharInternRowsNumber;
 
-std::vector<std::wstring> AgendamentosSelect_dados(34);
+std::vector<std::wstring> AgendamentosSelect_dados(35);
 std::wstring AgendamentosSelect_dataAte;
 std::wstring AgendamentosSelect_dataRegistroAte;
 
@@ -191,7 +194,7 @@ void AgendamentosSelect_AtualizarPosicoesOffset(HWND hWnd) {
 
     int startYFull = 80 - AgendamentosSelect_g_scrollY;
     int width = rect.right;
-    int yPos = startYFull + 240;
+    int yPos = startYFull + 300;
 
     // --- PARÂMETROS DO BOTÃO ---
     int buttonWidth = 23;
@@ -289,7 +292,7 @@ void AgendamentosSelect_createBtnPageLimit(HWND hWnd) {
     int yPos;
     int selectWidth = 50;
     int width = rect.right;
-    yPos = startYFull + 240;
+    yPos = startYFull + 275;
     xPos_start = (width / 2 - selectWidth / 2) + 55; // Posição inicial
 
     // 1. Calcular o número total de páginas (numeroBtn)
@@ -428,7 +431,7 @@ void AgendamentosSelect_AtualizarPosicoesLimit(HWND hWnd) {
     int width = rect.right;
 
     // A posição Y é calculada em relação ao topo da área cliente, ajustada pelo scroll
-    yPos = startYFull + 214;
+    yPos = startYFull + 275;
     xPos = (width) / 2 - selectWidth / 2;
 
     // 2. Uso CORRETO de SetWindowPos
@@ -462,7 +465,7 @@ void AgendamentosSelect_createInputLimit(HWND hWnd) {
 
     int selectWidth = 50;
     int width = rect.right;
-    yPos = startYFull + 214;
+    yPos = startYFull + 275;
     xPos = (width) / 2 - selectWidth / 2;
 
     // 1. Defina a largura desejada para a lista suspensa (ex: 300 pixels)
@@ -533,7 +536,7 @@ void AgendamentosSelect_AtualizarPosicoesOrder(HWND hWnd) {
     int cellHeight = 32;
     int numColumns = 7;
     int cellWidth = width / (numColumns > 0 ? numColumns + 3 : 1); // +3 para os botões
-    int startY = 350 - AgendamentosSelect_g_scrollY;  // Posição Y com scroll
+    int startY = 410 - AgendamentosSelect_g_scrollY;  // Posição Y com scroll
     int startX = 22 - AgendamentosSelect_g_scrollX;  // Posição X com scroll
 
     for (int col = 0; col < 7; col++) {
@@ -845,6 +848,7 @@ std::wstring AgendamentosSelect_arrumarNomesColunas(std::wstring displayText) {
     else if (displayText == L"ID_Pet_FK") displayText = L"ID Pet";
     else if (displayText == L"ID_Tutor_FK") displayText = L"ID Tutor";
     else if (displayText == L"ID") displayText = L"ID Agendamento";
+    else if (displayText == L"Price") displayText = L"Preço";
 
     return displayText;
 }
@@ -920,7 +924,7 @@ void AgendamentosSelect_AtualizarPosicoesInputs(HWND hWnd) {
     colNumber = 12;
     int colFinalNumber = colNumber + 10;
 
-    for (int col = 12; col < 23; col++) {
+    for (int col = 12; col < 22; col++) {
         yPos = startYFull + row * cellHeight + 7;
         xPos = startXFull + (col - colNumber) * cellWidthFull + 10;
 
@@ -951,54 +955,77 @@ void AgendamentosSelect_AtualizarPosicoesInputs(HWND hWnd) {
     // Configurar a linha do input
     startYFull = startYFull + 2 * cellHeight + 7;  // Posição Y com scroll
     startXFull = 22 - AgendamentosSelect_g_scrollX;  // Posição X com scroll
-    colNumber = 23;
-    colFinalNumber = colNumber + 11;
+    colNumber = 22;
+    colFinalNumber = colNumber + 10;
 
-    for (int col = 23; col < AgendamentosSelect_g_editControlsFilters.size(); col++) {
+    for (int col = colNumber; col < AgendamentosSelect_g_editControlsFilters.size() - 1; col++) {
         yPos = startYFull + row * cellHeight + 7;
-        xPos = startXFull + (col - colNumber) * cellWidthFull + 10;
+        if (col > 22) {
+            xPos = startXFull + (col - 1 - colNumber) * cellWidthFull + 10;
+        }
+        else {
+            xPos = startXFull + (col - colNumber) * cellWidthFull + 10;
+        }
         int widthDate = cellWidthFull / 2;
 
-        if (col == 31) {
+        if (col == 22) {
             xPos = startXFull + (col - colNumber) * cellWidthFull + 10;
 
-            SetWindowPos(AgendamentosSelect_g_editControlsFilters[col], NULL, xPos, yPos, widthDate, 25,
+            SetWindowPos(AgendamentosSelect_g_editControlsFilters[col], NULL, xPos, yPos, widthDate - 5, 25,
                 SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE | SWP_HIDEWINDOW);
-            SetWindowPos(AgendamentosSelect_g_editControlsFilters[col], NULL, xPos, yPos, widthDate, 25,
+            SetWindowPos(AgendamentosSelect_g_editControlsFilters[col], NULL, xPos, yPos, widthDate - 5, 25,
                 SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE | SWP_SHOWWINDOW);
+        }
+        else if (col == 23) {
+            xPos = startXFull + (col - 1 - colNumber) * cellWidthFull + 10;
+
+            SetWindowPos(AgendamentosSelect_g_editControlsFilters[col], NULL, xPos + widthDate, yPos, widthDate - 5, 25,
+                SWP_NOZORDER | SWP_NOACTIVATE | SWP_HIDEWINDOW);
+            SetWindowPos(AgendamentosSelect_g_editControlsFilters[col], NULL, xPos + widthDate, yPos, widthDate - 5, 25,
+                SWP_NOZORDER | SWP_NOACTIVATE | SWP_SHOWWINDOW);
         }
         else if (col == 32) {
             xPos = startXFull + (col - 1 - colNumber) * cellWidthFull + 10;
 
-            SetWindowPos(AgendamentosSelect_g_editControlsFilters[col], NULL, xPos + widthDate, yPos, widthDate, 25,
-                SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE | SWP_HIDEWINDOW);
-            SetWindowPos(AgendamentosSelect_g_editControlsFilters[col], NULL, xPos + widthDate, yPos, widthDate, 25,
-                SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE | SWP_SHOWWINDOW);
+            SetWindowPos(AgendamentosSelect_g_editControlsFilters[col], NULL, xPos, yPos, widthDate - 5, 25,
+                SWP_NOZORDER | SWP_NOACTIVATE | SWP_HIDEWINDOW);
+            SetWindowPos(AgendamentosSelect_g_editControlsFilters[col], NULL, xPos, yPos, widthDate - 5, 25,
+                SWP_NOZORDER | SWP_NOACTIVATE | SWP_SHOWWINDOW);
         }
         else if (col == 33) {
-            xPos = startXFull + (col - 1 - colNumber) * cellWidthFull + 10;
+            xPos = startXFull + (col - 2 - colNumber) * cellWidthFull + 10;
 
-            SetWindowPos(AgendamentosSelect_g_editControlsFilters[col], NULL, xPos, yPos, cellWidthFull - 15, 25,
-                SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE | SWP_HIDEWINDOW);
-            SetWindowPos(AgendamentosSelect_g_editControlsFilters[col], NULL, xPos, yPos, cellWidthFull - 15, 25,
-                SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE | SWP_SHOWWINDOW);
+            SetWindowPos(AgendamentosSelect_g_editControlsFilters[col], NULL, xPos + widthDate, yPos, widthDate - 5, 25,
+                SWP_NOZORDER | SWP_NOACTIVATE | SWP_HIDEWINDOW);
+            SetWindowPos(AgendamentosSelect_g_editControlsFilters[col], NULL, xPos + widthDate, yPos, widthDate - 5, 25,
+                SWP_NOZORDER | SWP_NOACTIVATE | SWP_SHOWWINDOW);
         }
         else {
             SetWindowPos(AgendamentosSelect_g_editControlsFilters[col], NULL, xPos, yPos, cellWidthFull - 15, 25,
-                SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE | SWP_HIDEWINDOW);
+                SWP_NOZORDER | SWP_NOACTIVATE | SWP_HIDEWINDOW);
             SetWindowPos(AgendamentosSelect_g_editControlsFilters[col], NULL, xPos, yPos, cellWidthFull - 15, 25,
-                SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE | SWP_SHOWWINDOW);
+                SWP_NOZORDER | SWP_NOACTIVATE | SWP_SHOWWINDOW);
         }
     }
 
     startXFull = 22 - AgendamentosSelect_g_scrollX;  // Posição X com scroll
-    startYFull = startYFull + 2 * cellHeight + 7;  // Posição Y com scroll
+    startYFull = startYFull + 3 * cellHeight + 7;  // Posição Y com scroll
+    xPos = startXFull + 10;
+    yPos = startYFull + 7;
+
+    SetWindowPos(AgendamentosSelect_g_editControlsFilters[34], NULL, xPos, yPos, cellWidthFull - 15, 25,
+        SWP_NOZORDER | SWP_NOACTIVATE | SWP_HIDEWINDOW);
+    SetWindowPos(AgendamentosSelect_g_editControlsFilters[34], NULL, xPos, yPos, cellWidthFull - 15, 25,
+        SWP_NOZORDER | SWP_NOACTIVATE | SWP_SHOWWINDOW);
+
+    startXFull = 22 - AgendamentosSelect_g_scrollX;  // Posição X com scroll
+    startYFull = startYFull + 1 * cellHeight + 7;  // Posição Y com scroll
     xPos = startXFull;
     yPos = startYFull;
 
-    SetWindowPos(AgendamentosSelect_g_editControlsFilters[34], NULL, xPos, yPos, 70, 30,
+    SetWindowPos(AgendamentosSelect_g_editControlsFilters[35], NULL, xPos, yPos, 70, 30,
         SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE | SWP_HIDEWINDOW);
-    SetWindowPos(AgendamentosSelect_g_editControlsFilters[34], NULL, xPos, yPos, 70, 30,
+    SetWindowPos(AgendamentosSelect_g_editControlsFilters[35], NULL, xPos, yPos, 70, 30,
         SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE | SWP_SHOWWINDOW);
 }
 
@@ -1275,14 +1302,14 @@ void AgendamentosSelect_criarInputsFilters(HWND hWnd) {
     startYFull = startYFull + 2 * cellHeight + 7;  // Posição Y com scroll
     startXFull = 22 - AgendamentosSelect_g_scrollX;  // Posição X com scroll
     int colNumber = 12;
-    int colFinalNumber = colNumber + 11;
+    int colFinalNumber = colNumber + 10;
 
     for (int col = colNumber; col < colFinalNumber; col++) {
         int controlID = col + 20;
         yPos = startYFull + row * cellHeight + 7;
         xPos = startXFull + (col - colNumber) * inputWidth + 10;
 
-        if (col == 20) {
+        if (col == 21) {
             HWND hComboBox = CreateWindowEx(
                 0,                                 // Estilos estendidos
                 L"ComboBox",                       // Nome da classe do controle ComboBox
@@ -1304,7 +1331,7 @@ void AgendamentosSelect_criarInputsFilters(HWND hWnd) {
 
             AgendamentosSelect_g_editControlsFilters.push_back(hComboBox);
         }
-        else if (col == 19) {
+        else if (col == 20) {
             HWND hComboBox = CreateWindowEx(
                 0,                                 // Estilos estendidos
                 L"ComboBox",                       // Nome da classe do controle ComboBox
@@ -1326,24 +1353,6 @@ void AgendamentosSelect_criarInputsFilters(HWND hWnd) {
 
             AgendamentosSelect_g_editControlsFilters.push_back(hComboBox);
         }
-        else if (col == 21) {
-            HWND hEdit = CreateWindowEx(
-                0, L"EDIT", L"",
-                WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP,
-                xPos, yPos, inputWidth / 2, 25, hWnd, (HMENU)(controlID), NULL, NULL
-            );
-
-            AgendamentosSelect_g_editControlsFilters.push_back(hEdit);
-        }
-        else if (col == 22) {
-            HWND hEdit2 = CreateWindowEx(
-                0, L"EDIT", L"",
-                WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP,
-                xPos + inputWidth / 2, yPos, inputWidth / 2, 25, hWnd, (HMENU)(controlID), NULL, NULL
-            );
-
-            AgendamentosSelect_g_editControlsFilters.push_back(hEdit2);
-        }
         else {
             HWND hEdit = CreateWindowEx(
                 0, L"EDIT", L"",
@@ -1357,16 +1366,21 @@ void AgendamentosSelect_criarInputsFilters(HWND hWnd) {
     // Configurar a linha do input
     startYFull = startYFull + 2 * cellHeight + 7;  // Posição Y com scroll
     startXFull = 22 - AgendamentosSelect_g_scrollX;  // Posição X com scroll
-    colNumber = 23;
+    colNumber = 22;
     colFinalNumber = AgendamentosSelect_numberRowsTable;
     int controlID;
 
     for (int col = colNumber; col < 34; col++) {
         controlID = col + 20;
         yPos = startYFull + row * cellHeight + 7;
-        xPos = startXFull + (col - colNumber) * inputWidth + 10;
+        if (col > 22) {
+            xPos = startXFull + (col - 1 - colNumber) * inputWidth + 10;
+        }
+        else {
+            xPos = startXFull + (col - colNumber) * inputWidth + 10;
+        }
 
-        if (col == 31) {
+        if (col == 32) {
             HWND hEdit = CreateWindowEx(
                 0, L"EDIT", L"",
                 WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP,
@@ -1375,7 +1389,25 @@ void AgendamentosSelect_criarInputsFilters(HWND hWnd) {
 
             AgendamentosSelect_g_editControlsFilters.push_back(hEdit);
         }
-        else if (col == 32) {
+        else if (col == 33) {
+            HWND hEdit2 = CreateWindowEx(
+                0, L"EDIT", L"",
+                WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP,
+                xPos + inputWidth / 2, yPos, inputWidth / 2, 25, hWnd, (HMENU)(controlID), NULL, NULL
+            );
+
+            AgendamentosSelect_g_editControlsFilters.push_back(hEdit2);
+        }
+        else if (col == 22) {
+            HWND hEdit = CreateWindowEx(
+                0, L"EDIT", L"",
+                WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP,
+                xPos, yPos, inputWidth / 2, 25, hWnd, (HMENU)(controlID), NULL, NULL
+            );
+
+            AgendamentosSelect_g_editControlsFilters.push_back(hEdit);
+        }
+        else if (col == 23) {
             HWND hEdit2 = CreateWindowEx(
                 0, L"EDIT", L"",
                 WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP,
@@ -1394,6 +1426,19 @@ void AgendamentosSelect_criarInputsFilters(HWND hWnd) {
         }
     }
 
+    controlID = 34 + 20;
+    startXFull = 22 - AgendamentosSelect_g_scrollX;  // Posição X com scroll
+    startYFull = startYFull + 4 * cellHeight + 7;  // Posição Y com scroll
+    xPos = startXFull;
+    yPos = startYFull;
+
+    HWND hEdit = CreateWindowEx(
+        0, L"EDIT", L"",
+        WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP,
+        xPos, yPos, inputWidth, 25, hWnd, (HMENU)(controlID), NULL, NULL
+    );
+    AgendamentosSelect_g_editControlsFilters.push_back(hEdit);
+    
     startXFull = 22 - AgendamentosSelect_g_scrollX;  // Posição X com scroll
     startYFull = startYFull + 2 * cellHeight + 7;  // Posição Y com scroll
     xPos = startXFull;
@@ -1458,7 +1503,7 @@ void AgendamentosSelect_criarHeaderLineFilter(HDC hdc, HWND hWnd, int startYFull
 
         // Desenhar as células de dados
         for (size_t col = colNumber; col < colFinalNumber; col++) {
-            if (col != 12 && col != 23) {
+            if (col != 13 && col != 24) {
                 int xPos;
                 int yPos;
                 yPos = startYFull + row * cellHeight + 7;
@@ -1524,7 +1569,7 @@ void AgendamentosSelect_createHeaderTable(HWND hWnd, HDC hdc) {
     int cellHeight = 32;
     int numColumns = AgendamentosSelect_g_tableDataFull.empty() ? 0 : 7;
     int cellWidth = width / (numColumns > 0 ? numColumns + 3 : 1); // +3 para os botões
-    int startY = 350 - AgendamentosSelect_g_scrollY;  // Posição Y com scroll
+    int startY = 410 - AgendamentosSelect_g_scrollY;  // Posição Y com scroll
     int startX = 22 - AgendamentosSelect_g_scrollX;  // Posição X com scroll
 
     HBRUSH hCurrentBrush;
@@ -1569,7 +1614,7 @@ void AgendamentosSelect_createHeaderTable(HWND hWnd, HDC hdc) {
         int xPos = startX + counter * cellWidth + 10;
         int yPos = startY + 0 * cellHeight + 7;
 
-        if (col == 0 || col == 1 || col == 2 || col == 13 || col == 24 || col == 7 || col == 8) {
+        if (col == 0 || col == 1 || col == 2 || col == 14 || col == 25 || col == 7 || col == 8) {
             // Traduzir cabeçalhos se necessário
             if (displayText == L"Nome_do_Pet") displayText = L"Nome do Pet";
             else if (displayText == L"Nome_do_Tutor") displayText = L"Nome do Tutor";
@@ -1596,9 +1641,15 @@ void AgendamentosSelect_createHeaderTable(HWND hWnd, HDC hdc) {
 void AgendamentosSelect_selectHeaderDB() {
     AgendamentosSelect_g_tableDataFull.clear();
 
-    sqlite3* db;
+    // Abrir ou criar o banco de dados (código original mantido)
     char* errMsg = 0;
-    int rc = sqlite3_open("pet.db", &db);
+    sqlite3* db = nullptr;
+    std::string dbPath = GetAppDataPath() + "pet.db";
+
+    // Cria a pasta se não existir
+    CreateDirectoryA(dbPath.substr(0, dbPath.find_last_of('\\')).c_str(), NULL);
+
+    int rc = sqlite3_open(dbPath.c_str(), &db);
 
     // --- 2. PEGAR INFORMAÇÕES DA TABELA TUTORES ---
     const char* sqlPragmaAgendamentos = "PRAGMA table_info(Agendamentos);";
@@ -1685,6 +1736,14 @@ void AgendamentosSelect_createHeaderFilters(HDC hdc, HWND hWnd) {
     startYFull = startYFull + 2 * cellHeight + 7;  // Posição Y com scroll
     startXFull = 22 - AgendamentosSelect_g_scrollX;  // Posição X com scroll
     colNumber = 20 + 1;
+    colFinalNumber = AgendamentosSelect_g_tableDataFull[0].size() - 1;
+
+    AgendamentosSelect_criarHeaderLineFilter(hdc, hWnd, startYFull, startXFull, colNumber, colFinalNumber);
+
+    // Configurar a linha do header
+    startYFull = startYFull + 2 * cellHeight + 7;  // Posição Y com scroll
+    startXFull = 22 - AgendamentosSelect_g_scrollX;  // Posição X com scroll
+    colNumber = AgendamentosSelect_g_tableDataFull[0].size() - 1;
     colFinalNumber = AgendamentosSelect_g_tableDataFull[0].size();
 
     AgendamentosSelect_criarHeaderLineFilter(hdc, hWnd, startYFull, startXFull, colNumber, colFinalNumber);
@@ -1710,7 +1769,7 @@ void AgendamentosSelect_AtualizarPosicoesBotoes(HWND hWnd)
     int numColumns = AgendamentosSelect_g_tableData.empty() ? 0 : 7 + 3;
     int cellWidth = width / (numColumns > 0 ? numColumns : 1);
     int startX = 22;
-    int startY = 350;
+    int startY = 410;
     int cellHeight = 32;
 
     // Desabilitar redesenho durante a atualização
@@ -1742,11 +1801,15 @@ void AgendamentosSelect_AtualizarPosicoesBotoes(HWND hWnd)
 }
 
 bool AgendamentosSelect_deleteRecordById(const std::string& databasePath, int id, HWND hWnd) {
-    sqlite3* db;
+    // Abrir ou criar o banco de dados (código original mantido)
     char* errMsg = 0;
+    sqlite3* db = nullptr;
+    std::string dbPath = GetAppDataPath() + "pet.db";
 
-    // Abrir conexão com o banco
-    int rc = sqlite3_open(databasePath.c_str(), &db);
+    // Cria a pasta se não existir
+    CreateDirectoryA(dbPath.substr(0, dbPath.find_last_of('\\')).c_str(), NULL);
+
+    int rc = sqlite3_open(dbPath.c_str(), &db);
     if (rc != SQLITE_OK) {
         MessageBoxW(hWnd, L"Erro ao abrir banco de dados", L"Erro", MB_ICONERROR);
         return false;
@@ -1786,10 +1849,15 @@ void AgendamentosSelect_selectDB() {
     // 1. LIMPAR DADOS ANTIGOS ANTES DE CADA CONSULTA
     AgendamentosSelect_g_tableData.clear();
 
-    // Consultar o banco apenas se a tabela estiver vazia
-    sqlite3* db;
+    // Abrir ou criar o banco de dados (código original mantido)
     char* errMsg = 0;
-    int rc = sqlite3_open("pet.db", &db);
+    sqlite3* db = nullptr;
+    std::string dbPath = GetAppDataPath() + "pet.db";
+
+    // Cria a pasta se não existir
+    CreateDirectoryA(dbPath.substr(0, dbPath.find_last_of('\\')).c_str(), NULL);
+
+    int rc = sqlite3_open(dbPath.c_str(), &db);
     if (rc == SQLITE_OK) {
         std::string sqlSelect;
         std::string sqlSelectCount;
@@ -1916,39 +1984,39 @@ int AgendamentosSelect_columnValue(int col) {
         break;
     case 13:
         // Código para COL = 13
-        column = 16;
+        column = 38;
         break;
     case 14:
         // Código para COL = 14
-        column = 17;
+        column = 16;
         break;
     case 15:
         // Código para COL = 15
-        column = 18;
+        column = 17;
         break;
     case 16:
         // Código para COL = 16
-        column = 19;
+        column = 18;
         break;
     case 17:
         // Código para COL = 17
-        column = 20;
+        column = 19;
         break;
     case 18:
         // Código para COL = 18
-        column = 21;
+        column = 20;
         break;
     case 19:
         // Código para COL = 19
-        column = 22;
+        column = 21;
         break;
     case 20:
         // Código para COL = 20
-        column = 23;
+        column = 22;
         break;
     case 21:
         // Código para COL = 21
-        column = 24;
+        column = 23;
         break;
     case 22:
         // Código para COL = 22
@@ -1956,45 +2024,49 @@ int AgendamentosSelect_columnValue(int col) {
         break;
     case 23:
         // Código para COL = 23
-        column = 25;
+        column = 24;
         break;
     case 24:
         // Código para COL = 24
-        column = 7;
+        column = 25;
         break;
     case 25:
         // Código para COL = 25
-        column = 8;
+        column = 7;
         break;
     case 26:
         // Código para COL = 26
-        column = 9;
+        column = 8;
         break;
     case 27:
         // Código para COL = 27
-        column = 10;
+        column = 9;
         break;
     case 28:
         // Código para COL = 28
-        column = 11;
+        column = 10;
         break;
     case 29:
         // Código para COL = 29
-        column = 12;
+        column = 11;
         break;
     case 30:
         // Código para COL = 30
-        column = 13;
+        column = 12;
         break;
     case 31:
         // Código para COL = 31
-        column = 14;
+        column = 13;
         break;
     case 32:
         // Código para COL = 32
         column = 14;
         break;
     case 33:
+        // Código para COL = 33
+        column = 14;
+        break;
+    case 34:
         // Código para COL = 33
         column = 15;
         break;
@@ -2027,7 +2099,7 @@ void AgendamentosSelect_verificarFiltro(const std::vector<std::wstring>& dados, 
     }
 
     int column;
-    int numeroColIteracoes = 34;
+    int numeroColIteracoes = 35;
     AgendamentosSelect_g_tableData;
     for (size_t row = 0; row < AgendamentosSelect_g_tableData.size(); row++) {
 
@@ -2049,7 +2121,7 @@ void AgendamentosSelect_verificarFiltro(const std::vector<std::wstring>& dados, 
 
             std::wstring displayText = dadoTable;
 
-            if (!dados[col].empty() && (col == 0 || col == 1 || col == 2 || col == 4 || col == 5 || col == 13 || col == 19 || col == 20 || col == 24)) {
+            if (!dados[col].empty() && (col == 0 || col == 1 || col == 2 || col == 4 || col == 5 || col == 13 || col == 19 || col == 20 || col == 25)) {
                 filtro = dados[col];
                 if (filtro != dadoTable) {
                     naoDesenharIntern[row] = 1;
@@ -2069,10 +2141,10 @@ void AgendamentosSelect_verificarFiltro(const std::vector<std::wstring>& dados, 
                     }
                 }
             }
-            else if (!dados[col].empty() && (col == 21 || col == 22)) {
-                bool estaEntre = AgendamentosSelect_estaEntreDatas(dados[21], dados[22], dadoTable);
+            else if (!dados[col].empty() && (col == 22 || col == 23)) {
+                bool estaEntre = AgendamentosSelect_estaEntreDatas(dados[22], dados[23], dadoTable);
                 if (!estaEntre) {
-                    if (col == 22 && dados[21].empty()) {
+                    if (col == 23 && dados[23].empty()) {
                         naoDesenharIntern[row] = 1;
                         break;
                     }
@@ -2095,10 +2167,10 @@ void AgendamentosSelect_verificarFiltro(const std::vector<std::wstring>& dados, 
                     }
                 }
             }
-            else if (!dados[col].empty() && (col == 31 || col == 32)) {
-                bool estaEntre = AgendamentosSelect_estaEntreDatas(dados[31], dados[32], dadoTable);
+            else if (!dados[col].empty() && (col == 32 || col == 33)) {
+                bool estaEntre = AgendamentosSelect_estaEntreDatas(dados[32], dados[33], dadoTable);
                 if (!estaEntre) {
-                    if (col == 32 && dados[31].empty()) {
+                    if (col == 33 && dados[32].empty()) {
                         naoDesenharIntern[row] = 1;
                         break;
                     }
@@ -2285,7 +2357,7 @@ void AgendamentosSelect_ConfigurarScrollBars(HWND hWnd)
     AgendamentosSelect_g_clientHeight = rect.bottom - rect.top;
 
     int cellHeight = 32;
-    int filtersHeight = 6 * cellHeight + 6 * 7;
+    int filtersHeight = 8 * cellHeight + 8 * 7;
 
     //offsetTableRow = limitTableRow
     int limit;
@@ -2568,7 +2640,7 @@ void AgendamentosSelect_AtualizarPosicoesControlesAgendamentoEdit(HWND hWnd)
 
     // Atualizar posição do botão
     if (AgendamentosSelect_g_hButton) {
-        int buttonY = startY + 10 * cellHeight + 3;
+        int buttonY = startY + 11 * cellHeight + 3;
         SetWindowPos(AgendamentosSelect_g_hButton, NULL, startX, buttonY, 150, 30,
             SWP_NOZORDER | SWP_NOACTIVATE);
     }
@@ -2694,7 +2766,7 @@ void AgendamentosSelect_AtualizarPosicoesControlesAgendamento(HWND hWnd)
 
     // Atualizar posição do botão
     if (AgendamentosSelect_g_hButton) {
-        int buttonY = startY + 10 * cellHeight + 3;
+        int buttonY = startY + 11 * cellHeight + 3;
         SetWindowPos(AgendamentosSelect_g_hButton, NULL, startX, buttonY, 150, 30,
             SWP_NOZORDER | SWP_NOACTIVATE);
     }
@@ -2842,6 +2914,142 @@ bool AgendamentosSelect_isValidDate(const std::wstring& date) {
     return true;
 }
 
+float validarPrecoApenasVirgula(const std::string& precoStr) {
+    std::string tempStr = precoStr;
+    int decimalCount = 0;
+    float valorFloat = -1.0f;
+
+    // 1. Verificação inicial
+    if (tempStr.empty()) {
+        return -1.0f;
+    }
+
+    // 2. Limpeza e Validação de Caracteres
+    for (char c : tempStr) {
+        if (isdigit(c)) {
+            continue;
+        }
+        else if (c == ',') {
+            decimalCount++;
+        }
+        else if (c == '.') {
+            // Rejeita explicitamente o PONTO decimal.
+            return -1.0f;
+        }
+        else {
+            // Contém um caractere não numérico e não permitido
+            return -1.0f;
+        }
+    }
+
+    // 3. Validação do Separador Decimal
+    if (decimalCount > 1) {
+        // Mais de uma vírgula
+        return -1.0f;
+    }
+
+    // 4. Normalização: Converte a VÍRGULA para PONTO para que std::stof possa fazer a conversão.
+    std::replace(tempStr.begin(), tempStr.end(), ',', '.');
+
+    // 5. Conversão Segura para Float
+    try {
+        valorFloat = std::stof(tempStr);
+
+        // 6. Validação de Valor Positivo
+        if (valorFloat > 0.0f) {
+            return valorFloat;
+        }
+        else {
+            return -1.0f; // Preço zero ou negativo
+        }
+    }
+    catch (const std::exception& e) {
+        // Falha na conversão (formato incorreto, out of range, etc.)
+        return -1.0f;
+    }
+}
+
+#include <string>
+#include <algorithm> 
+#include <cctype>    // Para iswdigit
+
+/**
+ * @brief Valida se uma string larga (std::wstring) representa um preço válido e positivo,
+ * aceitando APENAS VÍRGULA (,) como separador decimal.
+ *
+ * @param precoWStr A string larga de entrada (std::wstring).
+ * @return O valor float convertido (estritamente maior que 0.0f) se a string for válida.
+ * @return -1.0f se a string for inválida (formato, caracteres errados, ou valor <= 0).
+ */
+bool ValidarPreco(const std::wstring& dado)
+{
+    if (dado.empty()) return false;
+
+    bool temVirgula = false;
+    int casasDecimais = 0;
+
+    for (size_t i = 0; i < dado.size(); ++i)
+    {
+        wchar_t c = dado[i];
+
+        // 1. Aceita apenas dígitos
+        if (std::iswdigit(c))
+        {
+            if (temVirgula)
+                casasDecimais++;
+            continue;
+        }
+
+        // 2. Aceita apenas UMA vírgula, não no início nem no fim
+        if (c == L',')
+        {
+            if (temVirgula || i == 0 || i == dado.size() - 1)
+                return false; // duplicada, no início ou no fim
+            temVirgula = true;
+            continue;
+        }
+
+        // 3. Qualquer outro caractere (incluindo ponto) = INVÁLIDO
+        return false;
+    }
+
+    // 4. Regras finais
+    if (temVirgula)
+    {
+        if (casasDecimais == 0) return false; // vírgula sem dígitos depois: "10,"
+        if (casasDecimais > 2)  return false; // mais de 2 decimais: "10,999"
+    }
+
+    // 5. Deve ter pelo menos um dígito
+    if (!temVirgula && dado.find_first_of(L"0123456789") == std::wstring::npos)
+        return false;
+
+    return true;
+}
+
+std::wstring FormatarPrecoSemPontoMilhar(double valor)
+{
+    // Arredonda para 2 casas decimais
+    valor = std::round(valor * 100.0) / 100.0;
+
+    // Usa stringstream com precisão fixa
+    std::wstringstream ss;
+    ss << std::fixed << std::setprecision(2) << valor;
+
+    std::wstring str = ss.str();
+
+    // Substitui o ponto decimal por vírgula
+    size_t pos = str.find(L'.');
+    if (pos != std::wstring::npos) {
+        str.replace(pos, 1, L",");
+    }
+    else {
+        str += L",00"; // Caso não tenha decimal
+    }
+
+    return str;
+}
+
 LPCWSTR AgendamentosSelect_error = L"0";
 std::wstring AgendamentosSelect_mensagem = L"";
 LPCWSTR AgendamentosSelect_msg = L"";
@@ -2870,6 +3078,16 @@ std::wstring AgendamentosSelect_treatDataAppointment(std::wstring dado, int numb
         else if (!AgendamentosSelect_isValidDate(dado)) {
             AgendamentosSelect_error = L"1";
             AgendamentosSelect_mensagem = L"Insira: 'Data' no formato: dd/mm/aaaa.\n" + AgendamentosSelect_mensagem;
+        }
+    }
+    else if (number == 11) {
+        if (dado.empty()) {
+            AgendamentosSelect_error = L"1";
+            AgendamentosSelect_mensagem = L"Insira: 'Preço'.\n" + AgendamentosSelect_mensagem;
+        }
+        else if (!ValidarPreco(dado)) {
+            AgendamentosSelect_error = L"1";
+            AgendamentosSelect_mensagem = L"Insira: 'Preço' no formato: 999,99.\n" + AgendamentosSelect_mensagem;
         }
     }
     else if (number == 10) {

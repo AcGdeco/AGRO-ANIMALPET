@@ -600,9 +600,15 @@ LRESULT CALLBACK WndProcAdd(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
                 }
             }
 
-            sqlite3* db;
+            // Abrir ou criar o banco de dados (código original mantido)
             char* errMsg = 0;
-            int rc = sqlite3_open("pet.db", &db);
+            sqlite3* db = nullptr;
+            std::string dbPath = GetAppDataPath() + "pet.db";
+
+            // Cria a pasta se não existir
+            CreateDirectoryA(dbPath.substr(0, dbPath.find_last_of('\\')).c_str(), NULL);
+
+            int rc = sqlite3_open(dbPath.c_str(), &db);
             if (rc) {
                 MessageBox(hWnd, L"Erro ao abrir/criar o banco de dados!", L"Erro", MB_OK | MB_ICONERROR);
             }

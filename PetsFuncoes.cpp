@@ -1339,9 +1339,15 @@ void PetsSelect_createHeaderTable(HWND hWnd, HDC hdc) {
 void PetsSelect_selectHeaderDB() {
     PetsSelect_g_tableDataFull.clear(); // Limpa o vetor no início
 
-    sqlite3* db;
+    // Abrir ou criar o banco de dados (código original mantido)
     char* errMsg = 0;
-    int rc = sqlite3_open("pet.db", &db);
+    sqlite3* db = nullptr;
+    std::string dbPath = GetAppDataPath() + "pet.db";
+
+    // Cria a pasta se não existir
+    CreateDirectoryA(dbPath.substr(0, dbPath.find_last_of('\\')).c_str(), NULL);
+
+    int rc = sqlite3_open(dbPath.c_str(), &db);
 
     if (rc != SQLITE_OK) {
         // Tratar erro de abertura do banco de dados
@@ -1462,11 +1468,15 @@ void PetsSelect_AtualizarPosicoesBotoes(HWND hWnd)
 }
 
 bool PetsSelect_deleteRecordById(const std::string& databasePath, int id, HWND hWnd) {
-    sqlite3* db;
+    // Abrir ou criar o banco de dados (código original mantido)
     char* errMsg = 0;
+    sqlite3* db = nullptr;
+    std::string dbPath = GetAppDataPath() + "pet.db";
 
-    // Abrir conexão com o banco
-    int rc = sqlite3_open(databasePath.c_str(), &db);
+    // Cria a pasta se não existir
+    CreateDirectoryA(dbPath.substr(0, dbPath.find_last_of('\\')).c_str(), NULL);
+
+    int rc = sqlite3_open(dbPath.c_str(), &db);
     if (rc != SQLITE_OK) {
         MessageBoxW(hWnd, L"Erro ao abrir banco de dados", L"Erro", MB_ICONERROR);
         return false;
@@ -1506,10 +1516,15 @@ void PetsSelect_selectDB() {
     // 1. LIMPAR DADOS ANTIGOS ANTES DE CADA CONSULTA
     PetsSelect_g_tableData.clear();
 
-    // Consultar o banco apenas se a tabela estiver vazia
-    sqlite3* db;
+    // Abrir ou criar o banco de dados (código original mantido)
     char* errMsg = 0;
-    int rc = sqlite3_open("pet.db", &db);
+    sqlite3* db = nullptr;
+    std::string dbPath = GetAppDataPath() + "pet.db";
+
+    // Cria a pasta se não existir
+    CreateDirectoryA(dbPath.substr(0, dbPath.find_last_of('\\')).c_str(), NULL);
+
+    int rc = sqlite3_open(dbPath.c_str(), &db);
     if (rc == SQLITE_OK) {
         std::string sqlSelect;
         std::string sqlSelectCount;
@@ -2423,9 +2438,17 @@ std::wstring PetsSelect_treatDataAppointment(std::wstring dado, int number) {
         PetsSelect_error = L"1";
         PetsSelect_mensagem = L"Insira: 'Nome do Pet'.\n" + PetsSelect_mensagem;
     }
+    else if (number == 3 && dado.empty()) {
+        PetsSelect_error = L"1";
+        PetsSelect_mensagem = L"Insira: 'Raça'.\n" + PetsSelect_mensagem;
+    }
     else if (number == 4 && dado.empty()) {
         PetsSelect_error = L"1";
         PetsSelect_mensagem = L"Insira: 'Nome do Tutor'.\n" + PetsSelect_mensagem;
+    }
+    else if (number == 5 && dado.empty()) {
+        PetsSelect_error = L"1";
+        PetsSelect_mensagem = L"Insira: 'Cor'.\n" + PetsSelect_mensagem;
     }
     else if (number == 6 && !dado.empty()) {
         if (!PetsSelect_isNumber(dado)) {
@@ -2438,6 +2461,10 @@ std::wstring PetsSelect_treatDataAppointment(std::wstring dado, int number) {
             PetsSelect_error = L"1";
             PetsSelect_mensagem = L"Insira: Apenas números decimais ou inteiros em 'Peso'.\n" + PetsSelect_mensagem;
         }
+    }
+    else if (number == 8 && dado.empty()) {
+        PetsSelect_error = L"1";
+        PetsSelect_mensagem = L"Insira: 'Sexo'.\n" + PetsSelect_mensagem;
     }
     else if (dado.empty()) {
         dado_escaped = L"";

@@ -1182,9 +1182,15 @@ void TutoresSelect_createHeaderTable(HWND hWnd, HDC hdc) {
 void TutoresSelect_selectHeaderDB() {
     TutoresSelect_g_tableDataFull.clear();
 
-    sqlite3* db;
+    // Abrir ou criar o banco de dados (código original mantido)
     char* errMsg = 0;
-    int rc = sqlite3_open("pet.db", &db);
+    sqlite3* db = nullptr;
+    std::string dbPath = GetAppDataPath() + "pet.db";
+
+    // Cria a pasta se não existir
+    CreateDirectoryA(dbPath.substr(0, dbPath.find_last_of('\\')).c_str(), NULL);
+
+    int rc = sqlite3_open(dbPath.c_str(), &db);
 
     errMsg = 0;
     const char* sqlPragma = "PRAGMA table_info(Tutores);";
@@ -1273,11 +1279,15 @@ void TutoresSelect_AtualizarPosicoesBotoes(HWND hWnd)
 }
 
 bool TutoresSelect_deleteRecordById(const std::string& databasePath, int id, HWND hWnd) {
-    sqlite3* db;
+    // Abrir ou criar o banco de dados (código original mantido)
     char* errMsg = 0;
+    sqlite3* db = nullptr;
+    std::string dbPath = GetAppDataPath() + "pet.db";
 
-    // Abrir conexão com o banco
-    int rc = sqlite3_open(databasePath.c_str(), &db);
+    // Cria a pasta se não existir
+    CreateDirectoryA(dbPath.substr(0, dbPath.find_last_of('\\')).c_str(), NULL);
+
+    int rc = sqlite3_open(dbPath.c_str(), &db);
     if (rc != SQLITE_OK) {
         MessageBoxW(hWnd, L"Erro ao abrir banco de dados", L"Erro", MB_ICONERROR);
         return false;
@@ -1317,10 +1327,15 @@ void TutoresSelect_selectDB() {
     // 1. LIMPAR DADOS ANTIGOS ANTES DE CADA CONSULTA
     TutoresSelect_g_tableData.clear();
 
-    // Consultar o banco apenas se a tabela estiver vazia
-    sqlite3* db;
+    // Abrir ou criar o banco de dados (código original mantido)
     char* errMsg = 0;
-    int rc = sqlite3_open("pet.db", &db);
+    sqlite3* db = nullptr;
+    std::string dbPath = GetAppDataPath() + "pet.db";
+
+    // Cria a pasta se não existir
+    CreateDirectoryA(dbPath.substr(0, dbPath.find_last_of('\\')).c_str(), NULL);
+
+    int rc = sqlite3_open(dbPath.c_str(), &db);
     if (rc == SQLITE_OK) {
         std::string sqlSelect;
         std::string sqlSelectCount;
@@ -2053,10 +2068,15 @@ std::string TutoresSelect_wstring_para_string(const std::wstring& wstr) {
  * @return false Se o CPF não estiver registrado ou em caso de erro.
  */
 bool TutoresSelect_verificar_cpf_registrado(const std::wstring& cpf_wstring) {
-    sqlite3* db; // Declaração da conexão
+    // Abrir ou criar o banco de dados (código original mantido)
+    char* errMsg = 0;
+    sqlite3* db = nullptr;
+    std::string dbPath = GetAppDataPath() + "pet.db";
 
-    // Conexão é aberta e o ponteiro 'db' é preenchido
-    int rc = sqlite3_open("pet.db", &db);
+    // Cria a pasta se não existir
+    CreateDirectoryA(dbPath.substr(0, dbPath.find_last_of('\\')).c_str(), NULL);
+
+    int rc = sqlite3_open(dbPath.c_str(), &db);
 
     if (rc != SQLITE_OK) {
         // ... tratamento de erro ...
@@ -2128,8 +2148,24 @@ std::wstring TutoresSelect_treatDataAppointment(std::wstring dado, int number) {
             TutoresSelect_mensagem = L"Insira: Apenas números em 'CEP'.\n" + TutoresSelect_mensagem;
         }
     }
-    else if (number == 6 && !dado.empty()) {
-        if (!TutoresSelect_isNumber(dado)) {
+    else if (number == 4) {
+        if (dado.empty()) {
+            TutoresSelect_error = L"1";
+            TutoresSelect_mensagem = L"Insira: 'Endereço'.\n" + TutoresSelect_mensagem;
+        }
+    }
+    else if (number == 5) {
+        if (dado.empty()) {
+            TutoresSelect_error = L"1";
+            TutoresSelect_mensagem = L"Insira: 'Ponto de Referência'.\n" + TutoresSelect_mensagem;
+        }
+    }
+    else if (number == 6) {
+        if (dado.empty()) {
+            TutoresSelect_error = L"1";
+            TutoresSelect_mensagem = L"Insira: 'Telefone'.\n" + TutoresSelect_mensagem;
+        }
+        else if (!TutoresSelect_isNumber(dado)) {
             TutoresSelect_error = L"1";
             TutoresSelect_mensagem = L"Insira: Apenas números em 'Telefone'.\n" + TutoresSelect_mensagem;
         }

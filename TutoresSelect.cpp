@@ -73,78 +73,8 @@ LRESULT CALLBACK WndProcTutoresSelect(HWND hWnd, UINT message, WPARAM wParam, LP
             SetWindowLongPtr(hWnd, GWL_STYLE, style | WS_VSCROLL);
         }
 
-        // Abrir ou criar o banco de dados (código original mantido)
-        sqlite3* db;
-        char* errMsg = 0;
-        int rc = sqlite3_open("pet.db", &db);
-        if (rc) {
-            MessageBox(hWnd, L"Erro ao abrir/criar o banco de dados!", L"Erro", MB_OK | MB_ICONERROR);
-            sqlite3_free(errMsg);
-        }
-        else {
-            // Código de criação de tabela e inserção (mantido como está)
-            //const char* sqlDrop = "DROP TABLE IF EXISTS Tutores;";
-            //rc = sqlite3_exec(db, sqlDrop, 0, 0, &errMsg);
-            //if (rc != SQLITE_OK) {
-                //MessageBox(hWnd, L"Erro ao dropar tabela!", L"Erro", MB_OK | MB_ICONERROR);
-                //sqlite3_free(errMsg);
-            //}
-            const char* sqlCreate = "CREATE TABLE IF NOT EXISTS Tutores (ID INTEGER PRIMARY KEY AUTOINCREMENT, Nome_do_Tutor TEXT, CEP TEXT, Endereco TEXT, Ponto_de_referencia TEXT, Telefone TEXT, CPF TEXT, Date TEXT, Hour TEXT);";
-            rc = sqlite3_exec(db, sqlCreate, 0, 0, &errMsg);
-            if (rc != SQLITE_OK) {
-                wchar_t fullMsg[512] = L"Erro ao criar tabela! Código: ";
-                wchar_t codeStr[32];
-                swprintf_s(codeStr, L"%d", rc);
-                wcscat_s(fullMsg, codeStr);
-                if (errMsg) {
-                    size_t len = strlen(errMsg) + 1;
-                    wchar_t wErrMsg[256];
-                    mbstowcs_s(NULL, wErrMsg, len, errMsg, _TRUNCATE);
-                    wcscat_s(fullMsg, L" - Detalhes: ");
-                    wcscat_s(fullMsg, wErrMsg);
-                }
-                MessageBox(hWnd, fullMsg, L"Erro", MB_OK | MB_ICONERROR);
-                sqlite3_free(errMsg);
-            }
-            else {
-                // Inserções (código original mantido)
-                 //std::wstring currentDate = TutoresSelect_GetCurrentDate();
-                //std::wstring currentHour = TutoresSelect_GetCurrentHour();
-                //for (int i = 1; i <= 100; i++) {
-                   //std::wstring sqlInsertW = L"INSERT INTO Tutores (Nome_do_Tutor, CEP, Endereco, Ponto_de_referencia, Telefone, CPF, Date, Hour) VALUES ('Laís', '36309016', 'Rua das flores - Guarda Mor - São João del Rei', 'Perto da pizzaria Agostinho', '32998360862', '09813426632', '" + currentDate + L"', '" + currentHour + L"');";
-                    //int required = WideCharToMultiByte(CP_UTF8, 0, sqlInsertW.c_str(), -1, nullptr, 0, nullptr, nullptr);
-                    //if (required > 0) {
-                        //std::string sqlInsertUtf8(required, '\0');
-                        //WideCharToMultiByte(CP_UTF8, 0, sqlInsertW.c_str(), -1, &sqlInsertUtf8[0], required, nullptr, nullptr);
-                        //char* errMsg = nullptr;
-                        //int rc = sqlite3_exec(db, sqlInsertUtf8.c_str(), nullptr, nullptr, &errMsg);
-                        //if (rc != SQLITE_OK) sqlite3_free(errMsg);
-                    //}
-                //}
-                //std::wstring sqlInsertW2 = L"INSERT INTO Pets (Nome_do_Pet, Raca, Nome_do_Tutor, CEP, Cor, Idade, Peso, Sexo, Castrado, Endereco, Ponto_de_referencia, Banho, Tosa, Obs_Tosa, Parasitas, Lesoes, Obs_Lesoes, Telefone, CPF, Date, Hour) VALUES ('Astralis', 'Viralata', 'Débora', '36309022', 'Preto', 6, 18, 'Feminino', 'Não', 'Rua Ricador Geraldo dos Santos - Alto das Mercês - nº12', 'Perto da igreja das Mercês', 'Padrão', 'Tesoura', 'aa ksfj asldfj açlksdj fkasjd fçklasdjf aksdlfjkalçsdfj kçalsdjf kçlasjd çfkasdj fklçaj sdçlfkjakslfj çlasdjf çasd jfçaskdjfsdf', 'Carrapatos', 'Pele', ' asdfj açlsjf akçslj fkçlasdj fkçlasdjf lçkasjdf kasdjfkiujriwejfç dfkmdnfçnvçaidsjfçkdsfjaçksdjfkaçsjdfkasdjfkçlasjdçfaksdjf', '32998365552', '09813426789', '" + currentDate + L"', '" + currentHour + L"');";
-                //int required2 = WideCharToMultiByte(CP_UTF8, 0, sqlInsertW2.c_str(), -1, nullptr, 0, nullptr, nullptr);
-                //if (required2 > 0) {
-                    //std::string sqlInsertUtf8(required2, '\0');
-                    //WideCharToMultiByte(CP_UTF8, 0, sqlInsertW2.c_str(), -1, &sqlInsertUtf8[0], required2, nullptr, nullptr);
-                    //char* errMsg = nullptr;
-                    //int rc = sqlite3_exec(db, sqlInsertUtf8.c_str(), nullptr, nullptr, &errMsg);
-                    //if (rc != SQLITE_OK) sqlite3_free(errMsg);
-                //}
-                //if (rc != SQLITE_OK && errMsg) {
-                    //size_t len = strlen(errMsg) + 1;
-                    //wchar_t wErrMsg[256];
-                    //mbstowcs_s(NULL, wErrMsg, len, errMsg, _TRUNCATE);
-                    //wchar_t fullMsg[512];
-                    //swprintf_s(fullMsg, L"Erro ao inserir dados! Detalhes: %s", wErrMsg);
-                    //MessageBoxW(hWnd, fullMsg, L"Erro", MB_OK | MB_ICONERROR);
-                    //sqlite3_free(errMsg);
-                //}
-            }
-            sqlite3_close(db);
+        TutoresSelect_RecarregarDadosTabela(hWnd);
 
-            TutoresSelect_RecarregarDadosTabela(hWnd);
-
-        }
         return 0;
     }
     break;
