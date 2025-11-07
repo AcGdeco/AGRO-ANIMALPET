@@ -1,0 +1,17 @@
+# Arquivos de Linker
+*.ilk
+
+# Arquivos de Debug/Build
+*.pdb
+*.obj
+*.exe
+*.dll
+
+# Pastas do Visual Studio
+Debug/
+Release/
+x64/
+x86/
+Pet/
+Pet/x64/Debug/Pet.ilk
+x64/Debug/Pet.pdb
