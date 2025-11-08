@@ -259,15 +259,12 @@ LRESULT CALLBACK WndProcTutoresRead(HWND hWnd, UINT message, WPARAM wParam, LPAR
         TutoresSelect_g_tableDataConsulta.clear();
 
         // Abrir ou criar o banco de dados (código original mantido)
-        char* errMsg = 0;
         sqlite3* db = nullptr;
-        std::string dbPath = GetAppDataPath() + "pet.db";
+        char* errMsg = nullptr;
+        int rc;
+        OpenDatabase(db);
 
-        // Cria a pasta se não existir
-        CreateDirectoryA(dbPath.substr(0, dbPath.find_last_of('\\')).c_str(), NULL);
-
-        int rc = sqlite3_open(dbPath.c_str(), &db);
-        if (rc == SQLITE_OK) {
+        if (OpenDatabase(db)) {
             // Supondo que TutoresSelect_idRecord é um long long/int, convertemos para string:
             std::string idRecordStr = std::to_string(TutoresSelect_idRecord);
 

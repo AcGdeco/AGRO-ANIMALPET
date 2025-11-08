@@ -1,139 +1,45 @@
-﻿  Add.cpp
-C:\Users\Andre\source\repos\Pet\Pet.h(37,13): warning C4091: 'extern ': ignorado à esquerda de 'ButtonAction' quando nenhuma variável é declarada
-  (compilando o arquivo fonte 'Add.cpp')
-  
-C:\Users\Andre\source\repos\Pet\Add.cpp(98,34): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\Add.cpp(323,48): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\Add.cpp(716,74): warning C4267: 'argumento': conversão de 'size_t' para 'int', possível perda de dados
-  AgendamentosAdd.cpp
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.h(35,13): warning C4091: 'extern ': ignorado à esquerda de 'AgendamentosSelect_ButtonAction' quando nenhuma variável é declarada
-  (compilando o arquivo fonte 'AgendamentosAdd.cpp')
-  
-C:\Users\Andre\source\repos\Pet\AgendamentosAdd.cpp(102,34): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\AgendamentosAdd.cpp(346,48): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\AgendamentosAdd.cpp(831,74): warning C4267: 'argumento': conversão de 'size_t' para 'int', possível perda de dados
-  AgendamentosConsultar.cpp
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.h(35,13): warning C4091: 'extern ': ignorado à esquerda de 'AgendamentosSelect_ButtonAction' quando nenhuma variável é declarada
-  (compilando o arquivo fonte 'AgendamentosConsultar.cpp')
-  
-C:\Users\Andre\source\repos\Pet\AgendamentosConsultar.cpp(39,9): warning C4101: 'colNumber': variável local não referenciada
-C:\Users\Andre\source\repos\Pet\AgendamentosConsultar.cpp(215,24): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\AgendamentosConsultar.cpp(399,17): warning C4477: 'snprintf': a cadeia de formato '%d' requer um argumento do tipo 'int', mas um argumento variadic 1 tem o tipo 'LONG_PTR'
-      C:\Users\Andre\source\repos\Pet\AgendamentosConsultar.cpp(399,17):
-      considere usar '%lld' na cadeia de formato
-      C:\Users\Andre\source\repos\Pet\AgendamentosConsultar.cpp(399,17):
-      considere usar '%Id' na cadeia de formato
-      C:\Users\Andre\source\repos\Pet\AgendamentosConsultar.cpp(399,17):
-      considere usar '%I64d' na cadeia de formato
-  
-C:\Users\Andre\source\repos\Pet\AgendamentosConsultar.cpp(446,24): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
-  AgendamentosEdit.cpp
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.h(35,13): warning C4091: 'extern ': ignorado à esquerda de 'AgendamentosSelect_ButtonAction' quando nenhuma variável é declarada
-  (compilando o arquivo fonte 'AgendamentosEdit.cpp')
-  
-C:\Users\Andre\source\repos\Pet\AgendamentosEdit.cpp(180,30): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\AgendamentosEdit.cpp(330,44): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\AgendamentosEdit.cpp(945,74): warning C4267: 'argumento': conversão de 'size_t' para 'int', possível perda de dados
-  AgendamentosFuncoes.cpp
+﻿  AgendamentosFuncoes.cpp
 C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.h(35,13): warning C4091: 'extern ': ignorado à esquerda de 'AgendamentosSelect_ButtonAction' quando nenhuma variável é declarada
   (compilando o arquivo fonte 'AgendamentosFuncoes.cpp')
   
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(19,9): warning C4005: 'min': redefinição de macro
+C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(22,9): warning C4005: 'min': redefinição de macro
       C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\shared\minwindef.h(197,9):
       ver a definição anterior de "min"
   
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1082,17): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1106,17): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1137,17): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1172,17): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1224,55): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1233,72): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1242,55): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1251,72): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1260,51): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1268,51): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1293,17): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1315,17): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1333,55): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1342,72): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1351,51): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1373,55): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1382,72): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1391,51): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1464,54): warning C4267: '=': conversão de 'size_t' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1465,71): warning C4267: '=': conversão de 'size_t' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1582,30): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1688,64): warning C4267: '=': conversão de 'size_t' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1723,18): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(2046,53): warning C4267: 'argumento': conversão de 'size_t' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(2208,20): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(2234,18): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(3140,16): warning C4244: 'return': conversão de 'LRESULT' para 'BOOL', possível perda de dados
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(3146,16): warning C4244: 'return': conversão de 'LRESULT' para 'BOOL', possível perda de dados
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(3152,16): warning C4244: 'return': conversão de 'LRESULT' para 'BOOL', possível perda de dados
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(3284,9): warning C4065: instrução switch contém rótulo 'default', mas nenhum 'case'
-  AgendamentosSelect.cpp
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\format(42): warning STL4038: The contents of <format> are available only with C++20 or later.
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.h(35,13): warning C4091: 'extern ': ignorado à esquerda de 'AgendamentosSelect_ButtonAction' quando nenhuma variável é declarada
-  (compilando o arquivo fonte 'AgendamentosSelect.cpp')
-  
-C:\Users\Andre\source\repos\Pet\AgendamentosSelect.cpp(71,20): warning C4244: 'inicializando': conversão de 'LONG_PTR' para 'LONG', possível perda de dados
-C:\Users\Andre\source\repos\Pet\AgendamentosSelect.cpp(212,63): warning C4244: 'argumento': conversão de 'LONG_PTR' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\AgendamentosSelect.cpp(297,44): warning C4244: 'argumento': conversão de 'LONG_PTR' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\AgendamentosSelect.cpp(388,42): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
-  Consultar.cpp
-C:\Users\Andre\source\repos\Pet\Pet.h(37,13): warning C4091: 'extern ': ignorado à esquerda de 'ButtonAction' quando nenhuma variável é declarada
-  (compilando o arquivo fonte 'Consultar.cpp')
-  
-C:\Users\Andre\source\repos\Pet\Consultar.cpp(296,24): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
-  Edit.cpp
-C:\Users\Andre\source\repos\Pet\Pet.h(37,13): warning C4091: 'extern ': ignorado à esquerda de 'ButtonAction' quando nenhuma variável é declarada
-  (compilando o arquivo fonte 'Edit.cpp')
-  
-C:\Users\Andre\source\repos\Pet\Edit.cpp(172,30): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\Edit.cpp(298,44): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\Edit.cpp(822,74): warning C4267: 'argumento': conversão de 'size_t' para 'int', possível perda de dados
-  Global.cpp
-C:\Users\Andre\source\repos\Pet\Global.cpp(220,34): warning C4101: 'e': variável local não referenciada
-  MenuUniversal.cpp
-C:\Users\Andre\source\repos\Pet\Pet.h(37,13): warning C4091: 'extern ': ignorado à esquerda de 'ButtonAction' quando nenhuma variável é declarada
-  (compilando o arquivo fonte 'MenuUniversal.cpp')
-  
-C:\Users\Andre\source\repos\Pet\TutoresFuncoes.h(33,13): warning C4091: 'extern ': ignorado à esquerda de 'TutoresSelect_ButtonAction' quando nenhuma variável é declarada
-  (compilando o arquivo fonte 'MenuUniversal.cpp')
-  
-C:\Users\Andre\source\repos\Pet\PetsFuncoes.h(35,13): warning C4091: 'extern ': ignorado à esquerda de 'PetsSelect_ButtonAction' quando nenhuma variável é declarada
-  (compilando o arquivo fonte 'MenuUniversal.cpp')
-  
-C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.h(35,13): warning C4091: 'extern ': ignorado à esquerda de 'AgendamentosSelect_ButtonAction' quando nenhuma variável é declarada
-  (compilando o arquivo fonte 'MenuUniversal.cpp')
-  
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\format(42): warning STL4038: The contents of <format> are available only with C++20 or later.
-  PetsAdd.cpp
-C:\Users\Andre\source\repos\Pet\PetsFuncoes.h(35,13): warning C4091: 'extern ': ignorado à esquerda de 'PetsSelect_ButtonAction' quando nenhuma variável é declarada
-  (compilando o arquivo fonte 'PetsAdd.cpp')
-  
-C:\Users\Andre\source\repos\Pet\PetsAdd.cpp(97,34): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\PetsAdd.cpp(111,34): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\PetsAdd.cpp(135,34): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\PetsAdd.cpp(157,48): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\PetsAdd.cpp(605,74): warning C4267: 'argumento': conversão de 'size_t' para 'int', possível perda de dados
-  PetsConsultar.cpp
-C:\Users\Andre\source\repos\Pet\PetsFuncoes.h(35,13): warning C4091: 'extern ': ignorado à esquerda de 'PetsSelect_ButtonAction' quando nenhuma variável é declarada
-  (compilando o arquivo fonte 'PetsConsultar.cpp')
-  
-C:\Users\Andre\source\repos\Pet\PetsConsultar.cpp(71,9): warning C4101: 'colNumber': variável local não referenciada
-C:\Users\Andre\source\repos\Pet\PetsConsultar.cpp(163,24): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\PetsConsultar.cpp(397,24): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
-  PetsEdit.cpp
-C:\Users\Andre\source\repos\Pet\PetsFuncoes.h(35,13): warning C4091: 'extern ': ignorado à esquerda de 'PetsSelect_ButtonAction' quando nenhuma variável é declarada
-  (compilando o arquivo fonte 'PetsEdit.cpp')
-  
-C:\Users\Andre\source\repos\Pet\PetsEdit.cpp(185,30): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\PetsEdit.cpp(194,30): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\PetsEdit.cpp(218,30): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\PetsEdit.cpp(240,44): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\PetsEdit.cpp(808,74): warning C4267: 'argumento': conversão de 'size_t' para 'int', possível perda de dados
+C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1109,17): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
+C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1133,17): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
+C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1164,17): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
+C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1199,17): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
+C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1251,55): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
+C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1260,72): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
+C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1269,55): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
+C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1278,72): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
+C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1287,51): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
+C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1295,51): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
+C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1320,17): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
+C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1342,17): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
+C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1360,51): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
+C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1387,55): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
+C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1396,72): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
+C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1405,55): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
+C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1414,72): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
+C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1423,51): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
+C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1438,43): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
+C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1509,54): warning C4267: '=': conversão de 'size_t' para 'int', possível perda de dados
+C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1510,71): warning C4267: '=': conversão de 'size_t' para 'int', possível perda de dados
+C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1627,30): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
+C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1735,67): warning C4267: '=': conversão de 'size_t' para 'int', possível perda de dados
+C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1742,62): warning C4267: '=': conversão de 'size_t' para 'int', possível perda de dados
+C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1743,64): warning C4267: '=': conversão de 'size_t' para 'int', possível perda de dados
+C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(1778,18): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
+C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(2108,53): warning C4267: 'argumento': conversão de 'size_t' para 'int', possível perda de dados
+C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(2270,20): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
+C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(2296,18): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
+C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(2956,34): warning C4101: 'e': variável local não referenciada
+C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(3348,16): warning C4244: 'return': conversão de 'LRESULT' para 'BOOL', possível perda de dados
+C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(3354,16): warning C4244: 'return': conversão de 'LRESULT' para 'BOOL', possível perda de dados
+C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(3360,16): warning C4244: 'return': conversão de 'LRESULT' para 'BOOL', possível perda de dados
+C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(3492,9): warning C4065: instrução switch contém rótulo 'default', mas nenhum 'case'
   PetsFuncoes.cpp
 C:\Users\Andre\source\repos\Pet\PetsFuncoes.h(35,13): warning C4091: 'extern ': ignorado à esquerda de 'PetsSelect_ButtonAction' quando nenhuma variável é declarada
   (compilando o arquivo fonte 'PetsFuncoes.cpp')
@@ -154,87 +60,47 @@ C:\Users\Andre\source\repos\Pet\PetsFuncoes.cpp(1143,51): warning C4312: 'conver
 C:\Users\Andre\source\repos\Pet\PetsFuncoes.cpp(1216,50): warning C4267: '=': conversão de 'size_t' para 'int', possível perda de dados
 C:\Users\Andre\source\repos\Pet\PetsFuncoes.cpp(1217,67): warning C4267: '=': conversão de 'size_t' para 'int', possível perda de dados
 C:\Users\Andre\source\repos\Pet\PetsFuncoes.cpp(1325,30): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\PetsFuncoes.cpp(1407,59): warning C4267: '=': conversão de 'size_t' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\PetsFuncoes.cpp(1443,18): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\PetsFuncoes.cpp(1611,30): warning C4267: '=': conversão de 'size_t' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\PetsFuncoes.cpp(1614,30): warning C4267: '=': conversão de 'size_t' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\PetsFuncoes.cpp(1617,26): warning C4267: '=': conversão de 'size_t' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\PetsFuncoes.cpp(1620,26): warning C4267: '=': conversão de 'size_t' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\PetsFuncoes.cpp(1772,20): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\PetsFuncoes.cpp(1798,18): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\PetsFuncoes.cpp(2697,16): warning C4244: 'return': conversão de 'LRESULT' para 'BOOL', possível perda de dados
-C:\Users\Andre\source\repos\Pet\PetsFuncoes.cpp(2703,16): warning C4244: 'return': conversão de 'LRESULT' para 'BOOL', possível perda de dados
-C:\Users\Andre\source\repos\Pet\PetsFuncoes.cpp(2709,16): warning C4244: 'return': conversão de 'LRESULT' para 'BOOL', possível perda de dados
-C:\Users\Andre\source\repos\Pet\PetsFuncoes.cpp(2841,9): warning C4065: instrução switch contém rótulo 'default', mas nenhum 'case'
-  PetsSelect.cpp
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\format(42): warning STL4038: The contents of <format> are available only with C++20 or later.
-C:\Users\Andre\source\repos\Pet\PetsFuncoes.h(35,13): warning C4091: 'extern ': ignorado à esquerda de 'PetsSelect_ButtonAction' quando nenhuma variável é declarada
-  (compilando o arquivo fonte 'PetsSelect.cpp')
-  
-C:\Users\Andre\source\repos\Pet\PetsSelect.cpp(71,20): warning C4244: 'inicializando': conversão de 'LONG_PTR' para 'LONG', possível perda de dados
-C:\Users\Andre\source\repos\Pet\PetsSelect.cpp(212,55): warning C4244: 'argumento': conversão de 'LONG_PTR' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\PetsSelect.cpp(363,36): warning C4244: 'argumento': conversão de 'LONG_PTR' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\PetsSelect.cpp(463,42): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
-  Select.cpp
-C:\Users\Andre\source\repos\Pet\Pet.h(37,13): warning C4091: 'extern ': ignorado à esquerda de 'ButtonAction' quando nenhuma variável é declarada
-  (compilando o arquivo fonte 'Select.cpp')
-  
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\format(42): warning STL4038: The contents of <format> are available only with C++20 or later.
-C:\Users\Andre\source\repos\Pet\Select.cpp(73,20): warning C4244: 'inicializando': conversão de 'LONG_PTR' para 'LONG', possível perda de dados
-C:\Users\Andre\source\repos\Pet\Select.cpp(212,44): warning C4244: 'argumento': conversão de 'LONG_PTR' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\Select.cpp(306,25): warning C4244: 'argumento': conversão de 'LONG_PTR' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\Select.cpp(397,42): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
-  Pet.cpp
-C:\Users\Andre\source\repos\Pet\Pet.h(37,13): warning C4091: 'extern ': ignorado à esquerda de 'ButtonAction' quando nenhuma variável é declarada
-  (compilando o arquivo fonte 'Pet.cpp')
-  
-C:\Users\Andre\source\repos\Pet\Pet.cpp(14,10): error C1083: Não é possível abrir arquivo incluir: 'Add.h': No such file or directory
-  TutoresAdd.cpp
-C:\Users\Andre\source\repos\Pet\TutoresFuncoes.h(33,13): warning C4091: 'extern ': ignorado à esquerda de 'TutoresSelect_ButtonAction' quando nenhuma variável é declarada
-  (compilando o arquivo fonte 'TutoresAdd.cpp')
-  
-C:\Users\Andre\source\repos\Pet\TutoresAdd.cpp(99,44): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\TutoresAdd.cpp(376,74): warning C4267: 'argumento': conversão de 'size_t' para 'int', possível perda de dados
-  TutoresConsultar.cpp
-C:\Users\Andre\source\repos\Pet\TutoresFuncoes.h(33,13): warning C4091: 'extern ': ignorado à esquerda de 'TutoresSelect_ButtonAction' quando nenhuma variável é declarada
-  (compilando o arquivo fonte 'TutoresConsultar.cpp')
-  
-C:\Users\Andre\source\repos\Pet\TutoresConsultar.cpp(310,24): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
-  TutoresEdit.cpp
-C:\Users\Andre\source\repos\Pet\TutoresFuncoes.h(33,13): warning C4091: 'extern ': ignorado à esquerda de 'TutoresSelect_ButtonAction' quando nenhuma variável é declarada
-  (compilando o arquivo fonte 'TutoresEdit.cpp')
-  
-C:\Users\Andre\source\repos\Pet\TutoresEdit.cpp(110,40): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\TutoresEdit.cpp(497,74): warning C4267: 'argumento': conversão de 'size_t' para 'int', possível perda de dados
-  Compilando...
+C:\Users\Andre\source\repos\Pet\PetsFuncoes.cpp(1408,59): warning C4267: '=': conversão de 'size_t' para 'int', possível perda de dados
+C:\Users\Andre\source\repos\Pet\PetsFuncoes.cpp(1444,18): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
+C:\Users\Andre\source\repos\Pet\PetsFuncoes.cpp(1615,30): warning C4267: '=': conversão de 'size_t' para 'int', possível perda de dados
+C:\Users\Andre\source\repos\Pet\PetsFuncoes.cpp(1618,30): warning C4267: '=': conversão de 'size_t' para 'int', possível perda de dados
+C:\Users\Andre\source\repos\Pet\PetsFuncoes.cpp(1621,26): warning C4267: '=': conversão de 'size_t' para 'int', possível perda de dados
+C:\Users\Andre\source\repos\Pet\PetsFuncoes.cpp(1624,26): warning C4267: '=': conversão de 'size_t' para 'int', possível perda de dados
+C:\Users\Andre\source\repos\Pet\PetsFuncoes.cpp(1776,20): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
+C:\Users\Andre\source\repos\Pet\PetsFuncoes.cpp(1802,18): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
+C:\Users\Andre\source\repos\Pet\PetsFuncoes.cpp(2713,16): warning C4244: 'return': conversão de 'LRESULT' para 'BOOL', possível perda de dados
+C:\Users\Andre\source\repos\Pet\PetsFuncoes.cpp(2719,16): warning C4244: 'return': conversão de 'LRESULT' para 'BOOL', possível perda de dados
+C:\Users\Andre\source\repos\Pet\PetsFuncoes.cpp(2725,16): warning C4244: 'return': conversão de 'LRESULT' para 'BOOL', possível perda de dados
+C:\Users\Andre\source\repos\Pet\PetsFuncoes.cpp(2857,9): warning C4065: instrução switch contém rótulo 'default', mas nenhum 'case'
   TutoresFuncoes.cpp
 C:\Users\Andre\source\repos\Pet\TutoresFuncoes.h(33,13): warning C4091: 'extern ': ignorado à esquerda de 'TutoresSelect_ButtonAction' quando nenhuma variável é declarada
   (compilando o arquivo fonte 'TutoresFuncoes.cpp')
   
-C:\Users\Andre\source\repos\Pet\TutoresFuncoes.cpp(21,9): warning C4005: 'min': redefinição de macro
+C:\Users\Andre\source\repos\Pet\TutoresFuncoes.cpp(22,9): warning C4005: 'min': redefinição de macro
       C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\shared\minwindef.h(197,9):
       ver a definição anterior de "min"
   
-C:\Users\Andre\source\repos\Pet\TutoresFuncoes.cpp(982,55): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\TutoresFuncoes.cpp(991,72): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\TutoresFuncoes.cpp(1000,51): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
-C:\Users\Andre\source\repos\Pet\TutoresFuncoes.cpp(1073,50): warning C4267: '=': conversão de 'size_t' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\TutoresFuncoes.cpp(1074,67): warning C4267: '=': conversão de 'size_t' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\TutoresFuncoes.cpp(1168,26): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\TutoresFuncoes.cpp(1254,18): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\TutoresFuncoes.cpp(1434,26): warning C4267: '=': conversão de 'size_t' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\TutoresFuncoes.cpp(1565,20): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\TutoresFuncoes.cpp(1591,18): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\TutoresFuncoes.cpp(2406,16): warning C4244: 'return': conversão de 'LRESULT' para 'BOOL', possível perda de dados
-C:\Users\Andre\source\repos\Pet\TutoresFuncoes.cpp(2412,16): warning C4244: 'return': conversão de 'LRESULT' para 'BOOL', possível perda de dados
-C:\Users\Andre\source\repos\Pet\TutoresFuncoes.cpp(2418,16): warning C4244: 'return': conversão de 'LRESULT' para 'BOOL', possível perda de dados
-C:\Users\Andre\source\repos\Pet\TutoresFuncoes.cpp(2550,9): warning C4065: instrução switch contém rótulo 'default', mas nenhum 'case'
-  TutoresSelect.cpp
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\format(42): warning STL4038: The contents of <format> are available only with C++20 or later.
-C:\Users\Andre\source\repos\Pet\TutoresFuncoes.h(33,13): warning C4091: 'extern ': ignorado à esquerda de 'TutoresSelect_ButtonAction' quando nenhuma variável é declarada
-  (compilando o arquivo fonte 'TutoresSelect.cpp')
-  
-C:\Users\Andre\source\repos\Pet\TutoresSelect.cpp(71,20): warning C4244: 'inicializando': conversão de 'LONG_PTR' para 'LONG', possível perda de dados
-C:\Users\Andre\source\repos\Pet\TutoresSelect.cpp(212,58): warning C4244: 'argumento': conversão de 'LONG_PTR' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\TutoresSelect.cpp(270,39): warning C4244: 'argumento': conversão de 'LONG_PTR' para 'int', possível perda de dados
-C:\Users\Andre\source\repos\Pet\TutoresSelect.cpp(360,38): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
+C:\Users\Andre\source\repos\Pet\TutoresFuncoes.cpp(983,55): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
+C:\Users\Andre\source\repos\Pet\TutoresFuncoes.cpp(992,72): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
+C:\Users\Andre\source\repos\Pet\TutoresFuncoes.cpp(1001,51): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
+C:\Users\Andre\source\repos\Pet\TutoresFuncoes.cpp(1074,50): warning C4267: '=': conversão de 'size_t' para 'int', possível perda de dados
+C:\Users\Andre\source\repos\Pet\TutoresFuncoes.cpp(1075,67): warning C4267: '=': conversão de 'size_t' para 'int', possível perda de dados
+C:\Users\Andre\source\repos\Pet\TutoresFuncoes.cpp(1169,26): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
+C:\Users\Andre\source\repos\Pet\TutoresFuncoes.cpp(1257,18): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
+C:\Users\Andre\source\repos\Pet\TutoresFuncoes.cpp(1443,26): warning C4267: '=': conversão de 'size_t' para 'int', possível perda de dados
+C:\Users\Andre\source\repos\Pet\TutoresFuncoes.cpp(1574,20): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
+C:\Users\Andre\source\repos\Pet\TutoresFuncoes.cpp(1600,18): warning C4267: 'inicializando': conversão de 'size_t' para 'int', possível perda de dados
+C:\Users\Andre\source\repos\Pet\TutoresFuncoes.cpp(2459,16): warning C4244: 'return': conversão de 'LRESULT' para 'BOOL', possível perda de dados
+C:\Users\Andre\source\repos\Pet\TutoresFuncoes.cpp(2465,16): warning C4244: 'return': conversão de 'LRESULT' para 'BOOL', possível perda de dados
+C:\Users\Andre\source\repos\Pet\TutoresFuncoes.cpp(2471,16): warning C4244: 'return': conversão de 'LRESULT' para 'BOOL', possível perda de dados
+C:\Users\Andre\source\repos\Pet\TutoresFuncoes.cpp(2603,9): warning C4065: instrução switch contém rótulo 'default', mas nenhum 'case'
+  Gerando Código...
+C:\Users\Andre\source\repos\Pet\TutoresFuncoes.cpp(2473,1): warning C4715: 'TutoresSelect_ProcessarMenu': nem todos os caminhos de controle retornam um valor
+C:\Users\Andre\source\repos\Pet\TutoresFuncoes.cpp(2572,1): warning C4715: 'TutoresSelect_CreateNewWindow': nem todos os caminhos de controle retornam um valor
+C:\Users\Andre\source\repos\Pet\PetsFuncoes.cpp(2727,1): warning C4715: 'PetsSelect_ProcessarMenu': nem todos os caminhos de controle retornam um valor
+C:\Users\Andre\source\repos\Pet\PetsFuncoes.cpp(2826,1): warning C4715: 'PetsSelect_CreateNewWindow': nem todos os caminhos de controle retornam um valor
+C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(3362,1): warning C4715: 'AgendamentosSelect_ProcessarMenu': nem todos os caminhos de controle retornam um valor
+C:\Users\Andre\source\repos\Pet\AgendamentosFuncoes.cpp(3461,1): warning C4715: 'AgendamentosSelect_CreateNewWindow': nem todos os caminhos de controle retornam um valor
+sqlite3.obj : warning LNK4075: ignorando '/EDITANDCONTINUE' devido a especificação '/OPT:ICF'
+  LINK : /LTCG especificado mas sem geração de código; remova /LTCG do link da linha de comando para melhorar performance do vinculador
+  Pet.vcxproj -> C:\Users\Andre\source\repos\Pet\x64\Release\Pet.exe

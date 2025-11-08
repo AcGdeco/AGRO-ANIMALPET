@@ -259,15 +259,12 @@ void PetsSelect_selectBD() {
     PetsSelect_g_tableDataEditar.clear();
 
     // Abrir ou criar o banco de dados (código original mantido)
-    char* errMsg = 0;
     sqlite3* db = nullptr;
-    std::string dbPath = GetAppDataPath() + "pet.db";
+    char* errMsg = nullptr;
+    int rc;
+    OpenDatabase(db);
 
-    // Cria a pasta se não existir
-    CreateDirectoryA(dbPath.substr(0, dbPath.find_last_of('\\')).c_str(), NULL);
-
-    int rc = sqlite3_open(dbPath.c_str(), &db);
-    if (rc == SQLITE_OK) {
+    if (OpenDatabase(db)) {
         std::string idRecordStr = std::to_string(PetsSelect_idRecord);
         std::string sqlSelect = "SELECT *, P.ID AS ID_Pet, T.ID AS ID_Tutor FROM Pets AS P INNER JOIN Tutores AS T ON ID_Tutor_FK = ID_Tutor WHERE ID_Pet = '" + idRecordStr + "';";
 
@@ -633,15 +630,12 @@ LRESULT CALLBACK WndProcPetsEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
             }
 
             // Abrir ou criar o banco de dados (código original mantido)
-            char* errMsg = 0;
             sqlite3* db = nullptr;
-            std::string dbPath = GetAppDataPath() + "pet.db";
+            char* errMsg = nullptr;
+            int rc;
+            OpenDatabase(db);
 
-            // Cria a pasta se não existir
-            CreateDirectoryA(dbPath.substr(0, dbPath.find_last_of('\\')).c_str(), NULL);
-
-            int rc = sqlite3_open(dbPath.c_str(), &db);
-            if (rc) {
+            if (!OpenDatabase(db)) {
                 MessageBox(hWnd, L"Erro ao abrir/criar o banco de dados!", L"Erro", MB_OK | MB_ICONERROR);
             }
             else {

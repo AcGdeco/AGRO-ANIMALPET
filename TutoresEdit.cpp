@@ -128,15 +128,12 @@ void TutoresSelect_selectBD() {
     TutoresSelect_g_tableDataEditar.clear();
 
     // Abrir ou criar o banco de dados (código original mantido)
-    char* errMsg = 0;
     sqlite3* db = nullptr;
-    std::string dbPath = GetAppDataPath() + "pet.db";
+    char* errMsg = nullptr;
+    int rc;
+    OpenDatabase(db);
 
-    // Cria a pasta se não existir
-    CreateDirectoryA(dbPath.substr(0, dbPath.find_last_of('\\')).c_str(), NULL);
-
-    int rc = sqlite3_open(dbPath.c_str(), &db);
-    if (rc == SQLITE_OK) {
+    if (OpenDatabase(db)) {
         std::string idRecordStr = std::to_string(TutoresSelect_idRecord);
         std::string sqlSelect = "SELECT * FROM Tutores WHERE ID = '" + idRecordStr + "';";
 
@@ -382,16 +379,15 @@ LRESULT CALLBACK WndProcTutoresEdit(HWND hWnd, UINT message, WPARAM wParam, LPAR
             }
 
             // Abrir ou criar o banco de dados (código original mantido)
-            char* errMsg = 0;
+        // Abrir ou criar o banco de dados (código original mantido)
             sqlite3* db = nullptr;
-            std::string dbPath = GetAppDataPath() + "pet.db";
+            char* errMsg = nullptr;
+            int rc;
+            OpenDatabase(db);
 
-            // Cria a pasta se não existir
-            CreateDirectoryA(dbPath.substr(0, dbPath.find_last_of('\\')).c_str(), NULL);
-
-            int rc = sqlite3_open(dbPath.c_str(), &db);
-            if (rc) {
+            if (!OpenDatabase(db)) {
                 MessageBox(hWnd, L"Erro ao abrir/criar o banco de dados!", L"Erro", MB_OK | MB_ICONERROR);
+                sqlite3_free(errMsg);
             }
             else {
                 std::wstring currentDate = TutoresSelect_GetCurrentDate();

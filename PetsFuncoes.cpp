@@ -596,25 +596,25 @@ void PetsSelect_ordenarDefinicoesValores(HWND hWnd) {
         switch (PetsSelect_idBtnGlobal)
         {
         case 0:
-            PetsSelect_orderColumn = "ID";
+            PetsSelect_orderColumn = "P.ID";
             break;
         case 1:
-            PetsSelect_orderColumn = "Nome_do_Pet";
+            PetsSelect_orderColumn = "Nome_do_Tutor";
             break;
         case 2:
-            PetsSelect_orderColumn = "Raca";
+            PetsSelect_orderColumn = "Nome_do_Pet";
             break;
         case 3:
-            PetsSelect_orderColumn = "Cor";
+            PetsSelect_orderColumn = "Raca";
             break;
         case 4:
-            PetsSelect_orderColumn = "Idade";
+            PetsSelect_orderColumn = "Cor";
             break;
         case 5:
-            PetsSelect_orderColumn = "Peso";
+            PetsSelect_orderColumn = "Idade";
             break;
         case 6:
-            PetsSelect_orderColumn = "Nome_do_Tutor";
+            PetsSelect_orderColumn = "Peso";
             break;
         default:
             break;
@@ -834,9 +834,9 @@ std::wstring PetsSelect_arrumarNomesColunas(std::wstring displayText) {
     else if (displayText == L"Raca") displayText = L"Raça";
     else if (displayText == L"Appointment_Date") displayText = L"Data (de - até)";
     else if (displayText == L"Appointment_Hour") displayText = L"Hora";
-    else if (displayText == L"Date") displayText = L"Data Registro (de - até)";
-    else if (displayText == L"Hour") displayText = L"Hora Registro";
-    else if (displayText == L"Ponto_de_referencia") displayText = L"Ponto de Referência";
+    else if (displayText == L"Date") displayText = L"Data Reg. (de - até)";
+    else if (displayText == L"Hour") displayText = L"Hora Reg.";
+    else if (displayText == L"Ponto_de_referencia") displayText = L"Ponto de Ref.";
     else if (displayText == L"Obs_Tosa") displayText = L"Observação";
     else if (displayText == L"Lesoes") displayText = L"Lesões";
     else if (displayText == L"Obs_Lesoes") displayText = L"Observação";
@@ -1340,17 +1340,12 @@ void PetsSelect_selectHeaderDB() {
     PetsSelect_g_tableDataFull.clear(); // Limpa o vetor no início
 
     // Abrir ou criar o banco de dados (código original mantido)
-    char* errMsg = 0;
     sqlite3* db = nullptr;
-    std::string dbPath = GetAppDataPath() + "pet.db";
+    char* errMsg = nullptr;
+    int rc;
+    OpenDatabase(db);
 
-    // Cria a pasta se não existir
-    CreateDirectoryA(dbPath.substr(0, dbPath.find_last_of('\\')).c_str(), NULL);
-
-    int rc = sqlite3_open(dbPath.c_str(), &db);
-
-    if (rc != SQLITE_OK) {
-        // Tratar erro de abertura do banco de dados
+    if (!OpenDatabase(db)) {
         return;
     }
 
@@ -1469,15 +1464,12 @@ void PetsSelect_AtualizarPosicoesBotoes(HWND hWnd)
 
 bool PetsSelect_deleteRecordById(const std::string& databasePath, int id, HWND hWnd) {
     // Abrir ou criar o banco de dados (código original mantido)
-    char* errMsg = 0;
     sqlite3* db = nullptr;
-    std::string dbPath = GetAppDataPath() + "pet.db";
+    char* errMsg = nullptr;
+    int rc;
+    OpenDatabase(db);
 
-    // Cria a pasta se não existir
-    CreateDirectoryA(dbPath.substr(0, dbPath.find_last_of('\\')).c_str(), NULL);
-
-    int rc = sqlite3_open(dbPath.c_str(), &db);
-    if (rc != SQLITE_OK) {
+    if (!OpenDatabase(db)) {
         MessageBoxW(hWnd, L"Erro ao abrir banco de dados", L"Erro", MB_ICONERROR);
         return false;
     }
@@ -1517,15 +1509,12 @@ void PetsSelect_selectDB() {
     PetsSelect_g_tableData.clear();
 
     // Abrir ou criar o banco de dados (código original mantido)
-    char* errMsg = 0;
     sqlite3* db = nullptr;
-    std::string dbPath = GetAppDataPath() + "pet.db";
+    char* errMsg = nullptr;
+    int rc;
+    OpenDatabase(db);
 
-    // Cria a pasta se não existir
-    CreateDirectoryA(dbPath.substr(0, dbPath.find_last_of('\\')).c_str(), NULL);
-
-    int rc = sqlite3_open(dbPath.c_str(), &db);
-    if (rc == SQLITE_OK) {
+    if (OpenDatabase(db)) {
         std::string sqlSelect;
         std::string sqlSelectCount;
         if (PetsSelect_orderColumn == "Appointment_Hour") {

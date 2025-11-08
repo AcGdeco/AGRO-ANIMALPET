@@ -1,10 +1,12 @@
-#include <vector>
+Ôªø#include <vector>
 #include "sqlite3.h"
 #include <string>
 #include <windows.h>
 #include "Global.h"
 #include <iostream>
+#include <filesystem>
 #include <shlobj.h>  // Para SHGetKnownFolderPath
+#include <fstream>
 
 int windowsNumber = 1;
 std::vector<std::vector<std::wstring>> TutoresSelect_Global_g_tableData;
@@ -20,18 +22,99 @@ struct ComboBoxItemData {
     long long idTutor;
 };
 
+fs::path GetDatabasePath()
+{
+    // === LOCAL FIXO: C:\AgroAnimalpet\ ===
+    fs::path dbDir = L"C:\\AgroAnimalpet";
+
+    // Cria a pasta com permiss√£o total
+    std::error_code ec;
+    if (!fs::create_directories(dbDir, ec)) {
+        if (ec) {
+            // Se falhar (ex: sem permiss√£o), usa pasta tempor√°ria
+            wchar_t temp[MAX_PATH];
+            GetTempPathW(MAX_PATH, temp);
+            dbDir = fs::path(temp) / L"AgroAnimalpet";
+            fs::create_directories(dbDir);  // Ignora erro
+        }
+    }
+
+    return dbDir;
+}
+
+bool OpenDatabase(sqlite3*& db)
+{
+    db = nullptr;
+
+    try {
+        const fs::path dbPath = GetDatabasePath() / L"pet.db";
+
+        // === For√ßa cria√ß√£o do arquivo ===
+        {
+            std::ofstream touch(dbPath, std::ios::binary | std::ios::app);
+            if (!touch.is_open()) {
+                MessageBox(nullptr,
+                    (L"N√£o foi poss√≠vel criar o banco de dados.\n"
+                        L"Caminho: " + dbPath.wstring() + L"\n\n"
+                        L"Tente executar como administrador.").c_str(),
+                    L"Erro de Permiss√£o", MB_OK | MB_ICONERROR);
+                return false;
+            }
+            touch.close();
+        }
+
+        if (!fs::exists(dbPath)) {
+            MessageBox(nullptr,
+                (L"Arquivo n√£o encontrado ap√≥s cria√ß√£o:\n" + dbPath.wstring()).c_str(),
+                L"Erro", MB_OK | MB_ICONERROR);
+            return false;
+        }
+
+        // === Usa string() ‚Üí UTF-8 seguro no Windows 10/11 ===
+        const std::string utf8Path = dbPath.string();
+
+        int rc = sqlite3_open(utf8Path.c_str(), &db);
+        if (rc != SQLITE_OK || !db) {
+            std::wstring msg = L"Falha ao abrir o banco de dados.\n"
+                L"C√≥digo: " + std::to_wstring(rc) + L"\n"
+                L"Caminho: " + dbPath.wstring();
+
+            if (db) {
+                const char* err = sqlite3_errmsg(db);
+                msg += L"\nDetalhes: " + std::wstring(err, err + strlen(err));
+                sqlite3_close(db);
+            }
+
+            MessageBox(nullptr, msg.c_str(), L"Erro SQLite", MB_OK | MB_ICONERROR);
+            return false;
+        }
+
+         //MessageBox(nullptr,
+            //(L"Banco de dados criado/aberto com sucesso!\n\n" + dbPath.wstring()).c_str(),
+            //L"Sucesso", MB_OK | MB_ICONINFORMATION);
+
+        return true;
+    }
+    catch (const std::exception& ex) {
+        MessageBox(nullptr,
+            (L"Erro cr√≠tico:\n" + std::wstring(ex.what(), ex.what() + strlen(ex.what()))).c_str(),
+            L"Exce√ß√£o", MB_OK | MB_ICONERROR);
+        return false;
+    }
+}
+
 std::wstring TutoresSelect_Global_utf8_to_wstring(const char* str) {
     if (!str) return L"NULL";
     int size_needed = MultiByteToWideChar(CP_UTF8, 0, str, -1, nullptr, 0);
     if (size_needed <= 0) return L"";
-    std::wstring wstr(size_needed - 1, 0); // -1 para n„o incluir o caractere nulo
+    std::wstring wstr(size_needed - 1, 0); // -1 para n√£o incluir o caractere nulo
     MultiByteToWideChar(CP_UTF8, 0, str, -1, &wstr[0], size_needed);
     return wstr;
 }
 
 int TutoresSelect_Global_sqlite_callback(void* data, int argc, char** argv, char** azColName) {
     std::vector<std::vector<std::wstring>>* table = static_cast<std::vector<std::vector<std::wstring>>*>(data);
-    // Primeira chamada: adicionar cabeÁalhos (nomes das colunas)
+    // Primeira chamada: adicionar cabe√ßalhos (nomes das colunas)
     if (table->empty()) {
         std::vector<std::wstring> headers;
         for (int i = 0; i < argc; i++) {
@@ -54,20 +137,17 @@ void TutoresSelect_Global_selectDB() {
     // 1. LIMPAR DADOS ANTIGOS ANTES DE CADA CONSULTA
     TutoresSelect_Global_g_tableData.clear();
 
-    // Abrir ou criar o banco de dados (cÛdigo original mantido)
-    char* errMsg = 0;
+    // Abrir ou criar o banco de dados (c√≥digo original mantido)
     sqlite3* db = nullptr;
-    std::string dbPath = GetAppDataPath() + "pet.db";
+    char* errMsg = nullptr;
+    int rc;
+    OpenDatabase(db);
 
-    // Cria a pasta se n„o existir
-    CreateDirectoryA(dbPath.substr(0, dbPath.find_last_of('\\')).c_str(), NULL);
-
-    int rc = sqlite3_open(dbPath.c_str(), &db);
-    if (rc == SQLITE_OK) {
+    if (OpenDatabase(db)) {
         // QUERY SIMPLIFICADA - APENAS SELECT * FROM Tutores
         std::string sqlSelect = "SELECT * FROM Tutores ORDER BY LOWER(Nome_do_Tutor) ASC";
 
-        rc = sqlite3_exec(db, sqlSelect.c_str(), TutoresSelect_Global_sqlite_callback, &TutoresSelect_Global_g_tableData, &errMsg);
+        int rc = sqlite3_exec(db, sqlSelect.c_str(), TutoresSelect_Global_sqlite_callback, &TutoresSelect_Global_g_tableData, &errMsg);
         if (rc != SQLITE_OK) {
             if (errMsg) {
                 // Converte char* para wchar_t* corretamente
@@ -86,7 +166,7 @@ void TutoresSelect_Global_selectDB() {
         sqlite3_close(db);
     }
     else {
-        TutoresSelect_Global_g_tableData.push_back({ L"Erro", L"N„o foi possÌvel abrir o banco" });
+        TutoresSelect_Global_g_tableData.push_back({ L"Erro", L"N√£o foi poss√≠vel abrir o banco" });
     }
 }
 
@@ -109,8 +189,8 @@ void TutoresSelect_Global_preencherComboBox(HWND hComboBox) {
             SendMessage(
                 hComboBox,
                 CB_SETITEMDATA,
-                (WPARAM)itemIndex,     // wParam: O ÕNDICE numÈrico recÈm-adicionado
-                (LPARAM)idTutorNum     // lParam: O VALOR NUM…RICO (ID) a ser armazenado
+                (WPARAM)itemIndex,     // wParam: O √çNDICE num√©rico rec√©m-adicionado
+                (LPARAM)idTutorNum     // lParam: O VALOR NUM√âRICO (ID) a ser armazenado
             );
         }
     }
@@ -118,7 +198,7 @@ void TutoresSelect_Global_preencherComboBox(HWND hComboBox) {
 
 int TutoresPetsSelect_Global_sqlite_callback(void* data, int argc, char** argv, char** azColName) {
     std::vector<std::vector<std::wstring>>* table = static_cast<std::vector<std::vector<std::wstring>>*>(data);
-    // Primeira chamada: adicionar cabeÁalhos (nomes das colunas)
+    // Primeira chamada: adicionar cabe√ßalhos (nomes das colunas)
     if (table->empty()) {
         std::vector<std::wstring> headers;
         for (int i = 0; i < argc; i++) {
@@ -141,16 +221,13 @@ void TutoresPetsSelect_Global_selectDB() {
     // 1. LIMPAR DADOS ANTIGOS ANTES DE CADA CONSULTA
     TutoresPetsSelect_Global_g_tableData.clear();
 
-    // Abrir ou criar o banco de dados (cÛdigo original mantido)
-    char* errMsg = 0;
+    // Abrir ou criar o banco de dados (c√≥digo original mantido)
     sqlite3* db = nullptr;
-    std::string dbPath = GetAppDataPath() + "pet.db";
+    char* errMsg = nullptr;
+    int rc;
+    OpenDatabase(db);
 
-    // Cria a pasta se n„o existir
-    CreateDirectoryA(dbPath.substr(0, dbPath.find_last_of('\\')).c_str(), NULL);
-
-    int rc = sqlite3_open(dbPath.c_str(), &db);
-    if (rc == SQLITE_OK) {
+    if (OpenDatabase(db)) {
         // QUERY SIMPLIFICADA - APENAS SELECT * FROM Tutores
         std::string sqlSelect = "SELECT *, P.ID AS ID_Pet, T.ID AS ID_Tutor FROM Pets AS P INNER JOIN Tutores AS T ON ID_Tutor_FK = ID_Tutor ORDER BY LOWER(Nome_do_Tutor) ASC";
 
@@ -173,7 +250,7 @@ void TutoresPetsSelect_Global_selectDB() {
         sqlite3_close(db);
     }
     else {
-        TutoresPetsSelect_Global_g_tableData.push_back({ L"Erro", L"N„o foi possÌvel abrir o banco" });
+        TutoresPetsSelect_Global_g_tableData.push_back({ L"Erro", L"N√£o foi poss√≠vel abrir o banco" });
     }
 }
 
@@ -202,8 +279,8 @@ void TutoresPetsSelect_Global_preencherComboBox(HWND hComboBox) {
             SendMessage(
                 hComboBox,
                 CB_SETITEMDATA,
-                (WPARAM)itemIndex,     // wParam: O ÕNDICE numÈrico recÈm-adicionado
-                (LPARAM)data     // lParam: O VALOR NUM…RICO (ID) a ser armazenado
+                (WPARAM)itemIndex,     // wParam: O √çNDICE num√©rico rec√©m-adicionado
+                (LPARAM)data     // lParam: O VALOR NUM√âRICO (ID) a ser armazenado
             );
         }
         else {
@@ -214,51 +291,51 @@ void TutoresPetsSelect_Global_preencherComboBox(HWND hComboBox) {
             SendMessage(
                 hComboBox,
                 CB_SETITEMDATA,
-                (WPARAM)0,     // wParam: O ÕNDICE numÈrico recÈm-adicionado
-                (LPARAM)data     // lParam: O VALOR NUM…RICO (ID) a ser armazenado
+                (WPARAM)0,     // wParam: O √çNDICE num√©rico rec√©m-adicionado
+                (LPARAM)data     // lParam: O VALOR NUM√âRICO (ID) a ser armazenado
             );
         }
     }
 }
 
 int ChecarOpcaoComboBoxPorID(HWND hComboBox, const std::wstring& idPetAchecar) {
-    // 1. Converter o ID de string para o tipo numÈrico esperado (LRESULT/long long)
+    // 1. Converter o ID de string para o tipo num√©rico esperado (LRESULT/long long)
     LRESULT targetID_long;
     try {
-        // Usa std::stoll para converter wstring para long long (que È LRESULT em 64bit)
+        // Usa std::stoll para converter wstring para long long (que √© LRESULT em 64bit)
         targetID_long = std::stoll(idPetAchecar);
     }
     catch (const std::exception& e) {
-        // Tratar erro de convers„o (ex: string vazia ou n„o numÈrica)
+        // Tratar erro de convers√£o (ex: string vazia ou n√£o num√©rica)
         // Poderia logar o erro ou apenas retornar erro.
-        // std::cerr << "Erro de convers„o de ID: " << e.what() << std::endl;
+        // std::cerr << "Erro de convers√£o de ID: " << e.what() << std::endl;
         return CB_ERR;
     }
 
-    // 2. Obter o n˙mero total de itens no ComboBox
+    // 2. Obter o n√∫mero total de itens no ComboBox
     int count = (int)SendMessage(hComboBox, CB_GETCOUNT, 0, 0);
 
     // 3. Iterar por todos os itens
     for (int i = 0; i < count; ++i) {
-        // 4. Obter o valor de CB_ITEMDATA (que È o ponteiro para ComboBoxItemData)
+        // 4. Obter o valor de CB_ITEMDATA (que √© o ponteiro para ComboBoxItemData)
         LRESULT itemDataLParam = SendMessage(hComboBox, CB_GETITEMDATA, (WPARAM)i, 0);
 
-        // O valor CB_ERR (-1) È retornado se o item n„o tiver dados ou se for o item 0 que vocÍ configurou.
+        // O valor CB_ERR (-1) √© retornado se o item n√£o tiver dados ou se for o item 0 que voc√™ configurou.
         if (itemDataLParam != CB_ERR && itemDataLParam != 0) {
             // Converter o LPARAM de volta para um ponteiro para a estrutura
             ComboBoxItemData* data = reinterpret_cast<ComboBoxItemData*>(itemDataLParam);
 
             // 5. Comparar o 'idPet' armazenado com o 'targetID'
             if (data->idPet == targetID_long) {
-                // Encontrado! Selecionar o item e retornar o Ìndice
+                // Encontrado! Selecionar o item e retornar o √≠ndice
                 SendMessage(hComboBox, CB_SETCURSEL, (WPARAM)i, 0);
                 return i;
             }
         }
-        // Se itemDataLParam for 0 (o primeiro item que vocÍ inicializou com idPet=0), 
-        // a comparaÁ„o ser· feita no item 0, mas garantimos que n„o tentamos
+        // Se itemDataLParam for 0 (o primeiro item que voc√™ inicializou com idPet=0), 
+        // a compara√ß√£o ser√° feita no item 0, mas garantimos que n√£o tentamos
         // desreferenciar um ponteiro nulo se a API retornar 0 por algum motivo.
-        // J· que vocÍ usa o ID 0 para o item vazio, este bloco de 'else if' lida com isso.
+        // J√° que voc√™ usa o ID 0 para o item vazio, este bloco de 'else if' lida com isso.
         else if (itemDataLParam != CB_ERR && i == 0) {
             ComboBoxItemData* data = reinterpret_cast<ComboBoxItemData*>(itemDataLParam);
             if (data->idPet == targetID_long) {
@@ -268,7 +345,7 @@ int ChecarOpcaoComboBoxPorID(HWND hComboBox, const std::wstring& idPetAchecar) {
         }
     }
 
-    // 6. N„o encontrado
+    // 6. N√£o encontrado
     return CB_ERR;
 }
 
@@ -364,20 +441,20 @@ std::wstring GetActiveClassWindowName() {
     // 1. Obter o Handle (HWND) da janela em primeiro plano (ativa)
     HWND hWnd = GetForegroundWindow();
 
-    // 2. Verifica se o Handle È v·lido
+    // 2. Verifica se o Handle √© v√°lido
     if (hWnd == NULL) {
         return L"";
     }
 
-    // Define um tamanho m·ximo razo·vel para o nome da classe.
-    // O nome da classe pode ter atÈ 256 caracteres (incluindo o terminador nulo) em WinAPI.
+    // Define um tamanho m√°ximo razo√°vel para o nome da classe.
+    // O nome da classe pode ter at√© 256 caracteres (incluindo o terminador nulo) em WinAPI.
     const int MAX_CLASS_NAME = 256;
 
     // Alocar um buffer para armazenar o nome da classe
     std::wstring className(MAX_CLASS_NAME, L'\0');
 
     // 3. Obter o nome da classe
-    // GetClassNameW È a vers„o WIDE (Unicode) da funÁ„o.
+    // GetClassNameW √© a vers√£o WIDE (Unicode) da fun√ß√£o.
     int copied = GetClassNameW(
         hWnd,
         &className[0], // Ponteiro para o buffer de destino

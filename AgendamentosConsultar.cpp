@@ -384,16 +384,12 @@ LRESULT CALLBACK WndProcAgendamentosRead(HWND hWnd, UINT message, WPARAM wParam,
         AgendamentosSelect_g_tableDataConsulta.clear();
 
         // Abrir ou criar o banco de dados (código original mantido)
-        char* errMsg = 0;
         sqlite3* db = nullptr;
-        std::string dbPath = GetAppDataPath() + "pet.db";
+        char* errMsg = nullptr;
+        int rc;
+        OpenDatabase(db);
 
-        // Cria a pasta se não existir
-        CreateDirectoryA(dbPath.substr(0, dbPath.find_last_of('\\')).c_str(), NULL);
-
-        int rc = sqlite3_open(dbPath.c_str(), &db);
-        if (rc == SQLITE_OK) {
-
+        if (OpenDatabase(db)) {
             // 1. Defina o buffer de destino. Escolha um tamanho adequado.
             char buffer[512];
 
@@ -449,7 +445,7 @@ LRESULT CALLBACK WndProcAgendamentosRead(HWND hWnd, UINT message, WPARAM wParam,
         // Configurar a tabela com scroll
         int cellHeight = 32;  // Altura de cada célula
         int numColumns = AgendamentosSelect_g_tableDataConsulta.empty() ? 0 : AgendamentosSelect_g_tableDataConsulta[0].size() + 3;
-        int cellWidth = (width + 2000) / (numColumns > 0 ? numColumns : 1);
+        int cellWidth = (width + 6000) / (numColumns > 0 ? numColumns : 1);
         int startY = 40 - AgendamentosSelect_g_scrollY;  // Posição Y com scroll
         int startX = 22 - AgendamentosSelect_g_scrollX;  // Posição X com scroll
 

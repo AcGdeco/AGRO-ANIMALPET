@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <cwctype>
 #include <codecvt>
+#include <stdexcept> 
 
 #define min(a, b) ((a) < (b) ? (a) : (b)) 
 
@@ -834,9 +835,9 @@ std::wstring TutoresSelect_arrumarNomesColunas(std::wstring displayText) {
     else if (displayText == L"Raca") displayText = L"Raça";
     else if (displayText == L"Appointment_Date") displayText = L"Data (de - até)";
     else if (displayText == L"Appointment_Hour") displayText = L"Hora";
-    else if (displayText == L"Date") displayText = L"Data Registro (de - até)";
-    else if (displayText == L"Hour") displayText = L"Hora Registro";
-    else if (displayText == L"Ponto_de_referencia") displayText = L"Ponto de Referência";
+    else if (displayText == L"Date") displayText = L"Data Reg. (de - até)";
+    else if (displayText == L"Hour") displayText = L"Hora Reg.";
+    else if (displayText == L"Ponto_de_referencia") displayText = L"Ponto de Ref.";
     else if (displayText == L"Obs_Tosa") displayText = L"Observação";
     else if (displayText == L"Lesoes") displayText = L"Lesões";
     else if (displayText == L"Obs_Lesoes") displayText = L"Observação";
@@ -1183,14 +1184,10 @@ void TutoresSelect_selectHeaderDB() {
     TutoresSelect_g_tableDataFull.clear();
 
     // Abrir ou criar o banco de dados (código original mantido)
-    char* errMsg = 0;
     sqlite3* db = nullptr;
-    std::string dbPath = GetAppDataPath() + "pet.db";
-
-    // Cria a pasta se não existir
-    CreateDirectoryA(dbPath.substr(0, dbPath.find_last_of('\\')).c_str(), NULL);
-
-    int rc = sqlite3_open(dbPath.c_str(), &db);
+    char* errMsg = nullptr;
+    int rc;
+    OpenDatabase(db);
 
     errMsg = 0;
     const char* sqlPragma = "PRAGMA table_info(Tutores);";
@@ -1280,16 +1277,13 @@ void TutoresSelect_AtualizarPosicoesBotoes(HWND hWnd)
 
 bool TutoresSelect_deleteRecordById(const std::string& databasePath, int id, HWND hWnd) {
     // Abrir ou criar o banco de dados (código original mantido)
-    char* errMsg = 0;
     sqlite3* db = nullptr;
-    std::string dbPath = GetAppDataPath() + "pet.db";
+    char* errMsg = nullptr;
+    int rc;
+    OpenDatabase(db);
 
-    // Cria a pasta se não existir
-    CreateDirectoryA(dbPath.substr(0, dbPath.find_last_of('\\')).c_str(), NULL);
-
-    int rc = sqlite3_open(dbPath.c_str(), &db);
-    if (rc != SQLITE_OK) {
-        MessageBoxW(hWnd, L"Erro ao abrir banco de dados", L"Erro", MB_ICONERROR);
+    if (!OpenDatabase(db)) {
+        MessageBox(hWnd, L"Erro ao abrir/criar o banco de dados!", L"Erro", MB_OK | MB_ICONERROR);
         return false;
     }
 
@@ -1328,15 +1322,12 @@ void TutoresSelect_selectDB() {
     TutoresSelect_g_tableData.clear();
 
     // Abrir ou criar o banco de dados (código original mantido)
-    char* errMsg = 0;
     sqlite3* db = nullptr;
-    std::string dbPath = GetAppDataPath() + "pet.db";
+    char* errMsg = nullptr;
+    int rc;
+    OpenDatabase(db);
 
-    // Cria a pasta se não existir
-    CreateDirectoryA(dbPath.substr(0, dbPath.find_last_of('\\')).c_str(), NULL);
-
-    int rc = sqlite3_open(dbPath.c_str(), &db);
-    if (rc == SQLITE_OK) {
+    if (OpenDatabase(db)) {
         std::string sqlSelect;
         std::string sqlSelectCount;
         if (TutoresSelect_orderColumn == "Appointment_Hour") {
@@ -1432,7 +1423,7 @@ void TutoresSelect_verificarFiltro(const std::vector<std::wstring>& dados, std::
         // CORREÇÃO: Pular linha 0 (cabeçalho) se necessário
         if (row == 0) continue; // Mantém o cabeçalho
 
-        for (size_t col = 0; col < numeroColIteracoes; col++) {
+        for (size_t col = 0; col < 10; col++) {
             if (col == 21) {
                 column = 20;
             }
@@ -1444,6 +1435,9 @@ void TutoresSelect_verificarFiltro(const std::vector<std::wstring>& dados, std::
             }
             else if (col == 25) {
                 column = 23;
+            }
+            else if (col == 9) {
+                column = 8;
             }
             else {
                 column = col;
@@ -2048,16 +2042,43 @@ bool verificar_cpf_valido(const std::string& cpf) {
     return true;
 }
 
-std::string TutoresSelect_wstring_para_string(const std::wstring& wstr) {
-    // Nota: O uso de std::wstring_convert e std::codecvt_utf8 pode ser
-    // obsoleto ou depender de configurações do compilador (especialmente no Linux).
-    // Para fins de demonstração, usaremos a abordagem comum:
+/**
+ * Converte std::wstring (UTF-16) → std::string (UTF-8)
+ * Usa a API do Windows – rápida, confiável e não depende de <codecvt>.
+ */
+    std::string TutoresSelect_wstring_para_string(const std::wstring & wstr)
+{
+    if (wstr.empty())
+        return {};
 
-    // Configura o codecvt para UTF-8.
-    using convert_type = std::codecvt_utf8<wchar_t>;
-    std::wstring_convert<convert_type, wchar_t> converter;
+    // Primeiro passo: descobrir quantos bytes são necessários
+    int bytesNeeded = ::WideCharToMultiByte(
+        CP_UTF8,                 // código de página UTF-8
+        0,                       // flags padrão
+        wstr.c_str(),            // ponteiro para wchar_t*
+        static_cast<int>(wstr.size()),
+        nullptr,                 // buffer nulo → só cálculo
+        0,
+        nullptr, nullptr);
 
-    return converter.to_bytes(wstr);
+    if (bytesNeeded <= 0)
+        throw std::runtime_error("WideCharToMultiByte falhou (cálculo de tamanho)");
+
+    // Segundo passo: alocar e fazer a conversão real
+    std::string result(bytesNeeded, 0);
+    int written = ::WideCharToMultiByte(
+        CP_UTF8,
+        0,
+        wstr.c_str(),
+        static_cast<int>(wstr.size()),
+        &result[0],
+        bytesNeeded,
+        nullptr, nullptr);
+
+    if (written != bytesNeeded)
+        throw std::runtime_error("WideCharToMultiByte falhou (conversão)");
+
+    return result;
 }
 
 /**
@@ -2069,16 +2090,12 @@ std::string TutoresSelect_wstring_para_string(const std::wstring& wstr) {
  */
 bool TutoresSelect_verificar_cpf_registrado(const std::wstring& cpf_wstring) {
     // Abrir ou criar o banco de dados (código original mantido)
-    char* errMsg = 0;
     sqlite3* db = nullptr;
-    std::string dbPath = GetAppDataPath() + "pet.db";
+    char* errMsg = nullptr;
+    int rc;
+    OpenDatabase(db);
 
-    // Cria a pasta se não existir
-    CreateDirectoryA(dbPath.substr(0, dbPath.find_last_of('\\')).c_str(), NULL);
-
-    int rc = sqlite3_open(dbPath.c_str(), &db);
-
-    if (rc != SQLITE_OK) {
+    if (!OpenDatabase(db)) {
         // ... tratamento de erro ...
         return 1;
     }

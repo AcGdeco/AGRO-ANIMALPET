@@ -11,19 +11,19 @@
 #include <locale.h>
 #include "Select.h"
 #include "MenuUniversal.h"
-#include <Add.h>
-#include <TutoresAdd.h>
-#include <PetsAdd.h>
-#include <AgendamentosAdd.h>
-#include <Consultar.h>
-#include <TutoresConsultar.h>
-#include <PetsConsultar.h>
-#include <AgendamentosConsultar.h>
+#include "Add.h"
+#include "TutoresAdd.h"
+#include "PetsAdd.h"
+#include "AgendamentosAdd.h"
+#include "Consultar.h"
+#include "TutoresConsultar.h"
+#include "PetsConsultar.h"
+#include "AgendamentosConsultar.h"
 #include <regex>
-#include <Edit.h>
-#include <TutoresEdit.h>
-#include <PetsEdit.h>
-#include <AgendamentosEdit.h>
+#include "Edit.h"
+#include "TutoresEdit.h"
+#include "PetsEdit.h"
+#include "AgendamentosEdit.h"
 #include <sstream>
 #include <tuple>
 #include <algorithm>
@@ -1551,14 +1551,10 @@ void selectHeaderDB() {
     g_tableDataFull.clear();
 
     // Abrir ou criar o banco de dados (código original mantido)
-    char* errMsg = 0;
     sqlite3* db = nullptr;
-    std::string dbPath = GetAppDataPath() + "pet.db";
-
-    // Cria a pasta se não existir
-    CreateDirectoryA(dbPath.substr(0, dbPath.find_last_of('\\')).c_str(), NULL);
-
-    int rc = sqlite3_open(dbPath.c_str(), &db);
+    char* errMsg = nullptr;
+    int rc;
+    OpenDatabase(db);
 
     errMsg = 0;
     const char* sqlPragma = "PRAGMA table_info(Tudo);";
@@ -1662,14 +1658,15 @@ void AtualizarPosicoesBotoes(HWND hWnd)
 }
 
 bool deleteRecordById(const std::string& databasePath, int id, HWND hWnd) {
-    sqlite3* db;
-    char* errMsg = 0;
+    // Abrir ou criar o banco de dados (código original mantido)
+    sqlite3* db = nullptr;
+    char* errMsg = nullptr;
+    int rc;
+    OpenDatabase(db);
 
-    // Abrir conexão com o banco
-    int rc = sqlite3_open(databasePath.c_str(), &db);
-    if (rc != SQLITE_OK) {
-        MessageBoxW(hWnd, L"Erro ao abrir banco de dados", L"Erro", MB_ICONERROR);
-        return false;
+    if (!OpenDatabase(db)) {
+        MessageBox(hWnd, L"Erro ao abrir/criar o banco de dados!", L"Erro", MB_OK | MB_ICONERROR);
+        sqlite3_free(errMsg);
     }
 
     // Preparar a query SQL
@@ -1707,15 +1704,12 @@ void selectDB() {
     g_tableData.clear();
 
     // Abrir ou criar o banco de dados (código original mantido)
-    char* errMsg = 0;
     sqlite3* db = nullptr;
-    std::string dbPath = GetAppDataPath() + "pet.db";
+    char* errMsg = nullptr;
+    int rc;
+    OpenDatabase(db);
 
-    // Cria a pasta se não existir
-    CreateDirectoryA(dbPath.substr(0, dbPath.find_last_of('\\')).c_str(), NULL);
-
-    int rc = sqlite3_open(dbPath.c_str(), &db);
-    if (rc == SQLITE_OK) {
+    if (OpenDatabase(db)) {
         std::string sqlSelect;
         std::string sqlSelectCount;
         if (orderColumn == "Appointment_Hour") {
@@ -3104,15 +3098,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         hBitmap = (HBITMAP)LoadImage(NULL, L"Images\\animalpet.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 
         // Abrir ou criar o banco de dados (código original mantido)
-        char* errMsg = 0;
         sqlite3* db = nullptr;
-        std::string dbPath = GetAppDataPath() + "pet.db";
+        char* errMsg = nullptr;
+        int rc;
+        OpenDatabase(db);
 
-        // Cria a pasta se não existir
-        CreateDirectoryA(dbPath.substr(0, dbPath.find_last_of('\\')).c_str(), NULL);
-
-        int rc = sqlite3_open(dbPath.c_str(), &db);
-        if (rc) {
+        if (!OpenDatabase(db)) {
             MessageBox(hWnd, L"Erro ao abrir/criar o banco de dados!", L"Erro", MB_OK | MB_ICONERROR);
             sqlite3_free(errMsg);
         }
@@ -3179,15 +3170,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
 
         // Abrir ou criar o banco de dados (código original mantido)
-        errMsg = 0;
         db = nullptr;
-        dbPath = GetAppDataPath() + "pet.db";
+        errMsg = nullptr;
+        OpenDatabase(db);
 
-        // Cria a pasta se não existir
-        CreateDirectoryA(dbPath.substr(0, dbPath.find_last_of('\\')).c_str(), NULL);
-
-        rc = sqlite3_open(dbPath.c_str(), &db);
-        if (rc) {
+        if (!OpenDatabase(db)) {
             MessageBox(hWnd, L"Erro ao abrir/criar o banco de dados!", L"Erro", MB_OK | MB_ICONERROR);
             sqlite3_free(errMsg);
         }
@@ -3254,15 +3241,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
 
         // Abrir ou criar o banco de dados (código original mantido)
-        errMsg = 0;
         db = nullptr;
-        dbPath = GetAppDataPath() + "pet.db";
+        errMsg = nullptr;
+        OpenDatabase(db);
 
-        // Cria a pasta se não existir
-        CreateDirectoryA(dbPath.substr(0, dbPath.find_last_of('\\')).c_str(), NULL);
-
-        rc = sqlite3_open(dbPath.c_str(), &db);
-        if (rc) {
+        if (!OpenDatabase(db)) {
             MessageBox(hWnd, L"Erro ao abrir/criar o banco de dados!", L"Erro", MB_OK | MB_ICONERROR);
             sqlite3_free(errMsg);
         }

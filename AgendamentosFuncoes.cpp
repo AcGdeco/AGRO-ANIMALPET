@@ -837,9 +837,9 @@ std::wstring AgendamentosSelect_arrumarNomesColunas(std::wstring displayText) {
     else if (displayText == L"Raca") displayText = L"Raça";
     else if (displayText == L"Appointment_Date") displayText = L"Data (de - até)";
     else if (displayText == L"Appointment_Hour") displayText = L"Hora";
-    else if (displayText == L"Date") displayText = L"Data Registro (de - até)";
-    else if (displayText == L"Hour") displayText = L"Hora Registro";
-    else if (displayText == L"Ponto_de_referencia") displayText = L"Ponto de Referência";
+    else if (displayText == L"Date") displayText = L"Data Reg. (de - até)";
+    else if (displayText == L"Hour") displayText = L"Hora Reg.";
+    else if (displayText == L"Ponto_de_referencia") displayText = L"Ponto de Ref.";
     else if (displayText == L"Obs_Tosa") displayText = L"Observação";
     else if (displayText == L"Lesoes") displayText = L"Lesões";
     else if (displayText == L"Obs_Lesoes") displayText = L"Observação";
@@ -1642,14 +1642,10 @@ void AgendamentosSelect_selectHeaderDB() {
     AgendamentosSelect_g_tableDataFull.clear();
 
     // Abrir ou criar o banco de dados (código original mantido)
-    char* errMsg = 0;
     sqlite3* db = nullptr;
-    std::string dbPath = GetAppDataPath() + "pet.db";
-
-    // Cria a pasta se não existir
-    CreateDirectoryA(dbPath.substr(0, dbPath.find_last_of('\\')).c_str(), NULL);
-
-    int rc = sqlite3_open(dbPath.c_str(), &db);
+    char* errMsg = nullptr;
+    int rc;
+    OpenDatabase(db);
 
     // --- 2. PEGAR INFORMAÇÕES DA TABELA TUTORES ---
     const char* sqlPragmaAgendamentos = "PRAGMA table_info(Agendamentos);";
@@ -1802,15 +1798,12 @@ void AgendamentosSelect_AtualizarPosicoesBotoes(HWND hWnd)
 
 bool AgendamentosSelect_deleteRecordById(const std::string& databasePath, int id, HWND hWnd) {
     // Abrir ou criar o banco de dados (código original mantido)
-    char* errMsg = 0;
     sqlite3* db = nullptr;
-    std::string dbPath = GetAppDataPath() + "pet.db";
+    char* errMsg = nullptr;
+    int rc;
+    OpenDatabase(db);
 
-    // Cria a pasta se não existir
-    CreateDirectoryA(dbPath.substr(0, dbPath.find_last_of('\\')).c_str(), NULL);
-
-    int rc = sqlite3_open(dbPath.c_str(), &db);
-    if (rc != SQLITE_OK) {
+    if (!OpenDatabase(db)) {
         MessageBoxW(hWnd, L"Erro ao abrir banco de dados", L"Erro", MB_ICONERROR);
         return false;
     }
@@ -1850,15 +1843,12 @@ void AgendamentosSelect_selectDB() {
     AgendamentosSelect_g_tableData.clear();
 
     // Abrir ou criar o banco de dados (código original mantido)
-    char* errMsg = 0;
     sqlite3* db = nullptr;
-    std::string dbPath = GetAppDataPath() + "pet.db";
+    char* errMsg = nullptr;
+    int rc;
+    OpenDatabase(db);
 
-    // Cria a pasta se não existir
-    CreateDirectoryA(dbPath.substr(0, dbPath.find_last_of('\\')).c_str(), NULL);
-
-    int rc = sqlite3_open(dbPath.c_str(), &db);
-    if (rc == SQLITE_OK) {
+    if (OpenDatabase(db)) {
         std::string sqlSelect;
         std::string sqlSelectCount;
         if (AgendamentosSelect_orderColumn == "A.Appointment_Hour") {
