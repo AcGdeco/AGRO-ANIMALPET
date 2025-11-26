@@ -53,8 +53,8 @@ void AgendamentosSelect_PreencherControlesEdicao(HWND hWnd) {
     int column;
     for (int col = 0; col < 10; col++) {
         int controlID = col + 2;
-		column = col + 20;
-        std::wstring displayText = col == 9 ? AgendamentosSelect_g_tableDataEditar[1][31] : AgendamentosSelect_g_tableDataEditar[1][column];
+		column = col + 21;
+        std::wstring displayText = col == 9 ? AgendamentosSelect_g_tableDataEditar[1][32] : AgendamentosSelect_g_tableDataEditar[1][column];
 
         // 3. Obter o HWND do controle (pelo ID ou pelo vetor g_editControls)
         // Usar GetDlgItem(hWnd, controlID) ou iterar sobre g_editControls
@@ -67,7 +67,7 @@ void AgendamentosSelect_PreencherControlesEdicao(HWND hWnd) {
         }
 
         if (col == 0) { // Tutores - Pets (Checkbox)
-            std::wstring displayText = AgendamentosSelect_g_tableDataEditar[1][9];
+            std::wstring displayText = AgendamentosSelect_g_tableDataEditar[1][10];
             ChecarOpcaoComboBoxPorID(hControl, displayText);
         }
         else if (col == 1) { // Banho (Radio Buttons)
@@ -200,7 +200,7 @@ void AgendamentosSelect_CriarControlesEdicao(HWND hWnd) {
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL
             );
 
-            // Criar botão consultar Pet
+            // Criar botão Dados do Pet
             AgendamentosSelect_g_hButton_consultar_Pet = CreateWindowW(
                 L"BUTTON", L"Pet",
                 WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON | WS_TABSTOP,
@@ -790,7 +790,7 @@ LRESULT CALLBACK WndProcAgendamentosEdit(HWND hWnd, UINT message, WPARAM wParam,
                 sqlite3_close(db);
             }
         }
-        else if (wmId == 20) { //CONSULTAR TUTOR
+        else if (wmId == 20) { //DADOS DO CLIENTE
             HWND input = GetDlgItem(hWnd, 2);
             LRESULT selectedIndex = SendMessage(input, CB_GETCURSEL, 0, 0);
 
@@ -815,7 +815,7 @@ LRESULT CALLBACK WndProcAgendamentosEdit(HWND hWnd, UINT message, WPARAM wParam,
 
             TutoresSelect_idRecord = tutorId;
 
-            if (!AgendamentosSelect_CreateNewWindow(hWnd, hInst, L"JanelaTutoresReadClasse", L"CONSULTAR TUTOR"))
+            if (!AgendamentosSelect_CreateNewWindow(hWnd, hInst, L"JanelaTutoresReadClasse", L"DADOS DO CLIENTE"))
             {
                 // O erro já é tratado dentro da função
                 break;
@@ -829,7 +829,7 @@ LRESULT CALLBACK WndProcAgendamentosEdit(HWND hWnd, UINT message, WPARAM wParam,
                 }
             }
         }
-        else if (wmId == 21) { //CONSULTAR PET
+        else if (wmId == 21) { //DADOS DO PET
             HWND input = GetDlgItem(hWnd, 2);
             LRESULT selectedIndex = SendMessage(input, CB_GETCURSEL, 0, 0);
 
@@ -854,7 +854,7 @@ LRESULT CALLBACK WndProcAgendamentosEdit(HWND hWnd, UINT message, WPARAM wParam,
 
             PetsSelect_idRecord = petId;
 
-            if (!AgendamentosSelect_CreateNewWindow(hWnd, hInst, L"JanelaPetsReadClasse", L"CONSULTAR PET"))
+            if (!AgendamentosSelect_CreateNewWindow(hWnd, hInst, L"JanelaPetsReadClasse", L"DADOS DO PET"))
             {
                 // O erro já é tratado dentro da função
                 break;

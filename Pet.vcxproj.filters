@@ -204,5 +204,11 @@
     <Image Include="images\icon.ico">
       <Filter>Arquivos de Recurso</Filter>
     </Image>
+    <Image Include="Images\AgroAnimalPet.ico">
+      <Filter>Arquivos de Recurso</Filter>
+    </Image>
+    <Image Include="images\icon7.ico">
+      <Filter>Arquivos de Recurso</Filter>
+    </Image>
   </ItemGroup>
 </Project>

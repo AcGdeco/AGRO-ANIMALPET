@@ -68,6 +68,33 @@ void TutoresSelect_PreencherControlesEdicao(HWND hWnd) {
             SetWindowText(hControl, displayText.c_str());
         }
     }
+
+    // Variável HWND para o seu ComboBox (obtida com GetDlgItem, por exemplo)
+    HWND hComboBox = GetDlgItem(hWnd, 8);
+    LPARAM indexToSelect = 0;
+    int index;
+
+    if (TutoresSelect_g_tableDataEditar[1][7] == L"Semanal") {
+        index = 1;
+    }
+    else if (TutoresSelect_g_tableDataEditar[1][7] == L"Quinzenal") {
+        index = 2;
+    }
+    else {
+        index = 0;
+    }
+
+    // 3. Atribua o valor numérico (com cast, se necessário) ao LPARAM
+    indexToSelect = (LPARAM)index;
+
+    // Envia a mensagem CB_SETCURSEL (Set Current Selection) para o ComboBox
+    // O valor de 'indexToSelect' é passado no parâmetro wParam.
+    LRESULT result = SendMessage(
+        hComboBox,          // HWND do ComboBox
+        CB_SETCURSEL,       // Mensagem para definir o índice do item selecionado
+        (WPARAM)indexToSelect, // wParam: O índice a ser selecionado (baseado em zero)
+        0                   // lParam: Não usado (deve ser 0)
+    );
 }
 
 void TutoresSelect_CriarControlesEdicao(HWND hWnd) {
@@ -111,6 +138,30 @@ void TutoresSelect_CriarControlesEdicao(HWND hWnd) {
         );
         TutoresSelect_g_editControls.push_back(hEdit);
     }
+
+    int colNumber = 6 + 1;
+    int controlID = 6 + 2;
+    int xPos = startX + cellWidth + 10;
+    int yPos = startY + colNumber * cellHeight + 3;
+
+    HWND hComboBox = CreateWindowEx(
+        0,
+        L"COMBOBOX",
+        L"",
+        WS_VISIBLE | WS_CHILD | CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP,
+        xPos, yPos,
+        200, 200,
+        hWnd,
+        (HMENU)(INT_PTR)controlID,
+        GetModuleHandle(NULL),
+        NULL
+    );
+
+    SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"");
+    SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Semanal");
+    SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Quinzenal");
+
+    TutoresSelect_g_editControls.push_back(hComboBox);
 
     // 4. Criação do Botão Salvar
     int buttonY = startY + 7 * cellHeight + 3;
@@ -378,7 +429,19 @@ LRESULT CALLBACK WndProcTutoresEdit(HWND hWnd, UINT message, WPARAM wParam, LPAR
                 }
             }
 
-            // Abrir ou criar o banco de dados (código original mantido)
+            HWND input = GetDlgItem(hWnd, 8);
+            int selectedIndex = (int)SendMessage(input, CB_GETCURSEL, 0, 0);
+
+            if (selectedIndex != CB_ERR) // Se há um item selecionado
+            {
+                wchar_t buffer[256];
+                SendMessage(input, CB_GETLBTEXT, selectedIndex, (LPARAM)buffer);
+                dados[8] = std::wstring(buffer);
+            }
+            else {
+                dados[8] = L"";
+            }
+
         // Abrir ou criar o banco de dados (código original mantido)
             sqlite3* db = nullptr;
             char* errMsg = nullptr;
@@ -401,7 +464,8 @@ LRESULT CALLBACK WndProcTutoresEdit(HWND hWnd, UINT message, WPARAM wParam, LPAR
                     L"Telefone = '" + TutoresSelect_treatDataAppointment(dados[6], 6) + L"', "
                     L"CPF = '" + TutoresSelect_treatDataAppointment(dados[7], 7) + L"', "
                     L"Date = '" + currentDate + L"', "
-                    L"Hour = '" + currentHour + L"' "
+                    L"Hour = '" + currentHour + L"', "
+                    L"Pacote = '" + TutoresSelect_treatDataAppointment(dados[8], 8) + L"' "
                     L"WHERE ID = " + std::to_wstring(TutoresSelect_idRecord) + L";";
 
                 if (TutoresSelect_error == L"1") {
@@ -462,7 +526,7 @@ LRESULT CALLBACK WndProcTutoresEdit(HWND hWnd, UINT message, WPARAM wParam, LPAR
 
         // Desenhar linhas visíveis
         int firstVisibleRow = max(0, (TutoresSelect_g_scrollY - 40) / cellHeight);
-        int lastVisibleRow = min(5, firstVisibleRow + (TutoresSelect_g_clientHeight / cellHeight) + 2);
+        int lastVisibleRow = min(6, firstVisibleRow + (TutoresSelect_g_clientHeight / cellHeight) + 2);
 
         HBRUSH hBrushWhite = CreateSolidBrush(RGB(255, 255, 255));
         HBRUSH hBrushGray = CreateSolidBrush(RGB(240, 240, 240));
@@ -471,7 +535,7 @@ LRESULT CALLBACK WndProcTutoresEdit(HWND hWnd, UINT message, WPARAM wParam, LPAR
         SetBkMode(hdcMem, OPAQUE);
 
         for (int row = firstVisibleRow; row <= lastVisibleRow; row++) {
-            if (row >= 6) break;
+            if (row >= 7) break;
 
             HBRUSH hCurrentBrush = (row % 2 == 0) ? hBrushGray : hBrushWhite;
             COLORREF bgColor = (row % 2 == 0) ? RGB(240, 240, 240) : RGB(255, 255, 255);
@@ -497,10 +561,10 @@ LRESULT CALLBACK WndProcTutoresEdit(HWND hWnd, UINT message, WPARAM wParam, LPAR
             // Desenhar labels
             const wchar_t* labels[] = {
                 L"Nome do Tutor:", L"CEP:", L"Endereço:",
-                L"Ponto de Referência:", L"Telefone:", L"CPF:"
+                L"Ponto de Referência:", L"Telefone:", L"CPF:", L"Pacote:"
             };
 
-            if (row < 6) {
+            if (row < 7) {
                 TextOut(hdcMem, xPosLabel, yPosLabel, labels[row], wcslen(labels[row]));
             }
         }

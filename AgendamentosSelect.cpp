@@ -92,7 +92,7 @@ LRESULT CALLBACK WndProcAgendamentosSelect(HWND hWnd, UINT message, WPARAM wPara
 
             AgendamentosSelect_idRecord = id;
 
-            if (!AgendamentosSelect_CreateNewWindow(hWnd, hInst, L"JanelaAgendamentosReadClasse", L"CONSULTAR AGENDAMENTO"))
+            if (!AgendamentosSelect_CreateNewWindow(hWnd, hInst, L"JanelaAgendamentosReadClasse", L"DADOS DO AGENDAMENTO"))
             {
                 // O erro já é tratado dentro da função
                 break;
@@ -149,10 +149,10 @@ LRESULT CALLBACK WndProcAgendamentosSelect(HWND hWnd, UINT message, WPARAM wPara
             //swprintf_s(msg, L"Botão %s%d clicado!", L"Filtrar", (int)id, (int)id);
             //MessageBoxW(hWnd, msg, L"Info", MB_OK);
 
-            for (int i = 0; i <= 34; i++) {
+            for (int i = 0; i <= 36; i++) {
                 std::wstring controlIDStr = std::to_wstring(i);
                 HWND input = GetDlgItem(hWnd, i + 20);
-                if (i == 1 || i == 2 || i == 4 || i == 5 || i == 20 || i == 21) { // Se o comando veio do nosso ComboBox
+                if (i == 1 || i == 2 || i == 4 || i == 5 || i == 20 || i == 21 || i == 32) { // Se o comando veio do nosso ComboBox
                     // 1. Obter o índice do item selecionado
                     int indiceSelecionado = (int)SendMessageW(
                         input, CB_GETCURSEL, 0, 0

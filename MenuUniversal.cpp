@@ -68,7 +68,9 @@ HMENU CriarMenu() {
     
     // Adiciona o menu Ajuda ao menu principal
     AppendMenuW(hMenu, MF_POPUP, (UINT_PTR)hFileMenuAjuda, L"&Ajuda");
-    
+
+    AppendMenuW(hMenu, MF_POPUP, IDM_VOLTAR, L"&Voltar");
+  
     return hMenu;
 }
 
@@ -80,7 +82,7 @@ LRESULT ProcessarMenuArquivo(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
         switch (wmId) {
             case IDM_ARQUIVO_NOVO:
             {
-                if (!CreateNewWindow(hWnd, hInst, L"JanelaAddClasse", L"CRIAR AGENDAMENTO"))
+                if (!CreateNewWindow(hWnd, hInst, L"JanelaAddClasse", L"CADASTRO DO AGENDAMENTO"))
                 {
                     // O erro já é tratado dentro da função
                     break;
@@ -101,7 +103,7 @@ LRESULT ProcessarMenuArquivo(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
             }
             case IDM_TUTORES_NOVO:
             {
-                if (!CreateNewWindow(hWnd, hInst, L"JanelaTutoresAddClasse", L"CRIAR TUTOR"))
+                if (!CreateNewWindow(hWnd, hInst, L"JanelaTutoresAddClasse", L"CADASTRO DO CLIENTE"))
                 {
                     // O erro já é tratado dentro da função
                     break;
@@ -122,7 +124,7 @@ LRESULT ProcessarMenuArquivo(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
             }
             case IDM_PETS_NOVO:
             {
-                if (!CreateNewWindow(hWnd, hInst, L"JanelaPetsAddClasse", L"CRIAR PET"))
+                if (!CreateNewWindow(hWnd, hInst, L"JanelaPetsAddClasse", L"CADASTRO DO PET"))
                 {
                     // O erro já é tratado dentro da função
                     break;
@@ -143,7 +145,7 @@ LRESULT ProcessarMenuArquivo(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
             }
             case IDM_AGENDAMENTOS_NOVO:
             {
-                if (!CreateNewWindow(hWnd, hInst, L"JanelaAgendamentosAddClasse", L"CRIAR AGENDAMENTO"))
+                if (!CreateNewWindow(hWnd, hInst, L"JanelaAgendamentosAddClasse", L"CADASTRO DO AGENDAMENTO"))
                 {
                     // O erro já é tratado dentro da função
                     break;
@@ -160,6 +162,21 @@ LRESULT ProcessarMenuArquivo(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
                     break;
                 }
                 break;
+                return 1;
+            }
+            case IDM_VOLTAR:
+            {
+                if (g_historicoJanelas.size() >= 2) {
+                    JanelaAtivaInfo anterior = g_historicoJanelas[g_historicoJanelas.size() - 2];
+
+                    // Recriar a janela com base na classe
+                    if (!CreateNewWindow(hWnd, hInst, anterior.className.c_str(), anterior.windowTitle.c_str())) {
+                        MessageBoxW(hWnd, L"Erro ao reabrir a janela anterior.", L"Voltar", MB_OK | MB_ICONERROR);
+                    }
+                }
+                else {
+                    //MessageBoxW(hWnd, L"Nenhuma janela anterior registrada.", L"Voltar", MB_OK | MB_ICONWARNING);
+                }
                 return 1;
             }
         }

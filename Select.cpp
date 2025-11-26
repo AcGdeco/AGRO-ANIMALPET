@@ -166,7 +166,7 @@ LRESULT CALLBACK WndProcSelect(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 
             idRecord = id;
 
-            if (!CreateNewWindow(hWnd, hInst, L"JanelaReadClasse", L"CONSULTAR AGENDAMENTO"))
+            if (!CreateNewWindow(hWnd, hInst, L"JanelaReadClasse", L"DADOS DO AGENDAMENTO"))
             {
                 // O erro já é tratado dentro da função
                 break;

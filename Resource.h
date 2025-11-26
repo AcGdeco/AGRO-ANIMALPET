@@ -22,6 +22,8 @@
 #define IDB_PNG1                        136
 #define IDI_ICON5                       137
 #define IDB_BITMAP3                     138
+#define IDI_ICON6                       139
+#define IDI_ICON7                       140
 #define IDB_SETAS                       200
 #define IDB_SETAS_BAIXO                 201
 #define IDB_SETAS_CIMA                  202
@@ -32,7 +34,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NO_MFC                     1
-#define _APS_NEXT_RESOURCE_VALUE        139
+#define _APS_NEXT_RESOURCE_VALUE        142
 #define _APS_NEXT_COMMAND_VALUE         32771
 #define _APS_NEXT_CONTROL_VALUE         1000
 #define _APS_NEXT_SYMED_VALUE           110

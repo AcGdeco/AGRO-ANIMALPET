@@ -670,7 +670,7 @@ LRESULT CALLBACK WndProcAdd(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
         // Título com fundo branco
         RECT titleRect = { startX - 5, startY - 25, startX + 250, startY + 5 };
         FillRect(hdcMem, &titleRect, (HBRUSH)(COLOR_WINDOW + 1));
-        windowsTitle(hdcMem, startX, startY - 20, L"CRIAR AGENDAMENTO", 17);
+        windowsTitle(hdcMem, startX, startY - 20, L"CADASTRO DO AGENDAMENTO", 23);
 
         // Desenhar linhas visíveis
         int firstVisibleRow = max(0, (g_scrollY - 40) / cellHeight);

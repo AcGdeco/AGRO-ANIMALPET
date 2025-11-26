@@ -95,7 +95,7 @@ LRESULT CALLBACK WndProcAgendamentosAdd(HWND hWnd, UINT message, WPARAM wParam, 
         for (int col = 0; col < 10; col++) {
             int colNumber = col + 1;
             int controlID = col + 2; // IDs de 2 a 22
-            int xPos = startX + cellWidth + 10;
+            int xPos = startX + cellWidth + 30;
             int yPos = startY + colNumber * cellHeight + 3;
 
             if (col == 0) {
@@ -122,7 +122,7 @@ LRESULT CALLBACK WndProcAgendamentosAdd(HWND hWnd, UINT message, WPARAM wParam, 
                     (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL
                 );
 
-                // Criar botão consultar Pet
+                // Criar botão Dados do Pet
                 AgendamentosSelect_g_hButton_consultar_Pet = CreateWindowW(
                     L"BUTTON", L"Pet",
                     WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON | WS_TABSTOP,
@@ -676,7 +676,7 @@ LRESULT CALLBACK WndProcAgendamentosAdd(HWND hWnd, UINT message, WPARAM wParam, 
                 sqlite3_close(db);
             }
         }
-        else if (wmId == 0) { //CONSULTAR TUTOR
+        else if (wmId == 0) { //DADOS DO CLIENTE
             HWND input = GetDlgItem(hWnd, 2);
             LRESULT selectedIndex = SendMessage(input, CB_GETCURSEL, 0, 0);
 
@@ -701,7 +701,7 @@ LRESULT CALLBACK WndProcAgendamentosAdd(HWND hWnd, UINT message, WPARAM wParam, 
 
             TutoresSelect_idRecord = tutorId;
 
-            if (!AgendamentosSelect_CreateNewWindow(hWnd, hInst, L"JanelaTutoresReadClasse", L"CONSULTAR TUTOR"))
+            if (!AgendamentosSelect_CreateNewWindow(hWnd, hInst, L"JanelaTutoresReadClasse", L"DADOS DO CLIENTE"))
             {
                 // O erro já é tratado dentro da função
                 break;
@@ -715,7 +715,7 @@ LRESULT CALLBACK WndProcAgendamentosAdd(HWND hWnd, UINT message, WPARAM wParam, 
                 }
             }
         }
-        else if (wmId == 21) { //CONSULTAR PET
+        else if (wmId == 21) { //DADOS DO PET
             HWND input = GetDlgItem(hWnd, 2);
             LRESULT selectedIndex = SendMessage(input, CB_GETCURSEL, 0, 0);
 
@@ -740,7 +740,7 @@ LRESULT CALLBACK WndProcAgendamentosAdd(HWND hWnd, UINT message, WPARAM wParam, 
 
             PetsSelect_idRecord = petId;
 
-            if (!AgendamentosSelect_CreateNewWindow(hWnd, hInst, L"JanelaPetsReadClasse", L"CONSULTAR PET"))
+            if (!AgendamentosSelect_CreateNewWindow(hWnd, hInst, L"JanelaPetsReadClasse", L"DADOS DO PET"))
             {
                 // O erro já é tratado dentro da função
                 break;
@@ -788,7 +788,7 @@ LRESULT CALLBACK WndProcAgendamentosAdd(HWND hWnd, UINT message, WPARAM wParam, 
         // Título com fundo branco
         RECT titleRect = { startX - 5, startY - 25, startX + 250, startY + 5 };
         FillRect(hdcMem, &titleRect, (HBRUSH)(COLOR_WINDOW + 1));
-        AgendamentosSelect_windowsTitle(hdcMem, startX, startY - 20, L"CRIAR AGENDAMENTO", 17);
+        AgendamentosSelect_windowsTitle(hdcMem, startX, startY - 20, L"CADASTRO DO AGENDAMENTO", 23);
 
         // Desenhar linhas visíveis
         int firstVisibleRow = max(0, (AgendamentosSelect_g_scrollY - 40) / cellHeight);

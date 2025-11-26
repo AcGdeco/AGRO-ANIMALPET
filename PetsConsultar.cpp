@@ -187,7 +187,7 @@ LRESULT CALLBACK WndProcPetsRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
             idTutor = PetsSelect_g_tableDataConsulta[1][11];
             TutoresSelect_idRecord = std::stoll(idTutor);
 
-            if (!PetsSelect_CreateNewWindow(hWnd, hInst, L"JanelaTutoresReadClasse", L"CONSULTAR TUTOR"))
+            if (!PetsSelect_CreateNewWindow(hWnd, hInst, L"JanelaTutoresReadClasse", L"DADOS DO CLIENTE"))
             {
                 // O erro já é tratado dentro da função
                 break;
@@ -402,7 +402,7 @@ LRESULT CALLBACK WndProcPetsRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
         int startX = 22 - PetsSelect_g_scrollX;  // Posição X com scroll
 
         //Título
-        PetsSelect_windowsTitle(hdc, startX, startY - 20, L"CONSULTAR PET", 13);
+        PetsSelect_windowsTitle(hdc, startX, startY - 20, L"DADOS DO PET", 12);
 
         // Desenhar a grade
         HPEN hPen = CreatePen(PS_SOLID, 1, RGB(0, 0, 0));

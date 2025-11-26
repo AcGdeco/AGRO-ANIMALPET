@@ -70,6 +70,9 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -108,6 +111,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <OutputFile>$(OutDir)AgroAnimalPet$(TargetExt)</OutputFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -127,6 +131,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -196,10 +201,12 @@
   <ItemGroup>
     <Image Include="..\..\..\OneDrive\Área de Trabalho\Icon.ico" />
     <Image Include="..\..\..\OneDrive\Área de Trabalho\Icon.png" />
+    <Image Include="Images\AgroAnimalPet.ico" />
     <Image Include="Images\animalpet.bmp" />
     <Image Include="images\icon.ico" />
     <Image Include="images\icon3.ico" />
     <Image Include="images\icon4.ico" />
+    <Image Include="images\icon7.ico" />
     <Image Include="Images\Seta-Cima.ico" />
     <Image Include="Images\Seta-Baixo.ico" />
     <Image Include="Images\Setas.ico" />

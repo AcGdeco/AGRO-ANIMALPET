@@ -101,8 +101,32 @@ LRESULT CALLBACK WndProcTutoresAdd(HWND hWnd, UINT message, WPARAM wParam, LPARA
             TutoresSelect_g_editControls.push_back(hEdit);
         }
 
+        int colNumber = 6 + 1;
+        int controlID = 6 + 2;
+        int xPos = startX + cellWidth + 10;
+        int yPos = startY + colNumber * cellHeight + 3;
+
+        HWND hComboBox = CreateWindowEx(
+            0,                                       
+            L"COMBOBOX",                             
+            L"",                                     
+            WS_VISIBLE | WS_CHILD | CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP,
+            xPos, yPos,                              
+            200, 200,                                 
+            hWnd,
+            (HMENU)(INT_PTR)controlID,
+            GetModuleHandle(NULL),
+            NULL
+        );
+
+        SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"");
+        SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Semanal");
+        SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Quinzenal");
+
+        TutoresSelect_g_editControls.push_back(hComboBox);
+
         // Criar botão
-        int buttonY = startY + 6 * cellHeight + 3;
+        int buttonY = startY + 7 * cellHeight + 3;
         TutoresSelect_g_hButton = CreateWindowW(
             L"BUTTON", L"Salvar",
             WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON | WS_TABSTOP,
@@ -267,6 +291,19 @@ LRESULT CALLBACK WndProcTutoresAdd(HWND hWnd, UINT message, WPARAM wParam, LPARA
                 }
             }
 
+            HWND input = GetDlgItem(hWnd, 8);
+            int selectedIndex = (int)SendMessage(input, CB_GETCURSEL, 0, 0);
+
+            if (selectedIndex != CB_ERR) // Se há um item selecionado
+            {
+                wchar_t buffer[256];
+                SendMessage(input, CB_GETLBTEXT, selectedIndex, (LPARAM)buffer);
+                dados[8] = std::wstring(buffer);
+            }
+            else {
+                dados[8] = L"";
+            }
+
             // Abrir ou criar o banco de dados (código original mantido)
             sqlite3* db = nullptr;
             char* errMsg = nullptr;
@@ -281,7 +318,7 @@ LRESULT CALLBACK WndProcTutoresAdd(HWND hWnd, UINT message, WPARAM wParam, LPARA
                 std::wstring currentDate = TutoresSelect_GetCurrentDate();
                 std::wstring currentHour = TutoresSelect_GetCurrentHour();
 
-                std::wstring sqlInsertW = L"INSERT INTO Tutores (Nome_do_Tutor, CEP, Endereco, Ponto_de_referencia, Telefone, CPF, Date, Hour) VALUES ('" + TutoresSelect_treatDataAppointment(dados[2], 2) + L"', '" + TutoresSelect_treatDataAppointment(dados[3], 3) + L"', '" + TutoresSelect_treatDataAppointment(dados[4], 4) + L"', '" + TutoresSelect_treatDataAppointment(dados[5], 5) + L"', '" + TutoresSelect_treatDataAppointment(dados[6], 6) + L"', '" + TutoresSelect_treatDataAppointment(dados[7], 7) + L"', '" + currentDate + L"', '" + currentHour + L"');";
+                std::wstring sqlInsertW = L"INSERT INTO Tutores (Nome_do_Tutor, CEP, Endereco, Ponto_de_referencia, Telefone, CPF, Date, Hour, Pacote) VALUES ('" + TutoresSelect_treatDataAppointment(dados[2], 2) + L"', '" + TutoresSelect_treatDataAppointment(dados[3], 3) + L"', '" + TutoresSelect_treatDataAppointment(dados[4], 4) + L"', '" + TutoresSelect_treatDataAppointment(dados[5], 5) + L"', '" + TutoresSelect_treatDataAppointment(dados[6], 6) + L"', '" + TutoresSelect_treatDataAppointment(dados[7], 7) + L"', '" + currentDate + L"', '" + currentHour + L"', '" + TutoresSelect_treatDataAppointment(dados[8], 8) + L"');";
 
                 if (TutoresSelect_error == L"1") {
                     MessageBox(hWnd, TutoresSelect_msg, L"Erro", MB_OK | MB_ICONERROR);
@@ -334,11 +371,11 @@ LRESULT CALLBACK WndProcTutoresAdd(HWND hWnd, UINT message, WPARAM wParam, LPARA
         // Título com fundo branco
         RECT titleRect = { startX - 5, startY - 25, startX + 250, startY + 5 };
         FillRect(hdcMem, &titleRect, (HBRUSH)(COLOR_WINDOW + 1));
-        TutoresSelect_windowsTitle(hdcMem, startX, startY - 20, L"CRIAR TUTOR", 11);
+        TutoresSelect_windowsTitle(hdcMem, startX, startY - 20, L"CADASTRO DO CLIENTE", 19);
 
         // Desenhar linhas visíveis
         int firstVisibleRow = max(0, (TutoresSelect_g_scrollY - 40) / cellHeight);
-        int lastVisibleRow = min(5, firstVisibleRow + (TutoresSelect_g_clientHeight / cellHeight) + 2);
+        int lastVisibleRow = min(6, firstVisibleRow + (TutoresSelect_g_clientHeight / cellHeight) + 2);
 
         HBRUSH hBrushWhite = CreateSolidBrush(RGB(255, 255, 255));
         HBRUSH hBrushGray = CreateSolidBrush(RGB(240, 240, 240));
@@ -373,10 +410,10 @@ LRESULT CALLBACK WndProcTutoresAdd(HWND hWnd, UINT message, WPARAM wParam, LPARA
             // Desenhar labels
             const wchar_t* labels[] = {
                 L"Nome do Tutor:", L"CEP:", L"Endereço:",
-                L"Ponto de Referência:", L"Telefone:", L"CPF:"
+                L"Ponto de Referência:", L"Telefone:", L"CPF:", L"Pacote:"
             };
 
-            if (row < 6) {
+            if (row < 8) {
                 TextOut(hdcMem, xPosLabel, yPosLabel, labels[row], wcslen(labels[row]));
             }
         }

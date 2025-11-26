@@ -54,7 +54,7 @@ std::string AgendamentosSelect_orderColumn = "A.ID";
 std::string AgendamentosSelect_orderAscDesc = "DESC";
 std::vector<int> AgendamentosSelect_naoDesenharInternRowsNumber;
 
-std::vector<std::wstring> AgendamentosSelect_dados(35);
+std::vector<std::wstring> AgendamentosSelect_dados(36);
 std::wstring AgendamentosSelect_dataAte;
 std::wstring AgendamentosSelect_dataRegistroAte;
 
@@ -835,9 +835,9 @@ std::wstring AgendamentosSelect_arrumarNomesColunas(std::wstring displayText) {
     if (displayText == L"Nome_do_Pet") displayText = L"Nome do Pet";
     else if (displayText == L"Nome_do_Tutor") displayText = L"Nome do Tutor";
     else if (displayText == L"Raca") displayText = L"Raça";
-    else if (displayText == L"Appointment_Date") displayText = L"Data (de - até)";
+    else if (displayText == L"Appointment_Date") displayText = L"Data de-até";
     else if (displayText == L"Appointment_Hour") displayText = L"Hora";
-    else if (displayText == L"Date") displayText = L"Data Reg. (de - até)";
+    else if (displayText == L"Date") displayText = L"Data Reg. de-até";
     else if (displayText == L"Hour") displayText = L"Hora Reg.";
     else if (displayText == L"Ponto_de_referencia") displayText = L"Ponto de Ref.";
     else if (displayText == L"Obs_Tosa") displayText = L"Observação";
@@ -985,16 +985,41 @@ void AgendamentosSelect_AtualizarPosicoesInputs(HWND hWnd) {
                 SWP_NOZORDER | SWP_NOACTIVATE | SWP_SHOWWINDOW);
         }
         else if (col == 32) {
-            xPos = startXFull + (col - 1 - colNumber) * cellWidthFull + 10;
+            SetWindowPos(AgendamentosSelect_g_editControlsFilters[col], NULL, xPos, yPos, cellWidthFull - 15, 200,
+                SWP_NOZORDER | SWP_NOACTIVATE | SWP_HIDEWINDOW);
+            SetWindowPos(AgendamentosSelect_g_editControlsFilters[col], NULL, xPos, yPos, cellWidthFull - 15, 200,
+                SWP_NOZORDER | SWP_NOACTIVATE | SWP_SHOWWINDOW);
+        }
+        else {
+            SetWindowPos(AgendamentosSelect_g_editControlsFilters[col], NULL, xPos, yPos, cellWidthFull - 15, 25,
+                SWP_NOZORDER | SWP_NOACTIVATE | SWP_HIDEWINDOW);
+            SetWindowPos(AgendamentosSelect_g_editControlsFilters[col], NULL, xPos, yPos, cellWidthFull - 15, 25,
+                SWP_NOZORDER | SWP_NOACTIVATE | SWP_SHOWWINDOW);
+        }
+    }
 
+       // Configurar a linha do input
+    startYFull = startYFull + 2 * cellHeight + 7;  // Posição Y com scroll
+    startXFull = 22 - AgendamentosSelect_g_scrollX;  // Posição X com scroll
+    colNumber = 33;
+    colFinalNumber = colNumber + 10;
+
+    for (int col = colNumber; col < AgendamentosSelect_g_editControlsFilters.size(); col++) {
+        yPos = startYFull + row * cellHeight + 7;
+        if (col > 33) {
+            xPos = startXFull + (col - 1 - colNumber) * cellWidthFull + 10;
+        }
+        else {
+            xPos = startXFull + (col - colNumber) * cellWidthFull + 10;
+        }
+
+        if (col == 33) {
             SetWindowPos(AgendamentosSelect_g_editControlsFilters[col], NULL, xPos, yPos, widthDate - 5, 25,
                 SWP_NOZORDER | SWP_NOACTIVATE | SWP_HIDEWINDOW);
             SetWindowPos(AgendamentosSelect_g_editControlsFilters[col], NULL, xPos, yPos, widthDate - 5, 25,
                 SWP_NOZORDER | SWP_NOACTIVATE | SWP_SHOWWINDOW);
         }
-        else if (col == 33) {
-            xPos = startXFull + (col - 2 - colNumber) * cellWidthFull + 10;
-
+        else if (col == 34) {
             SetWindowPos(AgendamentosSelect_g_editControlsFilters[col], NULL, xPos + widthDate, yPos, widthDate - 5, 25,
                 SWP_NOZORDER | SWP_NOACTIVATE | SWP_HIDEWINDOW);
             SetWindowPos(AgendamentosSelect_g_editControlsFilters[col], NULL, xPos + widthDate, yPos, widthDate - 5, 25,
@@ -1009,24 +1034,14 @@ void AgendamentosSelect_AtualizarPosicoesInputs(HWND hWnd) {
     }
 
     startXFull = 22 - AgendamentosSelect_g_scrollX;  // Posição X com scroll
-    startYFull = startYFull + 3 * cellHeight + 7;  // Posição Y com scroll
-    xPos = startXFull + 10;
-    yPos = startYFull + 7;
-
-    SetWindowPos(AgendamentosSelect_g_editControlsFilters[34], NULL, xPos, yPos, cellWidthFull - 15, 25,
-        SWP_NOZORDER | SWP_NOACTIVATE | SWP_HIDEWINDOW);
-    SetWindowPos(AgendamentosSelect_g_editControlsFilters[34], NULL, xPos, yPos, cellWidthFull - 15, 25,
-        SWP_NOZORDER | SWP_NOACTIVATE | SWP_SHOWWINDOW);
-
-    startXFull = 22 - AgendamentosSelect_g_scrollX;  // Posição X com scroll
-    startYFull = startYFull + 1 * cellHeight + 7;  // Posição Y com scroll
+    startYFull = startYFull + 2 * cellHeight + 7;  // Posição Y com scroll
     xPos = startXFull;
     yPos = startYFull;
 
-    SetWindowPos(AgendamentosSelect_g_editControlsFilters[35], NULL, xPos, yPos, 70, 30,
-        SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE | SWP_HIDEWINDOW);
-    SetWindowPos(AgendamentosSelect_g_editControlsFilters[35], NULL, xPos, yPos, 70, 30,
-        SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE | SWP_SHOWWINDOW);
+    SetWindowPos(AgendamentosSelect_g_editControlsFilters[36], NULL, xPos, yPos, 70, 30,
+        SWP_NOZORDER | SWP_NOACTIVATE | SWP_HIDEWINDOW);
+    SetWindowPos(AgendamentosSelect_g_editControlsFilters[36], NULL, xPos, yPos, 70, 30,
+        SWP_NOZORDER | SWP_NOACTIVATE | SWP_SHOWWINDOW);
 }
 
 void AgendamentosSelect_SetFilterValues(const std::vector<std::wstring>& dados) {
@@ -1347,9 +1362,9 @@ void AgendamentosSelect_criarInputsFilters(HWND hWnd) {
             // Adicionar a opção A
             SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"");
             // Adicionar a opção A
-            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Masculino");
+            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Macho");
             // Adicionar a opção B
-            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Feminino");
+            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Fêmea");
 
             AgendamentosSelect_g_editControlsFilters.push_back(hComboBox);
         }
@@ -1380,25 +1395,7 @@ void AgendamentosSelect_criarInputsFilters(HWND hWnd) {
             xPos = startXFull + (col - colNumber) * inputWidth + 10;
         }
 
-        if (col == 32) {
-            HWND hEdit = CreateWindowEx(
-                0, L"EDIT", L"",
-                WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP,
-                xPos, yPos, inputWidth / 2, 25, hWnd, (HMENU)(controlID), NULL, NULL
-            );
-
-            AgendamentosSelect_g_editControlsFilters.push_back(hEdit);
-        }
-        else if (col == 33) {
-            HWND hEdit2 = CreateWindowEx(
-                0, L"EDIT", L"",
-                WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP,
-                xPos + inputWidth / 2, yPos, inputWidth / 2, 25, hWnd, (HMENU)(controlID), NULL, NULL
-            );
-
-            AgendamentosSelect_g_editControlsFilters.push_back(hEdit2);
-        }
-        else if (col == 22) {
+        if (col == 22) {
             HWND hEdit = CreateWindowEx(
                 0, L"EDIT", L"",
                 WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP,
@@ -1416,6 +1413,28 @@ void AgendamentosSelect_criarInputsFilters(HWND hWnd) {
 
             AgendamentosSelect_g_editControlsFilters.push_back(hEdit2);
         }
+        else if (col == 32) {
+            HWND hComboBox = CreateWindowEx(
+                0,                                 // Estilos estendidos
+                L"ComboBox",                       // Nome da classe do controle ComboBox
+                L"",                               // Texto inicial (vazio)
+                WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP, // Estilos: Filho, Visível, e lista suspensa que não pode ser editada (SELECT)
+                xPos, yPos, inputWidth, 150,
+                hWnd,                        // Janela pai
+                (HMENU)(controlID),                        // ID único do controle (para o WM_COMMAND)
+                (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
+                NULL
+            );
+
+            // Adicionar a opção A
+            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"");
+            // Adicionar a opção A
+            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Semanal");
+            // Adicionar a opção B
+            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Quinzenal");
+
+            AgendamentosSelect_g_editControlsFilters.push_back(hComboBox);
+        }
         else {
             HWND hEdit = CreateWindowEx(
                 0, L"EDIT", L"",
@@ -1426,19 +1445,43 @@ void AgendamentosSelect_criarInputsFilters(HWND hWnd) {
         }
     }
 
-    controlID = 34 + 20;
+    // Configurar a linha do input
+    startYFull = startYFull + 2 * cellHeight + 7;  // Posição Y com scroll
     startXFull = 22 - AgendamentosSelect_g_scrollX;  // Posição X com scroll
-    startYFull = startYFull + 4 * cellHeight + 7;  // Posição Y com scroll
-    xPos = startXFull;
-    yPos = startYFull;
+    colNumber = 34;
+    colFinalNumber = AgendamentosSelect_numberRowsTable;
 
-    HWND hEdit = CreateWindowEx(
-        0, L"EDIT", L"",
-        WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP,
-        xPos, yPos, inputWidth, 25, hWnd, (HMENU)(controlID), NULL, NULL
-    );
-    AgendamentosSelect_g_editControlsFilters.push_back(hEdit);
-    
+    for (int col = colNumber; col < 36; col++) {
+        controlID = col + 20;
+        
+        if (col == 33) {
+            HWND hEdit = CreateWindowEx(
+                0, L"EDIT", L"",
+                WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP,
+                xPos, yPos, inputWidth / 2, 25, hWnd, (HMENU)(controlID), NULL, NULL
+            );
+
+            AgendamentosSelect_g_editControlsFilters.push_back(hEdit);
+        }
+        else if (col == 34) {
+            HWND hEdit2 = CreateWindowEx(
+                0, L"EDIT", L"",
+                WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP,
+                xPos + inputWidth / 2, yPos, inputWidth / 2, 25, hWnd, (HMENU)(controlID), NULL, NULL
+            );
+
+            AgendamentosSelect_g_editControlsFilters.push_back(hEdit2);
+        }
+        else{
+            HWND hEdit = CreateWindowEx(
+                0, L"EDIT", L"",
+                WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP,
+                xPos, yPos, inputWidth, 25, hWnd, (HMENU)(controlID), NULL, NULL
+            );
+            AgendamentosSelect_g_editControlsFilters.push_back(hEdit);
+        }
+    }
+
     startXFull = 22 - AgendamentosSelect_g_scrollX;  // Posição X com scroll
     startYFull = startYFull + 2 * cellHeight + 7;  // Posição Y com scroll
     xPos = startXFull;
@@ -1732,14 +1775,14 @@ void AgendamentosSelect_createHeaderFilters(HDC hdc, HWND hWnd) {
     startYFull = startYFull + 2 * cellHeight + 7;  // Posição Y com scroll
     startXFull = 22 - AgendamentosSelect_g_scrollX;  // Posição X com scroll
     colNumber = 20 + 1;
-    colFinalNumber = AgendamentosSelect_g_tableDataFull[0].size() - 1;
+    colFinalNumber = AgendamentosSelect_g_tableDataFull[0].size() - 2;
 
     AgendamentosSelect_criarHeaderLineFilter(hdc, hWnd, startYFull, startXFull, colNumber, colFinalNumber);
 
     // Configurar a linha do header
     startYFull = startYFull + 2 * cellHeight + 7;  // Posição Y com scroll
     startXFull = 22 - AgendamentosSelect_g_scrollX;  // Posição X com scroll
-    colNumber = AgendamentosSelect_g_tableDataFull[0].size() - 1;
+    colNumber = AgendamentosSelect_g_tableDataFull[0].size() - 2;
     colFinalNumber = AgendamentosSelect_g_tableDataFull[0].size();
 
     AgendamentosSelect_criarHeaderLineFilter(hdc, hWnd, startYFull, startXFull, colNumber, colFinalNumber);
@@ -1922,103 +1965,103 @@ int AgendamentosSelect_columnValue(int col) {
     switch (col) {
     case 0:
         // Código para COL = 0
-        column = 27;
+        column = 28;
         break;
     case 1:
         // Código para COL = 1
-        column = 28;
+        column = 29;
         break;
     case 2:
         // Código para COL = 2
-        column = 29;
+        column = 30;
         break;
     case 3:
         // Código para COL = 3
-        column = 30;
+        column = 31;
         break;
     case 4:
         // Código para COL = 4
-        column = 31;
+        column = 32;
         break;
     case 5:
         // Código para COL = 5
-        column = 32;
+        column = 33;
         break;
     case 6:
         // Código para COL = 6
-        column = 33;
+        column = 34;
         break;
     case 7:
         // Código para COL = 7
-        column = 34;
+        column = 35;
         break;
     case 8:
         // Código para COL = 8
-        column = 34;
+        column = 35;
         break;
     case 9:
         // Código para COL = 9
-        column = 35;
+        column = 36;
         break;
     case 10:
         // Código para COL = 10
-        column = 36;
+        column = 37;
         break;
     case 11:
         // Código para COL = 11
-        column = 36;
+        column = 37;
         break;
     case 12:
         // Código para COL = 12
-        column = 37;
+        column = 38;
         break;
     case 13:
         // Código para COL = 13
-        column = 38;
+        column = 39;
         break;
     case 14:
         // Código para COL = 14
-        column = 16;
+        column = 17;
         break;
     case 15:
         // Código para COL = 15
-        column = 17;
+        column = 18;
         break;
     case 16:
         // Código para COL = 16
-        column = 18;
+        column = 19;
         break;
     case 17:
         // Código para COL = 17
-        column = 19;
+        column = 20;
         break;
     case 18:
         // Código para COL = 18
-        column = 20;
+        column = 21;
         break;
     case 19:
         // Código para COL = 19
-        column = 21;
+        column = 22;
         break;
     case 20:
         // Código para COL = 20
-        column = 22;
+        column = 23;
         break;
     case 21:
         // Código para COL = 21
-        column = 23;
+        column = 24;
         break;
     case 22:
         // Código para COL = 22
-        column = 24;
+        column = 25;
         break;
     case 23:
         // Código para COL = 23
-        column = 24;
+        column = 25;
         break;
     case 24:
         // Código para COL = 24
-        column = 25;
+        column = 26;
         break;
     case 25:
         // Código para COL = 25
@@ -2054,11 +2097,15 @@ int AgendamentosSelect_columnValue(int col) {
         break;
     case 33:
         // Código para COL = 33
-        column = 14;
+        column = 15;
         break;
     case 34:
         // Código para COL = 33
         column = 15;
+        break;
+    case 35:
+        // Código para COL = 33
+        column = 16;
         break;
     default:
         // Código para valores fora da faixa 1-39
@@ -2089,7 +2136,7 @@ void AgendamentosSelect_verificarFiltro(const std::vector<std::wstring>& dados, 
     }
 
     int column;
-    int numeroColIteracoes = 35;
+    int numeroColIteracoes = 36;
     AgendamentosSelect_g_tableData;
     for (size_t row = 0; row < AgendamentosSelect_g_tableData.size(); row++) {
 
@@ -2134,7 +2181,7 @@ void AgendamentosSelect_verificarFiltro(const std::vector<std::wstring>& dados, 
             else if (!dados[col].empty() && (col == 22 || col == 23)) {
                 bool estaEntre = AgendamentosSelect_estaEntreDatas(dados[22], dados[23], dadoTable);
                 if (!estaEntre) {
-                    if (col == 23 && dados[23].empty()) {
+                    if (col == 23 && dados[22].empty()) {
                         naoDesenharIntern[row] = 1;
                         break;
                     }
@@ -2157,10 +2204,10 @@ void AgendamentosSelect_verificarFiltro(const std::vector<std::wstring>& dados, 
                     }
                 }
             }
-            else if (!dados[col].empty() && (col == 32 || col == 33)) {
-                bool estaEntre = AgendamentosSelect_estaEntreDatas(dados[32], dados[33], dadoTable);
+            else if (!dados[col].empty() && (col == 33 || col == 34)) {
+                bool estaEntre = AgendamentosSelect_estaEntreDatas(dados[33], dados[34], dadoTable);
                 if (!estaEntre) {
-                    if (col == 33 && dados[32].empty()) {
+                    if (col == 34 && dados[33].empty()) {
                         naoDesenharIntern[row] = 1;
                         break;
                     }
@@ -2521,7 +2568,8 @@ void AgendamentosSelect_AtualizarPosicoesControlesAgendamentoEdit(HWND hWnd)
     int numColumns = 21;
     int cellWidth = (width + 2000) / (numColumns > 0 ? numColumns : 1);
     int startY = 40 - AgendamentosSelect_g_scrollY;
-    int startX = 22 - AgendamentosSelect_g_scrollX;
+    int gap = 50;
+    int startX = 22 + gap - AgendamentosSelect_g_scrollX;
     int xPos = 0;
     int yPos = 0;
     int colNumber;
@@ -2631,7 +2679,7 @@ void AgendamentosSelect_AtualizarPosicoesControlesAgendamentoEdit(HWND hWnd)
     // Atualizar posição do botão
     if (AgendamentosSelect_g_hButton) {
         int buttonY = startY + 11 * cellHeight + 3;
-        SetWindowPos(AgendamentosSelect_g_hButton, NULL, startX, buttonY, 150, 30,
+        SetWindowPos(AgendamentosSelect_g_hButton, NULL, startX - gap, buttonY, 150, 30,
             SWP_NOZORDER | SWP_NOACTIVATE);
     }
 }
@@ -2647,12 +2695,13 @@ void AgendamentosSelect_AtualizarPosicoesControlesAgendamento(HWND hWnd)
     int numColumns = 21;
     int cellWidth = (width + 2000) / (numColumns > 0 ? numColumns : 1);
     int startY = 40 - AgendamentosSelect_g_scrollY;
-    int startX = 22 - AgendamentosSelect_g_scrollX;
+    int gap = 50;
+    int startX = 22 + gap - AgendamentosSelect_g_scrollX;
     int xPos = 0;
     int yPos = 0;
     int colNumber;
     int countRow = 0;
-
+    
     // Atualizar posição dos campos de entrada
     for (size_t i = 0; i < AgendamentosSelect_g_editControls.size(); i++) {
         colNumber = countRow + 1;
@@ -2757,7 +2806,7 @@ void AgendamentosSelect_AtualizarPosicoesControlesAgendamento(HWND hWnd)
     // Atualizar posição do botão
     if (AgendamentosSelect_g_hButton) {
         int buttonY = startY + 11 * cellHeight + 3;
-        SetWindowPos(AgendamentosSelect_g_hButton, NULL, startX, buttonY, 150, 30,
+        SetWindowPos(AgendamentosSelect_g_hButton, NULL, startX - gap, buttonY, 150, 30,
             SWP_NOZORDER | SWP_NOACTIVATE);
     }
 }

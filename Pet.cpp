@@ -84,6 +84,27 @@ const wchar_t szSelectClass[] = L"HomeClass"; // Nova classe de janela
 HWND g_hButton = NULL;
 HBRUSH hBrushTransparent = (HBRUSH)GetStockObject(HOLLOW_BRUSH);
 
+std::vector<JanelaAtivaInfo> g_historicoJanelas;
+
+void CALLBACK WinEventProc(HWINEVENTHOOK hook, DWORD event, HWND hwnd,
+    LONG idObject, LONG idChild, DWORD dwEventThread, DWORD dwmsEventTime);
+
+void CALLBACK WinEventProc(HWINEVENTHOOK hook, DWORD event, HWND hwnd,
+    LONG idObject, LONG idChild, DWORD dwEventThread, DWORD dwmsEventTime) {
+    if (event == EVENT_SYSTEM_FOREGROUND && IsWindow(hwnd)) {
+        wchar_t className[256];
+        wchar_t title[256];
+        GetClassName(hwnd, className, 256);
+        GetWindowText(hwnd, title, 256);
+
+        // Evita duplicatas consecutivas
+        if (g_historicoJanelas.empty() || g_historicoJanelas.back().className != className) {
+            g_historicoJanelas.push_back({ className, title });
+            if (g_historicoJanelas.size() > 10) g_historicoJanelas.erase(g_historicoJanelas.begin());
+        }
+    }
+}
+
 // Declarações de encaminhamento de funções incluídas nesse módulo de código:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
@@ -91,16 +112,14 @@ LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
-                     _In_opt_ HINSTANCE hPrevInstance,
-                     _In_ LPWSTR    lpCmdLine,
-                     _In_ int       nCmdShow)
+    _In_opt_ HINSTANCE hPrevInstance,
+    _In_ LPWSTR    lpCmdLine,
+    _In_ int       nCmdShow)
 {
     setlocale(LC_ALL, "");
 
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
-
-    // TODO: Coloque o código aqui.
 
     // Inicializar cadeias de caracteres globais
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
@@ -108,15 +127,17 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     MyRegisterClass(hInstance);
 
     // Realize a inicialização do aplicativo:
-    if (!InitInstance (hInstance, nCmdShow))
+    if (!InitInstance(hInstance, nCmdShow))
     {
         return FALSE;
     }
 
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_PET));
 
-    MSG msg;
+    // >>> Aqui você coloca o hook <<<
+    HWINEVENTHOOK hook = SetWinEventHook(EVENT_SYSTEM_FOREGROUND, EVENT_SYSTEM_FOREGROUND, NULL, WinEventProc, 0, 0, WINEVENT_OUTOFCONTEXT);
 
+    MSG msg;
     while (GetMessage(&msg, nullptr, 0, 0))
     {
         HWND hwndActive = GetForegroundWindow();
@@ -131,8 +152,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         }
     }
 
-    return (int) msg.wParam;
+    // Remove o hook ao sair
+    UnhookWinEvent(hook);
+
+    return (int)msg.wParam;
 }
+
 
 //
 //  FUNÇÃO: MyRegisterClass()
@@ -2520,12 +2545,6 @@ std::wstring treatDataAppointment(std::wstring dado, int number) {
             mensagem = L"Insira: Apenas números em 'CEP'.\n" + mensagem;
         }
     }
-    else if (number == 7 && !dado.empty()) {
-        if (!isNumber(dado)) {
-            error = L"1";
-            mensagem = L"Insira: Apenas números em 'Idade'.\n" + mensagem;
-        }
-    }
     else if (number == 19 && !dado.empty()) {
         if (!isNumber(dado)) {
             error = L"1";
@@ -3115,7 +3134,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 //MessageBox(hWnd, L"Erro ao dropar tabela!", L"Erro", MB_OK | MB_ICONERROR);
                 //sqlite3_free(errMsg);
             //}
-            const char* sqlCreate = "CREATE TABLE IF NOT EXISTS Tutores (ID INTEGER PRIMARY KEY AUTOINCREMENT, Nome_do_Tutor TEXT, CEP TEXT, Endereco TEXT, Ponto_de_referencia TEXT, Telefone TEXT, CPF TEXT, Date TEXT, Hour TEXT);";
+            const char* sqlCreate = "CREATE TABLE IF NOT EXISTS Tutores (ID INTEGER PRIMARY KEY AUTOINCREMENT, Nome_do_Tutor TEXT, CEP TEXT, Endereco TEXT, Ponto_de_referencia TEXT, Telefone TEXT, CPF TEXT, Pacote TEXT, Date TEXT, Hour TEXT);";
             rc = sqlite3_exec(db, sqlCreate, 0, 0, &errMsg);
             if (rc != SQLITE_OK) {
                 wchar_t fullMsg[512] = L"Erro ao criar tabela! Código: ";

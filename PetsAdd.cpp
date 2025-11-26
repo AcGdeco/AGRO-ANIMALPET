@@ -145,8 +145,8 @@ LRESULT CALLBACK WndProcPetsAdd(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
                 );
 
                 SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"");
-                SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Masculino");
-                SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Feminino");
+                SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Macho");
+                SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Fêmea");
 
                 PetsSelect_g_editControls.push_back(hComboBox);
             }
@@ -513,7 +513,7 @@ LRESULT CALLBACK WndProcPetsAdd(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 
             TutoresSelect_idRecord = id;
 
-            if (!PetsSelect_CreateNewWindow(hWnd, hInst, L"JanelaTutoresReadClasse", L"CONSULTAR TUTOR"))
+            if (!PetsSelect_CreateNewWindow(hWnd, hInst, L"JanelaTutoresReadClasse", L"DADOS DO CLIENTE"))
             {
                 // O erro já é tratado dentro da função
                 break;
@@ -562,7 +562,7 @@ LRESULT CALLBACK WndProcPetsAdd(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
         // Título com fundo branco
         RECT titleRect = { startX - 5, startY - 25, startX + 250, startY + 5 };
         FillRect(hdcMem, &titleRect, (HBRUSH)(COLOR_WINDOW + 1));
-        PetsSelect_windowsTitle(hdcMem, startX, startY - 20, L"CRIAR PET", 9);
+        PetsSelect_windowsTitle(hdcMem, startX, startY - 20, L"CADASTRO DO PET", 15);
 
         // Desenhar linhas visíveis
         int firstVisibleRow = max(0, (PetsSelect_g_scrollY - 40) / cellHeight);

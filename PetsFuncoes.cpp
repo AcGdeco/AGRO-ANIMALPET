@@ -50,7 +50,7 @@ std::string PetsSelect_orderColumn = "ID";
 std::string PetsSelect_orderAscDesc = "DESC";
 std::vector<int> PetsSelect_naoDesenharInternRowsNumber;
 
-std::vector<std::wstring> PetsSelect_dados(21);
+std::vector<std::wstring> PetsSelect_dados(22);
 std::wstring PetsSelect_dataAte;
 std::wstring PetsSelect_dataRegistroAte;
 
@@ -832,9 +832,9 @@ std::wstring PetsSelect_arrumarNomesColunas(std::wstring displayText) {
     else if (displayText == L"ID") displayText = L"ID Pet";
     else if (displayText == L"Nome_do_Tutor") displayText = L"Nome do Tutor";
     else if (displayText == L"Raca") displayText = L"Raça";
-    else if (displayText == L"Appointment_Date") displayText = L"Data (de - até)";
+    else if (displayText == L"Appointment_Date") displayText = L"Data de-até";
     else if (displayText == L"Appointment_Hour") displayText = L"Hora";
-    else if (displayText == L"Date") displayText = L"Data Reg. (de - até)";
+    else if (displayText == L"Date") displayText = L"Data Reg. de-até";
     else if (displayText == L"Hour") displayText = L"Hora Reg.";
     else if (displayText == L"Ponto_de_referencia") displayText = L"Ponto de Ref.";
     else if (displayText == L"Obs_Tosa") displayText = L"Observação";
@@ -905,13 +905,13 @@ void PetsSelect_AtualizarPosicoesInputs(HWND hWnd) {
     startYFull = startYFull + 2 * cellHeight + 7;  // Posição Y com scroll
     startXFull = 22 - PetsSelect_g_scrollX;  // Posição X com scroll
     int colNumber = 10;
-    int colFinalNumber = colNumber + 11;
+    int colFinalNumber = colNumber + 12;
 
     for (int col = 11; col < colFinalNumber; col++) {
         yPos = startYFull + row * cellHeight + 7;
         xPos = startXFull + (col - 1 - colNumber) * cellWidthFull + 10;
 
-        if (col == 18) {
+        if (col == 19) {
             xPos = startXFull + (col - 1 - 10) * cellWidthFull + 10;
 
             SetWindowPos(PetsSelect_g_editControlsFilters[col], NULL, xPos, yPos, widthDate, 25,
@@ -919,7 +919,7 @@ void PetsSelect_AtualizarPosicoesInputs(HWND hWnd) {
             SetWindowPos(PetsSelect_g_editControlsFilters[col], NULL, xPos, yPos, widthDate, 25,
                 SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE | SWP_SHOWWINDOW);
         }
-        else if (col == 19) {
+        else if (col == 20) {
             xPos = startXFull + (col - 2 - 10) * cellWidthFull + 10;
 
             SetWindowPos(PetsSelect_g_editControlsFilters[col], NULL, xPos + widthDate, yPos, widthDate, 25,
@@ -927,7 +927,7 @@ void PetsSelect_AtualizarPosicoesInputs(HWND hWnd) {
             SetWindowPos(PetsSelect_g_editControlsFilters[col], NULL, xPos + widthDate, yPos, widthDate, 25,
                 SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE | SWP_SHOWWINDOW);
         }
-        else if (col == 20) {
+        else if (col == 21) {
             xPos = startXFull + (col - 2 - 10) * cellWidthFull + 10;
 
             SetWindowPos(PetsSelect_g_editControlsFilters[col], NULL, xPos, yPos, cellWidthFull - 15, 25,
@@ -1077,8 +1077,8 @@ void PetsSelect_criarInputsFilters(HWND hWnd) {
             );
 
             SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"");
-            SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Masculino");
-            SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Feminino");
+            SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Macho");
+            SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Fêmea");
 
             PetsSelect_g_editControlsFilters.push_back(hComboBox);
         }
@@ -1096,14 +1096,14 @@ void PetsSelect_criarInputsFilters(HWND hWnd) {
     startYFull = startYFull + 2 * cellHeight + 7;  // Posição Y com scroll
     startXFull = 22 - PetsSelect_g_scrollX;  // Posição X com scroll
     int colNumber = 11;
-    int colFinalNumber = 21;
+    int colFinalNumber = 22;
 
     for (int col = colNumber; col < colFinalNumber; col++) {
         int controlID = col + 20;
         yPos = startYFull + row * cellHeight + 7;
         xPos = startXFull + (col - 10) * cellWidthFull + 10;
 
-        if (col == 18) {
+        if (col == 19) {
             xPos = startXFull + (col - 1 - 10) * cellWidthFull + 10;
 
             HWND hEdit = CreateWindowEx(
@@ -1114,7 +1114,7 @@ void PetsSelect_criarInputsFilters(HWND hWnd) {
 
             PetsSelect_g_editControlsFilters.push_back(hEdit);
         }
-        else if (col == 19) {
+        else if (col == 20) {
             xPos = startXFull + (col - 1 - 10) * cellWidthFull + 10;
 
             HWND hEdit2 = CreateWindowEx(
@@ -1125,7 +1125,7 @@ void PetsSelect_criarInputsFilters(HWND hWnd) {
 
             PetsSelect_g_editControlsFilters.push_back(hEdit2);
         }
-        else if (col == 20) {
+        else if (col == 21) {
             xPos = startXFull + (col - 1 - 10) * cellWidthFull + 10;
 
             HWND hEdit = CreateWindowEx(
@@ -1135,6 +1135,28 @@ void PetsSelect_criarInputsFilters(HWND hWnd) {
             );
 
             PetsSelect_g_editControlsFilters.push_back(hEdit);
+        }
+        else if (col == 18) {
+            HWND hComboBox = CreateWindowEx(
+                0,                                 // Estilos estendidos
+                L"ComboBox",                       // Nome da classe do controle ComboBox
+                L"",                               // Texto inicial (vazio)
+                WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP, // Estilos: Filho, Visível, e lista suspensa que não pode ser editada (SELECT)
+                xPos, yPos, inputWidth, 150,
+                hWnd,                        // Janela pai
+                (HMENU)(controlID),                        // ID único do controle (para o WM_COMMAND)
+                (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
+                NULL
+            );
+
+            // Adicionar a opção A
+            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"");
+            // Adicionar a opção A
+            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Semanal");
+            // Adicionar a opção B
+            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Quinzenal");
+
+            PetsSelect_g_editControlsFilters.push_back(hComboBox);
         }
         else {
             HWND hEdit = CreateWindowEx(
@@ -1216,7 +1238,7 @@ void PetsSelect_criarHeaderLineFilter(HDC hdc, HWND hWnd, int startYFull, int st
             yPos = startYFull + row * cellHeight + 7;
             xPos = startXFull + (col - colNumber) * cellWidthFull + 10;
 
-            if (col > 10 && col < 19) {
+            if (col > 10 && col < 20) {
                 displayText = PetsSelect_g_tableDataFull[row][col + 1];
             }
             else {
@@ -1610,8 +1632,8 @@ void PetsSelect_verificarFiltro(const std::vector<std::wstring>& dados, std::vec
         // CORREÇÃO: Pular linha 0 (cabeçalho) se necessário
         if (row == 0) continue; // Mantém o cabeçalho
 
-        for (size_t col = 0; col < 21; col++) {
-            if (col == 20) {
+        for (size_t col = 0; col < 22; col++) {
+            if (col == 21) {
                 column = col - 1;
             }
             else if (col >= 9 && col < 12) {
@@ -1656,17 +1678,17 @@ void PetsSelect_verificarFiltro(const std::vector<std::wstring>& dados, std::vec
                     }
                 }
             }
-            else if (!dados[col].empty() && (col == 18 || col == 19)) {
+            else if (!dados[col].empty() && (col == 19 || col == 20)) {
 
                 // CORREÇÃO: Verificar se a coluna existe na linha atual
-                if (col == 19) {
+                if (col == 20) {
                     dadoTable = PetsSelect_g_tableData[row][col - 1];
 
                 }
 
-                bool estaEntre = PetsSelect_estaEntreDatas(dados[18], dados[19], dadoTable);
+                bool estaEntre = PetsSelect_estaEntreDatas(dados[19], dados[20], dadoTable);
                 if (!estaEntre) {
-                    if (col == 19 && dados[18].empty()) {
+                    if (col == 20 && dados[19].empty()) {
                         naoDesenharIntern[row] = 1;
                         break;
                     }
@@ -2438,12 +2460,6 @@ std::wstring PetsSelect_treatDataAppointment(std::wstring dado, int number) {
     else if (number == 5 && dado.empty()) {
         PetsSelect_error = L"1";
         PetsSelect_mensagem = L"Insira: 'Cor'.\n" + PetsSelect_mensagem;
-    }
-    else if (number == 6 && !dado.empty()) {
-        if (!PetsSelect_isNumber(dado)) {
-            PetsSelect_error = L"1";
-            PetsSelect_mensagem = L"Insira: Apenas números em 'Idade'.\n" + PetsSelect_mensagem;
-        }
     }
     else if (number == 7 && !dado.empty()) {
         if (!PetsSelect_isDecimalNumber(dado)) {

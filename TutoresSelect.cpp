@@ -92,7 +92,7 @@ LRESULT CALLBACK WndProcTutoresSelect(HWND hWnd, UINT message, WPARAM wParam, LP
 
             TutoresSelect_idRecord = id;
 
-            if (!TutoresSelect_CreateNewWindow(hWnd, hInst, L"JanelaTutoresReadClasse", L"CONSULTAR TUTOR"))
+            if (!TutoresSelect_CreateNewWindow(hWnd, hInst, L"JanelaTutoresReadClasse", L"DADOS DO CLIENTE"))
             {
                 // O erro já é tratado dentro da função
                 break;
@@ -149,12 +149,39 @@ LRESULT CALLBACK WndProcTutoresSelect(HWND hWnd, UINT message, WPARAM wParam, LP
             //swprintf_s(msg, L"Botão %s%d clicado!", L"Filtrar", (int)id, (int)id);
             //MessageBoxW(hWnd, msg, L"Info", MB_OK);
 
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < 11; i++) {
                 std::wstring controlIDStr = std::to_wstring(i);
                 HWND input = GetDlgItem(hWnd, i + 20);
-                wchar_t buffer[256];
-                GetWindowText(input, buffer, 256);
-                TutoresSelect_dados[i] = std::wstring(buffer);
+
+                if (i == 7) { // Se o comando veio do nosso ComboBox
+                    // 1. Obter o índice do item selecionado
+                    int indiceSelecionado = (int)SendMessageW(
+                        input, CB_GETCURSEL, 0, 0
+                    );
+
+                    // 2. Obter o texto do item selecionado
+                    if (indiceSelecionado != CB_ERR) {
+                        wchar_t buffer[256];
+
+                        // Obter o texto do índice
+                        SendMessageW(
+                            input,
+                            CB_GETLBTEXT,
+                            (WPARAM)indiceSelecionado,
+                            (LPARAM)buffer
+                        );
+                        TutoresSelect_dados[i] = std::wstring(buffer);
+
+                        // O valor selecionado está em 'buffer' (ex: L"Opção B")
+                        // Faça algo com o valor, como atualizar o filtro:
+                        // std::wstring valorFiltro = buffer;
+                        // aplicarFiltro(valorFiltro);
+                    }
+                }else {
+                    wchar_t buffer[256];
+                    GetWindowText(input, buffer, 256);
+                    TutoresSelect_dados[i] = std::wstring(buffer);
+                }
             }
 
             TutoresSelect_idNumeroUltimo = 1;

@@ -15,6 +15,13 @@ extern HWND AgendamentosSelect_g_hButton_consultar_tutor;
 extern HWND AgendamentosSelect_g_hButton_consultar_pet;
 namespace fs = std::filesystem;
 
+struct JanelaAtivaInfo {
+    std::wstring className;
+    std::wstring windowTitle;
+};
+
+extern std::vector<JanelaAtivaInfo> g_historicoJanelas;
+
 std::wstring GetActiveClassWindowName();
 
 void PetsSelect_RecarregarDadosTabela(HWND hWnd);

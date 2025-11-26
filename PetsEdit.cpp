@@ -110,10 +110,10 @@ void PetsSelect_PreencherControlesEdicao(HWND hWnd) {
             LPARAM indexToSelect = 0;
             int index;
 
-            if (PetsSelect_g_tableDataEditar[1][6] == L"Masculino") {
+            if (PetsSelect_g_tableDataEditar[1][6] == L"Macho") {
                 index = 1;
             }
-            else if (PetsSelect_g_tableDataEditar[1][6] == L"Feminino") {
+            else if (PetsSelect_g_tableDataEditar[1][6] == L"Fêmea") {
                 index = 2;
             }
             else {
@@ -228,8 +228,8 @@ void PetsSelect_CriarControlesEdicao(HWND hWnd) {
             );
 
             SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"");
-            SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Masculino");
-            SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Feminino");
+            SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Macho");
+            SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Fêmea");
 
             PetsSelect_g_editControls_edit.push_back(hComboBox);
         }
@@ -716,7 +716,7 @@ LRESULT CALLBACK WndProcPetsEdit(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 
             TutoresSelect_idRecord = id;
 
-            if (!PetsSelect_CreateNewWindow(hWnd, hInst, L"JanelaTutoresReadClasse", L"CONSULTAR TUTOR"))
+            if (!PetsSelect_CreateNewWindow(hWnd, hInst, L"JanelaTutoresReadClasse", L"DADOS DO CLIENTE"))
             {
                 // O erro já é tratado dentro da função
                 break;

@@ -161,7 +161,7 @@ LRESULT CALLBACK WndProcAgendamentosRead(HWND hWnd, UINT message, WPARAM wParam,
             idTutorAgendamento = AgendamentosSelect_g_tableDataConsulta[1][0];
             TutoresSelect_idRecord = std::stoll(idTutorAgendamento);
 
-            if (!AgendamentosSelect_CreateNewWindow(hWnd, hInst, L"JanelaTutoresReadClasse", L"CONSULTAR TUTOR"))
+            if (!AgendamentosSelect_CreateNewWindow(hWnd, hInst, L"JanelaTutoresReadClasse", L"DADOS DO CLIENTE"))
             {
                 // O erro já é tratado dentro da função
                 break;
@@ -177,10 +177,10 @@ LRESULT CALLBACK WndProcAgendamentosRead(HWND hWnd, UINT message, WPARAM wParam,
             }
         }
         else if (wmId == 1) { //CONSULTAR
-            idPetAgendamento = AgendamentosSelect_g_tableDataConsulta[1][9];
+            idPetAgendamento = AgendamentosSelect_g_tableDataConsulta[1][10];
             PetsSelect_idRecord = std::stoll(idPetAgendamento);
 
-            if (!AgendamentosSelect_CreateNewWindow(hWnd, hInst, L"JanelaPetsReadClasse", L"CONSULTAR PET"))
+            if (!AgendamentosSelect_CreateNewWindow(hWnd, hInst, L"JanelaPetsReadClasse", L"DADOS DO PET"))
             {
                 // O erro já é tratado dentro da função
                 break;
@@ -450,7 +450,7 @@ LRESULT CALLBACK WndProcAgendamentosRead(HWND hWnd, UINT message, WPARAM wParam,
         int startX = 22 - AgendamentosSelect_g_scrollX;  // Posição X com scroll
 
         //Título
-        AgendamentosSelect_windowsTitle(hdc, startX, startY - 20, L"CONSULTAR AGENDAMENTO", 21);
+        AgendamentosSelect_windowsTitle(hdc, startX, startY - 20, L"DADOS DO AGENDAMENTO", 20);
 
         // Desenhar a grade
         HPEN hPen = CreatePen(PS_SOLID, 1, RGB(0, 0, 0));
@@ -469,7 +469,7 @@ LRESULT CALLBACK WndProcAgendamentosRead(HWND hWnd, UINT message, WPARAM wParam,
         int colNumber = 0;
         int rowNumber = 0;
 
-        for (size_t col = 20; col < 32; col++) {
+        for (size_t col = 21; col < 33; col++) {
             colNumber++;
 
             HBRUSH hCurrentBrush = (col % 2 == 0) ? hBrushGray : hBrushWhite;
@@ -575,7 +575,7 @@ LRESULT CALLBACK WndProcAgendamentosRead(HWND hWnd, UINT message, WPARAM wParam,
                     TextOut(hdc, xPos, yPos, L"Preço R$:", 9);
                 }
                 else {
-                    if (col == 31) {
+                    if (col == 32) {
                         std::wstring precoStr = AgendamentosSelect_g_tableDataConsulta[row][col];
                         double valor = std::stod(precoStr);
                         
@@ -625,7 +625,7 @@ LRESULT CALLBACK WndProcAgendamentosRead(HWND hWnd, UINT message, WPARAM wParam,
 
         yPos = startY + (colNumber + 5) * cellHeight + 7;
         xPos = startX + cellWidth + 60;
-        TextOut(hdc, xPos, yPos, AgendamentosSelect_g_tableDataConsulta[1][10].c_str(), static_cast<int>(AgendamentosSelect_g_tableDataConsulta[1][10].length()));
+        TextOut(hdc, xPos, yPos, AgendamentosSelect_g_tableDataConsulta[1][11].c_str(), static_cast<int>(AgendamentosSelect_g_tableDataConsulta[1][11].length()));
 
         // Limpar recursos
         SelectObject(hdc, hOldBrush);

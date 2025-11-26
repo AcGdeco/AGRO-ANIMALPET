@@ -52,7 +52,7 @@ std::string TutoresSelect_orderColumn = "ID";
 std::string TutoresSelect_orderAscDesc = "DESC";
 std::vector<int> TutoresSelect_naoDesenharInternRowsNumber;
 
-std::vector<std::wstring> TutoresSelect_dados(10);
+std::vector<std::wstring> TutoresSelect_dados(11);
 std::wstring TutoresSelect_dataAte;
 std::wstring TutoresSelect_dataRegistroAte;
 
@@ -833,9 +833,9 @@ std::wstring TutoresSelect_arrumarNomesColunas(std::wstring displayText) {
     if (displayText == L"Nome_do_Pet") displayText = L"Nome do Pet";
     else if (displayText == L"Nome_do_Tutor") displayText = L"Nome do Tutor";
     else if (displayText == L"Raca") displayText = L"Raça";
-    else if (displayText == L"Appointment_Date") displayText = L"Data (de - até)";
+    else if (displayText == L"Appointment_Date") displayText = L"Data de-até";
     else if (displayText == L"Appointment_Hour") displayText = L"Hora";
-    else if (displayText == L"Date") displayText = L"Data Reg. (de - até)";
+    else if (displayText == L"Date") displayText = L"Data Reg. de-até";
     else if (displayText == L"Hour") displayText = L"Hora Reg.";
     else if (displayText == L"Ponto_de_referencia") displayText = L"Ponto de Ref.";
     else if (displayText == L"Obs_Tosa") displayText = L"Observação";
@@ -860,19 +860,19 @@ void TutoresSelect_AtualizarPosicoesInputs(HWND hWnd) {
     int xPos;
     int yPos;
 
-    for (int col = 0; col < 10; col++) {
+    for (int col = 0; col < 11; col++) {
         xPos = startXFull + col * cellWidthFull + 10;
         yPos = startYFull + row * cellHeight + 7;
         int colNumber = 7;
         int widthDate = cellWidthFull / 2;
 
-        if (col == 7) {
+        if (col == 8) {
             SetWindowPos(TutoresSelect_g_editControlsFilters[col], NULL, xPos, yPos, widthDate, 25,
                 SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE | SWP_HIDEWINDOW);
             SetWindowPos(TutoresSelect_g_editControlsFilters[col], NULL, xPos, yPos, widthDate, 25,
                 SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE | SWP_SHOWWINDOW);
         }
-        else if (col == 8) {
+        else if (col == 9) {
             xPos = startXFull + (col - 1) * cellWidthFull + 10;
 
             SetWindowPos(TutoresSelect_g_editControlsFilters[col], NULL, xPos + widthDate, yPos, widthDate, 25,
@@ -880,7 +880,7 @@ void TutoresSelect_AtualizarPosicoesInputs(HWND hWnd) {
             SetWindowPos(TutoresSelect_g_editControlsFilters[col], NULL, xPos + widthDate, yPos, widthDate, 25,
                 SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE | SWP_SHOWWINDOW);
         }
-        else if (col == 9) {
+        else if (col == 10) {
             xPos = startXFull + (col - 1) * cellWidthFull + 10;
 
             SetWindowPos(TutoresSelect_g_editControlsFilters[col], NULL, xPos, yPos, cellWidthFull - 15, 25,
@@ -901,9 +901,9 @@ void TutoresSelect_AtualizarPosicoesInputs(HWND hWnd) {
     xPos = startXFull;
     yPos = startYFull;
 
-    SetWindowPos(TutoresSelect_g_editControlsFilters[10], NULL, xPos, yPos, 70, 30,
+    SetWindowPos(TutoresSelect_g_editControlsFilters[11], NULL, xPos, yPos, 70, 30,
         SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE | SWP_HIDEWINDOW);
-    SetWindowPos(TutoresSelect_g_editControlsFilters[10], NULL, xPos, yPos, 70, 30,
+    SetWindowPos(TutoresSelect_g_editControlsFilters[11], NULL, xPos, yPos, 70, 30,
         SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE | SWP_SHOWWINDOW);
 }
 
@@ -971,12 +971,12 @@ void TutoresSelect_criarInputsFilters(HWND hWnd) {
     int yPos;
     int row = 1;
 
-    for (int col = 0; col < 10; col++) {
+    for (int col = 0; col < 11; col++) {
         int controlID = col + 20;
         yPos = startYFull + row * cellHeight + 7;
         xPos = startXFull + col * cellWidthFull + 10;
 
-        if (col == 7) {
+        if (col == 8) {
             HWND hEdit = CreateWindowEx(
                 0, L"EDIT", L"",
                 WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP,
@@ -985,7 +985,7 @@ void TutoresSelect_criarInputsFilters(HWND hWnd) {
 
             TutoresSelect_g_editControlsFilters.push_back(hEdit);
         }
-        else if (col == 8) {
+        else if (col == 9) {
             HWND hEdit2 = CreateWindowEx(
                 0, L"EDIT", L"",
                 WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP,
@@ -993,6 +993,28 @@ void TutoresSelect_criarInputsFilters(HWND hWnd) {
             );
 
             TutoresSelect_g_editControlsFilters.push_back(hEdit2);
+        }
+        else if (col == 7) {
+            HWND hComboBox = CreateWindowEx(
+                0,                                 // Estilos estendidos
+                L"ComboBox",                       // Nome da classe do controle ComboBox
+                L"",                               // Texto inicial (vazio)
+                WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP, // Estilos: Filho, Visível, e lista suspensa que não pode ser editada (SELECT)
+                xPos, yPos, inputWidth, 150,
+                hWnd,                        // Janela pai
+                (HMENU)(controlID),                        // ID único do controle (para o WM_COMMAND)
+                (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
+                NULL
+            );
+
+            // Adicionar a opção A
+            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"");
+            // Adicionar a opção A
+            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Semanal");
+            // Adicionar a opção B
+            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Quinzenal");
+
+            TutoresSelect_g_editControlsFilters.push_back(hComboBox);
         }
         else {
             HWND hEdit = CreateWindowEx(
@@ -1150,7 +1172,7 @@ void TutoresSelect_createHeaderTable(HWND hWnd, HDC hdc) {
     FillRect(hdc, &rowRect, hCurrentBrush);
 
     int counter = 0;
-    for (size_t col = 0; col < TutoresSelect_g_tableDataFull[0].size() - 2; col++) {
+    for (size_t col = 0; col < TutoresSelect_g_tableDataFull[0].size() - 3; col++) {
         std::wstring displayText = TutoresSelect_g_tableDataFull[0][col];
         int xPos = startX + counter * cellWidth + 10;
         int yPos = startY + 0 * cellHeight + 7;
@@ -1218,7 +1240,7 @@ void TutoresSelect_createHeaderFilters(HDC hdc, HWND hWnd) {
     int startYFull = 80 - TutoresSelect_g_scrollY;  // Posição Y com scroll
     int startXFull = 22 - TutoresSelect_g_scrollX;  // Posição X com scroll
     int colNumber = 0;
-    int colFinalNumber = colNumber + 9;
+    int colFinalNumber = colNumber + 10;
 
     TutoresSelect_criarHeaderLineFilter(hdc, hWnd, startYFull, startXFull, colNumber, colFinalNumber);
     
@@ -1423,7 +1445,7 @@ void TutoresSelect_verificarFiltro(const std::vector<std::wstring>& dados, std::
         // CORREÇÃO: Pular linha 0 (cabeçalho) se necessário
         if (row == 0) continue; // Mantém o cabeçalho
 
-        for (size_t col = 0; col < 10; col++) {
+        for (size_t col = 0; col < 11; col++) {
             if (col == 21) {
                 column = 20;
             }
@@ -1436,8 +1458,8 @@ void TutoresSelect_verificarFiltro(const std::vector<std::wstring>& dados, std::
             else if (col == 25) {
                 column = 23;
             }
-            else if (col == 9) {
-                column = 8;
+            else if (col == 10) {
+                column = 9;
             }
             else {
                 column = col;
@@ -1454,17 +1476,17 @@ void TutoresSelect_verificarFiltro(const std::vector<std::wstring>& dados, std::
                     break;
                 }
             }
-            else if (!dados[col].empty() && (col == 7 || col == 8)) {
+            else if (!dados[col].empty() && (col == 8 || col == 9)) {
 
                 // CORREÇÃO: Verificar se a coluna existe na linha atual
-                if (col == 8) {
+                if (col == 9) {
                     dadoTable = TutoresSelect_g_tableData[row][col - 1];
 
                 }
 
-                bool estaEntre = TutoresSelect_estaEntreDatas(dados[7], dados[8], dadoTable);
+                bool estaEntre = TutoresSelect_estaEntreDatas(dados[8], dados[9], dadoTable);
                 if (!estaEntre) {
-                    if (col == 8 && dados[7].empty()) {
+                    if (col == 9 && dados[8].empty()) {
                         naoDesenharIntern[row] = 1;
                         break;
                     }
@@ -1835,14 +1857,22 @@ void TutoresSelect_AtualizarPosicoesControlesAgendamento(HWND hWnd)
 
         xPos = startX + cellWidth + 10;
         yPos = startY + colNumber * cellHeight + 3;
-        SetWindowPos(TutoresSelect_g_editControls[i], NULL, xPos, yPos, 700, 25,
-            SWP_NOZORDER | SWP_NOACTIVATE);
+
+        if (i != TutoresSelect_g_editControls.size() - 1) {
+            SetWindowPos(TutoresSelect_g_editControls[i], NULL, xPos, yPos, 700, 25,
+                SWP_NOZORDER | SWP_NOACTIVATE);
+        }
+        else {
+            SetWindowPos(TutoresSelect_g_editControls[i], NULL, xPos, yPos, 700, 200,
+                SWP_NOZORDER | SWP_NOACTIVATE);
+        }
+        
         countRow++;
     }
 
     // Atualizar posição do botão
     if (TutoresSelect_g_hButton) {
-        int buttonY = startY + 7 * cellHeight + 3;
+        int buttonY = startY + 8 * cellHeight + 3;
         SetWindowPos(TutoresSelect_g_hButton, NULL, startX, buttonY, 150, 30,
             SWP_NOZORDER | SWP_NOACTIVATE);
     }

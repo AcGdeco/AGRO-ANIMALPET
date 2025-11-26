@@ -16,8 +16,9 @@
 #define IDM_PETS_CONSULTAR    1009
 #define IDM_AGENDAMENTOS_NOVO     1010
 #define IDM_AGENDAMENTOS_CONSULTAR    1011
+#define IDM_VOLTAR    1012
 
-// Funções do Menu Simples
+// Funï¿½ï¿½es do Menu Simples
 HMENU CriarMenu();
 LRESULT ProcessarMenuArquivo(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 LRESULT ProcessarMenuAjuda(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);

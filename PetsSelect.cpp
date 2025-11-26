@@ -92,7 +92,7 @@ LRESULT CALLBACK WndProcPetsSelect(HWND hWnd, UINT message, WPARAM wParam, LPARA
 
             PetsSelect_idRecord = id;
 
-            if (!PetsSelect_CreateNewWindow(hWnd, hInst, L"JanelaPetsReadClasse", L"CONSULTAR PET"))
+            if (!PetsSelect_CreateNewWindow(hWnd, hInst, L"JanelaPetsReadClasse", L"DADOS DO PET"))
             {
                 // O erro já é tratado dentro da função
                 break;
@@ -149,10 +149,10 @@ LRESULT CALLBACK WndProcPetsSelect(HWND hWnd, UINT message, WPARAM wParam, LPARA
             //swprintf_s(msg, L"Botão %s%d clicado!", L"Filtrar", (int)id, (int)id);
             //MessageBoxW(hWnd, msg, L"Info", MB_OK);
 
-            for (int i = 0; i <= 20; i++) {
+            for (int i = 0; i <= 21; i++) {
                 std::wstring controlIDStr = std::to_wstring(i);
                 HWND input = GetDlgItem(hWnd, i + 20);
-                if (i == 7) { // Se o comando veio do nosso ComboBox
+                if (i == 7 || i == 18) { // Se o comando veio do nosso ComboBox
                     // 1. Obter o índice do item selecionado
                     int indiceSelecionado = (int)SendMessageW(
                         input, CB_GETCURSEL, 0, 0

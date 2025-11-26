@@ -315,7 +315,7 @@ LRESULT CALLBACK WndProcTutoresRead(HWND hWnd, UINT message, WPARAM wParam, LPAR
         int startX = 22 - TutoresSelect_g_scrollX;  // Posição X com scroll
 
         //Título
-        TutoresSelect_windowsTitle(hdc, startX, startY - 20, L"CONSULTAR TUTOR", 15);
+        TutoresSelect_windowsTitle(hdc, startX, startY - 20, L"DADOS DO CLIENTE", 16);
 
         // Desenhar a grade
         HPEN hPen = CreatePen(PS_SOLID, 1, RGB(0, 0, 0));
@@ -334,7 +334,7 @@ LRESULT CALLBACK WndProcTutoresRead(HWND hWnd, UINT message, WPARAM wParam, LPAR
         int colNumber = 0;
         int rowNumber = 0;
 
-        for (size_t col = 0; col < 9; col++) {
+        for (size_t col = 0; col < 10; col++) {
             colNumber++;
 
             HBRUSH hCurrentBrush = (col % 2 == 0) ? hBrushGray : hBrushWhite;

@@ -301,7 +301,7 @@ LRESULT CALLBACK WndProcRead(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
         int startX = 22 - g_scrollX;  // Posição X com scroll
 
         //Título
-        windowsTitle(hdc, startX, startY - 20, L"CONSULTAR AGENDAMENTO", 21);
+        windowsTitle(hdc, startX, startY - 20, L"DADOS DO AGENDAMENTO", 20);
 
         // Desenhar a grade
         HPEN hPen = CreatePen(PS_SOLID, 1, RGB(0, 0, 0));
