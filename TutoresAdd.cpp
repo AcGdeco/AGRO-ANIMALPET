@@ -120,8 +120,8 @@ LRESULT CALLBACK WndProcTutoresAdd(HWND hWnd, UINT message, WPARAM wParam, LPARA
         );
 
         SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"");
-        SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Semanal");
         SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Quinzenal");
+        SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Mensal");
 
         TutoresSelect_g_editControls.push_back(hComboBox);
 

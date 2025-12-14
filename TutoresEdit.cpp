@@ -74,11 +74,11 @@ void TutoresSelect_PreencherControlesEdicao(HWND hWnd) {
     LPARAM indexToSelect = 0;
     int index;
 
-    if (TutoresSelect_g_tableDataEditar[1][7] == L"Semanal") {
-        index = 1;
+    if (TutoresSelect_g_tableDataEditar[1][7] == L"Mensal") {
+        index = 2;
     }
     else if (TutoresSelect_g_tableDataEditar[1][7] == L"Quinzenal") {
-        index = 2;
+        index = 1;
     }
     else {
         index = 0;
@@ -158,8 +158,8 @@ void TutoresSelect_CriarControlesEdicao(HWND hWnd) {
     );
 
     SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"");
-    SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Semanal");
     SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Quinzenal");
+    SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Mensal");
 
     TutoresSelect_g_editControls.push_back(hComboBox);
 

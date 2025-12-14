@@ -1,4 +1,10 @@
-﻿LINK : warning LNK4075: ignorando '/INCREMENTAL' devido a especificação '/LTCG'
+﻿  TutoresEdit.cpp
+C:\Users\Andre\source\repos\Pet\TutoresFuncoes.h(33,13): warning C4091: 'extern ': ignorado à esquerda de 'TutoresSelect_ButtonAction' quando nenhuma variável é declarada
+  (compiling source file 'TutoresEdit.cpp')
+  
+C:\Users\Andre\source\repos\Pet\TutoresEdit.cpp(137,40): warning C4312: 'conversão de tipo': conversão de 'int' para 'HMENU' de tamanho maior
+C:\Users\Andre\source\repos\Pet\TutoresEdit.cpp(568,74): warning C4267: 'argumento': conversão de 'size_t' para 'int', possível perda de dados
+LINK : warning LNK4075: ignorando '/INCREMENTAL' devido a especificação '/LTCG'
 sqlite3.obj : warning LNK4075: ignorando '/EDITANDCONTINUE' devido a especificação '/OPT:ICF'
   LINK : /LTCG especificado mas sem geração de código; remova /LTCG do link da linha de comando para melhorar performance do vinculador
   Pet.vcxproj -> C:\Users\Andre\source\repos\Pet\x64\Release\Pet.exe

@@ -830,12 +830,12 @@ bool TutoresSelect_estaEntreDatas(const std::wstring& dataIntervalo1,
 }
 
 std::wstring TutoresSelect_arrumarNomesColunas(std::wstring displayText) {
-    if (displayText == L"Nome_do_Pet") displayText = L"Nome do Pet";
-    else if (displayText == L"Nome_do_Tutor") displayText = L"Nome do Tutor";
+    if (displayText == L"Nome_do_Pet") displayText = L"Nome Pet";
+    else if (displayText == L"Nome_do_Tutor") displayText = L"Nome Tutor";
     else if (displayText == L"Raca") displayText = L"Raça";
     else if (displayText == L"Appointment_Date") displayText = L"Data de-até";
     else if (displayText == L"Appointment_Hour") displayText = L"Hora";
-    else if (displayText == L"Date") displayText = L"Data Reg. de-até";
+    else if (displayText == L"Date") displayText = L"Data R de-até";
     else if (displayText == L"Hour") displayText = L"Hora Reg.";
     else if (displayText == L"Ponto_de_referencia") displayText = L"Ponto de Ref.";
     else if (displayText == L"Obs_Tosa") displayText = L"Observação";
@@ -1009,10 +1009,10 @@ void TutoresSelect_criarInputsFilters(HWND hWnd) {
 
             // Adicionar a opção A
             SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"");
-            // Adicionar a opção A
-            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Semanal");
             // Adicionar a opção B
             SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Quinzenal");
+            // Adicionar a opção A
+            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Mensal");
 
             TutoresSelect_g_editControlsFilters.push_back(hComboBox);
         }
@@ -1178,8 +1178,8 @@ void TutoresSelect_createHeaderTable(HWND hWnd, HDC hdc) {
         int yPos = startY + 0 * cellHeight + 7;
 
         // Traduzir cabeçalhos se necessário
-        if (displayText == L"Nome_do_Pet") displayText = L"Nome do Pet";
-        else if (displayText == L"Nome_do_Tutor") displayText = L"Nome do Tutor";
+        if (displayText == L"Nome_do_Pet") displayText = L"Nome Pet";
+        else if (displayText == L"Nome_do_Tutor") displayText = L"Nome Tutor";
         else if (displayText == L"Raca") displayText = L"Raça";
         else if (displayText == L"Appointment_Date") displayText = L"Data";
         else if (displayText == L"Appointment_Hour") displayText = L"Hora";
